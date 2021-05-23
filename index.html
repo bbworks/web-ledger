@@ -6,28 +6,34 @@
     <title>App | Home</title>
 
     <!-- FONT AWESOME -->
-    <!-- NOTE: Import Font Awesome first, so we can override the formating of their icons -->
-    <!-- <link type="text/css" rel="stylesheet" href="/css/fontawesome-free-5.14.0-web/css/all.min.css"> -->
     <link type="text/css" rel="stylesheet" href="https://kit-free.fontawesome.com/releases/latest/css/free.min.css"></link>
+
+    <!-- BOOTSTRAP -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
 
     <!-- STYLESHEETS -->
     <link type="text/css" rel="stylesheet" href="/css/index.css">
   </head>
   <body>
-    <div class="content">
+    <div class="container">
+      <h1 class="display-1">Ledger</h1>
       <form id="transaction-form" class="transaction-form" action="" method="">
-        <div class="form-control-group">
-          <label class="form-label">
-            Transactions:
-            <input class="form-input" type="text">
-          </label>
-          <button class="submit" type="submit">Parse</button>
+        <div class="mb-2">
+          <label class="form-label">Transactions</label>
+          <input class="form-control" type="text">
+          <p class="form-text">Paste transaction data for parsing.</p>
+        </div>
+        <div>
+          <button class="btn btn-primary" type="submit">Parse</button>
         </div>
       </form>
       <div>
-        <table></table>
+        <h2 class="h2">Transactions</h2>
+        <table class="table table-striped"></table>
       </div>
     </div>
     <script type="text/javascript" src="/js/index.js"></script>
+    <!-- BOOTSTRAP -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
   </body>
 </html>

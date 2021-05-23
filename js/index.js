@@ -102,21 +102,28 @@ const fetchTransactionData = function() {
 
 const renderTable = function(transactionData) {
   //Define the table headers
-  const tableHeaders = `<tr>
-    <th>Posted Date</th>
-    <th>Transaction Date</th>
-    <th>Type</th>
-    <th>Category</th>
-    <th>Description</th>
-    <th>Notes</th>
-    <th>Amount</th>
-  </tr>`;
+  const tableHeaders = `<thead>
+      <tr>
+        <th>Posted Date</th>
+        <th>Transaction Date</th>
+        <th>Type</th>
+        <th>Category</th>
+        <th>Description</th>
+        <th>Notes</th>
+        <th>Amount</th>
+      </tr>
+    </thead>`;
+
+  const tableBody = `<tbody></tbody>`;
 
   //Clear the table
   table.innerHTML = "";
 
   //Append the table headers
   table.innerHTML += tableHeaders;
+
+  //Append the table body
+  table.innerHTML += tableBody;
 
   //Append the transactions
   renderTransactions(transactionData);
@@ -191,22 +198,25 @@ const renderTransactions = function(transactionData) {
   transactions = formatTransactions(transactions);
 
   const tableData = transactions.map(transaction=>{
-      let {Description, PostedDate, TransactionDate, Type, Amount} = transaction;
-      let {description, notes, category} = validateDescription(Description);
+    let {Description, PostedDate, TransactionDate, Type, Amount} = transaction;
+    let {description, notes, category} = validateDescription(Description);
 
-      return `<tr>
-        <td>${PostedDate}</td>
-        <td>${TransactionDate}</td>
-        <td>${Type}</td>
-        <td>${(category ? category : "")}</td>
-        <td>${description}</td>
-        <td>${(notes ? notes : "")}</td>
-        <td>${Amount}</td>
-      </tr>`
-    })
-      .join("\r\n");
+    return `<tr>
+      <td>${PostedDate}</td>
+      <td>${TransactionDate}</td>
+      <td>${Type}</td>
+      <td>${(category ? category : "")}</td>
+      <td>${description}</td>
+      <td>${(notes ? notes : "")}</td>
+      <td>${Amount}</td>
+    </tr>`
+  })
+    .join("\r\n");
 
-  table.innerHTML += tableData;
+  //Append the table data to the table body
+  const tableBody = table.querySelector("tbody");
+  tableBody.innerHTML = "";
+  tableBody.innerHTML += tableData;
 };
 
 form.addEventListener("submit", event=>{
