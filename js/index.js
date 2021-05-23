@@ -1,9 +1,31 @@
 //Initialize variables
 const form = document.getElementById("transaction-form");
-const table = document.querySelector("table");
+const fileInput = document.getElementById("transaction-form-input-file");
+const dataDiv = document.querySelector(".transaction-data");
+const table = dataDiv.querySelector("table");
+
+//Create utility functions
+const convertCSVToJSON = function(csv, delimiter = ",") {
+  //Initialize variables
+  const csvData = csv.split(/(?:\r\n|\r|\n)/).map(line=>line.split(delimiter));
+
+  //Get the headers
+  const headers = csvData.splice(0,1)[0];
+
+  //Get the data
+  const obj = csvData.map(line=>{
+    const lineObj = {};
+    line.forEach((value, i)=>{
+      lineObj[headers[i]] = value;
+    })
+    return lineObj;
+  });
+
+  return obj;
+};
 
 //Create functions
-let importTransactions = function(transactionsString) {
+const importTransactions = function(transactionData, isCSV) {
   const convertDateStringToDate = function(dateString) {
     //Initialize functions
     const returnMonthIndex = function(month) {
@@ -28,38 +50,70 @@ let importTransactions = function(transactionsString) {
     const monthIndex = returnMonthIndex(month);
 
     //Convert to actual date
-    let date = new Date(now.getFullYear(), monthIndex, day)
+    const date = new Date(now.getFullYear(), monthIndex, day)
 
     //Adjust date backwards one year if this ends up being a future date
-    if (date > now) date = new Date(date.setFullYear(date.getFullYear()-1));
+    if (date > now) date.setFullYear(date.getFullYear()-1);
 
     return date
   };
 
   try {
-    //Spilt the string of transactions into an array
-    const transactionsArray = transactionsString.split("POSTED:")
-      //Filter out empty data
-      .filter(transaction=>!!transaction)
-      //Remove unwanted data from the transactions
-      .map(transaction=>transaction.replace("\tPending Transactions Ends", ""));
+    let transactions;
 
-    //Massage the data into intelligible objects
-    const transactions = transactionsArray.map(transaction=>{
-      //Parse the transaction string into an object
-      const isMatch = transaction.match(/(PENDING|(\w+)\s*(\d+))\s*TRANSACTION:(\w+)\s*(\d+)\s+(?:Card No:([\*\d]+)\s*)?Description:(.+)\s*(Charges|Payments):(-?)\$([\d,]+\.\d{2})\s*/);
-      if (!isMatch) throw `Unable to read transaction.\r\n${transaction}`;
-      const matches = isMatch.map(match=>(match ? match.trim() : match))
-      return {
-        PostedDate: (matches[1] === "PENDING" ? null : convertDateStringToDate(`${matches[2]} ${matches[3]}`)),
-        TransactionDate: convertDateStringToDate(`${matches[4]} ${matches[5]}`),
-        Card: matches[6],
-        Description: matches[7],
-        Type: matches[8],
-        Amount: Number(`${matches[9]}${matches[10]}`.replace(",","")) * -1,
-      };
-    })
-    .reverse();
+    //If this is CSV data
+    if (isCSV) {
+      //For each CSV file, convert the contents to JSON
+      transactions = transactionData.map(csvData=>
+        //Convert the CSV data to JSON
+        convertCSVToJSON(csvData)
+          //Format each transaction object
+          .map(transaction=>{
+            const type = (transaction.Charges ? "Charges" : (transaction.Payments ? "Payments" : null));
+            const dateIsMatch = transaction.Date.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+            if (!type || !dateIsMatch) throw `Unable to read transaction.\r\n${transaction}`;
+
+            return {
+              PostedDate: null,
+              TransactionDate: new Date(dateIsMatch[3], Number(dateIsMatch[1])-1, dateIsMatch[2]),
+              Card: `*${transaction["Card No."]}`,
+              Description: transaction.Description,
+              Type: type,
+              Amount: Number(`${(type === "Charges" ? "-" : "")}${transaction[type]}`),
+            };
+          })
+      )
+        .flat();
+    }
+    //Otherwise, this is scraped from online app
+    else {
+      //Spilt the string of transactions into an array
+      const transactionsArray = transactionData.split("POSTED:")
+        //Filter out empty data
+        .filter(transaction=>!!transaction)
+        //Remove unwanted data from the transactions
+        .map(transaction=>transaction.replace("\tPending Transactions Ends", ""));
+
+      //Massage the data into intelligible objects
+      transactions = transactionsArray.map(transaction=>{
+        //Parse the transaction string into an object
+        const isMatch = transaction.match(/(PENDING|(\w+)\s*(\d+))\s*TRANSACTION:(\w+)\s*(\d+)\s+(?:Card No:([\*\d]+)\s*)?Description:(.+)\s*(Charges|Payments):(-?)\$([\d,]+\.\d{2})\s*/);
+        if (!isMatch) throw `Unable to read transaction.\r\n${transaction}`;
+        const matches = isMatch.map(match=>(match ? match.trim() : match))
+        return {
+          PostedDate: (matches[1] === "PENDING" ? null : convertDateStringToDate(`${matches[2]} ${matches[3]}`)),
+          TransactionDate: convertDateStringToDate(`${matches[4]} ${matches[5]}`),
+          Card: matches[6],
+          Description: matches[7],
+          Type: matches[8],
+          Amount: Number(`${matches[9]}${matches[10]}`.replace(",","")) * -1,
+        };
+      })
+      .reverse();
+    }
+
+    //Update the transactions
+    updateTransactions(transactions);
 
     //Return the transaction objects
     return transactions;
@@ -69,7 +123,7 @@ let importTransactions = function(transactionsString) {
   }
 };
 
-// let formatTransactions = function(transactions) {
+// const formatTransactions = function(transactions) {
 //   return transactions.map(transaction=>{
 //     const {PostedDate, TransactionDate, Card, Description, Type, Amount} = transaction;
 //     return `${Description}\t\t${Amount}`;
@@ -87,20 +141,28 @@ const formatTransactions = function(transactions) {
     return {
       ...transaction,
       Description: transaction.Description.replace(/([\w\'&]+)/g, p1=>p1[0].toUpperCase() + p1.substring(1).toLowerCase()),
-      PostedDate: (transaction.PostedDate && transaction.PostedDate.toLocaleDateString()),
-      TransactionDate: transaction.TransactionDate.toLocaleDateString(),
+      PostedDate: (transaction.PostedDate && new Date(transaction.PostedDate).toLocaleDateString()),
+      TransactionDate: (transaction.TransactionDate && new Date(transaction.TransactionDate).toLocaleDateString()),
       Amount: transaction.Amount.toFixed(2),
     }
   });
 };
 
-const fetchTransactionData = function() {
-  //Get the transaction data
-  const localData = localStorage.getItem("transaction-data");
-  if (localData) return renderTable(localData);
+const updateTransactions = function(transactions) {
+  //Save the data to localStorage
+  localStorage.setItem("transaction-data", JSON.stringify(transactions));
+
+  //Filter out transactions
+  transactions = filterTransactions(transactions);
+
+  //Format the transaction data
+  transactions = formatTransactions(transactions);
+
+  //Render the transactions table
+  renderTable(transactions);
 };
 
-const renderTable = function(transactionData) {
+const renderTable = function(transactions) {
   //Define the table headers
   const tableHeaders = `<thead>
       <tr>
@@ -125,11 +187,19 @@ const renderTable = function(transactionData) {
   //Append the table body
   table.innerHTML += tableBody;
 
-  //Append the transactions
-  renderTransactions(transactionData);
+  //Render the transactions
+  renderTransactions(transactions);
+
+  //Update the transaction import form status
+  const statusDiv = form.querySelector("#transaction-form-status");
+  statusDiv.innerHTML = `<p class="text-success">Imported ${transactions.length} transactions.</p>`;
+
+  //Update the number of transactions
+  const countDiv = dataDiv.querySelector(".transaction-count");
+  countDiv.innerHTML = `<small><em>${transactions.length} transactions</em></small>`;
 }
 
-const renderTransactions = function(transactionData) {
+const renderTransactions = function(transactions) {
   const validateDescription = function(description) {
     //Bills
     if (description.match(/Spectrum 855-707-7328 SC/i))  return {category: "Spectrum Internet", description: "Charge to CCD *3991", notes: null};
@@ -185,21 +255,9 @@ const renderTransactions = function(transactionData) {
     return {category: null, description: `*${description}`, notes: null};
   };
 
-  //Return an array of transaction objects
-  let transactions = importTransactions(transactionData);
-
-  //If the data was valid, save the data to localStorage
-  localStorage.setItem("transaction-data", transactionData);
-
-  //Filter out transactions
-  transactions = filterTransactions(transactions);
-
-  //Format the transaction data
-  transactions = formatTransactions(transactions);
-
   const tableData = transactions.map(transaction=>{
-    let {Description, PostedDate, TransactionDate, Type, Amount} = transaction;
-    let {description, notes, category} = validateDescription(Description);
+    const {Description, PostedDate, TransactionDate, Type, Amount} = transaction;
+    const {description, notes, category} = validateDescription(Description);
 
     return `<tr>
       <td>${PostedDate}</td>
@@ -219,6 +277,15 @@ const renderTransactions = function(transactionData) {
   tableBody.innerHTML += tableData;
 };
 
+const fetchTransactions = function() {
+  //Attempt to fetch the transaction data from localStorage
+  const transactions = JSON.parse(localStorage.getItem("transaction-data"));
+  if (!transactions) return;
+
+  //Update the transactions
+  updateTransactions(transactions);
+};
+
 form.addEventListener("submit", event=>{
   //Prevent form submission
   event.preventDefault();
@@ -226,9 +293,29 @@ form.addEventListener("submit", event=>{
   //Get the transaction data
   const transactionData = form.querySelector(".form-input").value;
 
-  //Render the new transaction data
-  renderTable(transactionData);
+  //Import the transaction data into an array of transaction objects
+  const transactions = importTransactions(transactionData);
+});
+
+fileInput.addEventListener("change", async event=>{
+  //Prevent default behavior
+  event.preventDefault();
+
+  //Get the transaction data
+  const transactionDataArray = [];
+  await Promise.all(  //Promise.all handles an array of Promises
+    [...fileInput.files].map(async file=>{
+      const fileContent = await file.text();
+      transactionDataArray.push(fileContent);
+    })
+  );
+
+  //Import the transaction data into an array of transaction objects
+  const transactions = importTransactions(transactionDataArray, true);
+
+  //Reset the file input
+  fileInput.value = "";
 });
 
 //Attempt an initial render
-fetchTransactionData();
+fetchTransactions();
