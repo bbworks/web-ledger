@@ -59,7 +59,7 @@ const importTransactions = function(transactionData, isCSV) {
   };
 
   try {
-    let transactions;
+    let transactions = {};
 
     //If this is CSV data
     if (isCSV) {
@@ -73,13 +73,18 @@ const importTransactions = function(transactionData, isCSV) {
             const dateIsMatch = transaction.Date.match(/(\d{2})\/(\d{2})\/(\d{4})/);
             if (!type || !dateIsMatch) throw `Unable to read transaction.\r\n${transaction}`;
 
-            return {
+            const transactionObj = {
               PostedDate: null,
               TransactionDate: new Date(dateIsMatch[3], Number(dateIsMatch[1])-1, dateIsMatch[2]),
               Card: `*${transaction["Card No."]}`,
               Description: transaction.Description,
               Type: type,
               Amount: Number(`${(type === "Charges" ? "-" : "")}${transaction[type]}`),
+            };
+
+            return {
+              data: transactionObj,
+              display: transactionObj,
             };
           })
       )
@@ -100,13 +105,19 @@ const importTransactions = function(transactionData, isCSV) {
         const isMatch = transaction.match(/(PENDING|(\w+)\s*(\d+))\s*TRANSACTION:(\w+)\s*(\d+)\s+(?:Card No:([\*\d]+)\s*)?Description:(.+)\s*(Charges|Payments):(-?)\$([\d,]+\.\d{2})\s*/);
         if (!isMatch) throw `Unable to read transaction.\r\n${transaction}`;
         const matches = isMatch.map(match=>(match ? match.trim() : match))
-        return {
+
+        const transactionObj = {
           PostedDate: (matches[1] === "PENDING" ? null : convertDateStringToDate(`${matches[2]} ${matches[3]}`)),
           TransactionDate: convertDateStringToDate(`${matches[4]} ${matches[5]}`),
           Card: matches[6],
           Description: matches[7],
           Type: matches[8],
           Amount: Number(`${matches[9]}${matches[10]}`.replace(",","")) * -1,
+        };
+
+        return {
+          data: transactionObj,
+          display: transactionObj,
         };
       })
       .reverse();
@@ -132,32 +143,139 @@ const importTransactions = function(transactionData, isCSV) {
 // };
 
 //Initialize functions
+const typeCheckTransactions = function (transactions) {
+  return transactions.map(transaction=>(
+    {
+      ...transaction,
+      data: {
+        ...transaction.data,
+        PostedDate: transaction.data.PostedDate && new Date(transaction.data.PostedDate),
+        TransactionDate: transaction.data.TransactionDate && new Date(transaction.data.TransactionDate),
+        Amount: Number(transaction.data.Amount),
+      },
+      display: {
+        ...transaction.display,
+        PostedDate: transaction.display.PostedDate && new Date(transaction.display.PostedDate),
+        TransactionDate: transaction.display.TransactionDate && new Date(transaction.display.TransactionDate),
+        Amount: Number(transaction.display.Amount),
+      },
+    }
+  ));
+};
+
 const filterTransactions = function (transactions) {
-  return transactions.filter(transaction=>(transaction.Description ? transaction.Description.toUpperCase() !== "PAYMENT - THANK YOU ATLANTA GA" : true));
+  return transactions.map(transaction=>(
+    {
+      ...transaction,
+      display: (transaction.display.Description && transaction.display.Description.toUpperCase() === "PAYMENT - THANK YOU ATLANTA GA" ? null : transaction.display),
+    }
+  ));
+};
+
+const validateDescription = function(transaction) {
+  const {Description: description} = transaction.display;
+  let validation = {Category: null, Description: `*${description}`, Notes: null};
+
+  //Skip the transaction if there is no description
+  if (!description) return {
+    ...transaction,
+    display: {
+      ...transaction.display,
+      ...validation
+    },
+  };
+
+  //Bills
+      if (description.match(/Spectrum 855-707-7328 SC/i))  validation = {Category: "Spectrum Internet", Description: "Charge to CCD *3991", Notes: null};
+  else if (description.match(/Simplisafe 888-957-4675 Ma/i))  validation = {Category: "SimpliSafe (for mom)", Description: "Charge to CCD *3991", Notes: null};
+  else if (description.match(/SDC\*Laurens Electric C Laurens SC/i))  validation = {Category: "Laurens Electric ProTec Security", Description: "Charge to CCD *3991", Notes: null};
+  else if (description.match(/SJWD Water District 8649492805 SC/i))  validation = {Category: "SJWD Water District", Description: "Charge to CCD *3991", Notes: null};
+  else if (description.match(/State Farm Insurance 8009566310 Il/i))  validation = {Category: "State Farm auto insurance", Description: "Charge to CCD *3991", Notes: null};
+  else if (description.match(/Spotelse if y USA(?: New York NY)?/i))  validation = {Category: "Spotelse if y Premium subscription", Description: "Charge to CCD *3991", Notes: null};
+  else if (description.match(/Netflix.Com Netflix.Com Ca/i))  validation = {Category: "Netflix Premium subscription", Description: "Charge to CCD *3991", Notes: null};
+  else if (description.match(/Ddv \*Discoveryplus 0123456789 TN/i))  validation = {Category: "Discovery Plus subscription", Description: "Charge to CCD *3991", Notes: null};
+  else if (description.match(/AT&T \*Payment 800-288-2020 TX/i))  validation = {Category: "AT&T Internet", Description: "Charge to CCD *3991", Notes: null};
+
+  //Recurring expenses
+
+  //Gas
+  else if (description.match(/QT \d+ (?:INSIDE|OUTSIDE|\w+ \w{2})/i)) validation = {Category: "Gas", Description: "QuikTrip", Notes: null};
+  else if (description.match(/CIRCLE K # \d+ \w+ \w{2}/i)) validation = {Category: "Gas", Description: "Circle K", Notes: null};
+  else if (description.match(/7-ELEVEN \d+ \w+ \w{2}/i)) validation = {Category: "Gas", Description: "7-Eleven", Notes: null};
+
+  //Groceies & Necessities
+  else if (description.match(/Walmart Grocery [\d-]+ Ar/i)) validation = {Category: "Groceries/Necessities", Description: "Walmart Supercenter", Notes: "grocery pickup"};
+  else if (description.match(/Target #\d+ \w+ \w{2}/i)) validation = {Category: "Groceries/Necessities", Description: "Target", Notes: null};
+  else if (description.match(/Ingles Markets #\d+ \w+ \w{2}/i)) validation = {Category: "Groceries/Necessities", Description: "Ingles", Notes: null};
+  else if (description.match(/Publix #\d+ \w+ \w{2}/i)) validation = {Category: "Groceries/Necessities", Description: "Publix", Notes: "grocery pickup"};
+  else if (description.match(/(?:SamsClub #8142 Spartanburg SC|Sams Club #8142 864-574-3480 SC)/i)) validation = {Category: "Groceries/Necessities", Description: "Sam's Club", Notes: null};
+
+  else if (description.match(/Walgreens #\d+/i)) validation = {Category: "Groceries/Necessities", Description: "Walgreens", Notes: null};
+
+  //Famil Outings
+  else if (description.match(/McDonald's \w+ \w+ \w{2}/i))  validation = {Category: "Family Outings", Description: "McDonald's", Notes: null};
+  else if (description.match(/Burger King #\d+(?: \w+ \w+ \w{2})?/i))  validation = {Category: "Family Outings", Description: "Burger King", Notes: null};
+  else if (description.match(/PDQ \d+ OLO \w+ \w{2}/i))  validation = {Category: "Family Outings", Description: "PDQ", Notes: null};
+  else if (description.match(/Chick-Fil-A #\d+ \w+ \w{2}/i))  validation = {Category: "Family Outings", Description: "Chick-fil-A", Notes: null};
+  else if (description.match(/Bojangles \d+ \w+/i))  validation = {Category: "Family Outings", Description: "Bojangles", Notes: null};
+  else if (description.match(/Cook Out [\w ]+(?: \w+ \w{2})?/i))  validation = {Category: "Family Outings", Description: "Cook Out", Notes: null};
+  else if (description.match(/Wendys #\d+ \w+ \w{2}/i))  validation = {Category: "Family Outings", Description: "Wendy's", Notes: null};
+  else if (description.match(/Sweet Basil Thai Cusin Greenville SC/i))  validation = {Category: "Family Outings", Description: "Sweet Basil Thai Cusine", Notes: null};
+  else if (description.match(/Panda Hibachi Duncan SC/i))  validation = {Category: "Family Outings", Description: "Panda Hibachi", Notes: null};
+  else if (description.match(/El Molcajete Duncan Sc/i))  validation = {Category: "Family Outings", Description: "El Molcajete", Notes: null};
+  else if (description.match(/(?:Chipotle \d+ \w \w{2}|Chipotle Online 1800\d{6} CA)/i))  validation = {Category: "Family Outings", Description: "Chipotle", Notes: null};
+  else if (description.match(/La Fogata Mexican Rest Simpsonville Sc/i))  validation = {Category: "Family Outings", Description: "La Fogata", Notes: null};
+  else if (description.match(/Pizza Hut \d+ \d+ \w{2}/i))  validation = {Category: "Family Outings", Description: "Pizza Hut", Notes: null};
+  else if (description.match(/Tutti Frutti Spartanburg SC/i))  validation = {Category: "Family Outings", Description: "Tutti Frutti", Notes: null};
+
+  //Church
+  else if (description.match(/Brookwood Church Donat Simpsonville Sc/i))  validation = {Category: "Church", Description: "Brookwood Church", Notes: "online giving"};
+
+  //Other
+  else if (description.match(/Dollartree \w+ \w{2}/i))  validation = {Category: null, Description: "Dollar Tree", Notes: null};
+  else if (description.match(/[\w\* ]+ amzn.com\/billwa/i))  validation = {Category: null, Description: "Amazon", Notes: null};
+
+  return {
+    ...transaction,
+    display: {
+      ...transaction.display,
+      ...validation
+    },
+  };
 };
 
 const formatTransactions = function(transactions) {
   return transactions.map(transaction=>{
     return {
       ...transaction,
-      Description: transaction.Description.replace(/([\w\'&]+)/g, p1=>p1[0].toUpperCase() + p1.substring(1).toLowerCase()),
-      PostedDate: (transaction.PostedDate && new Date(transaction.PostedDate).toLocaleDateString()),
-      TransactionDate: (transaction.TransactionDate && new Date(transaction.TransactionDate).toLocaleDateString()),
-      Amount: transaction.Amount.toFixed(2),
+      display: {
+        ...transaction.display,
+        PostedDate: (transaction.display.PostedDate ? new Date(transaction.display.PostedDate).toLocaleDateString() : ""),
+        TransactionDate: (transaction.display.TransactionDate ? new Date(transaction.display.TransactionDate).toLocaleDateString() : ""),
+        Description: transaction.display.Description && transaction.display.Description.replace(/([\w\'&]+)/g, p1=>p1[0].toUpperCase() + p1.substring(1).toLowerCase()),
+        Amount: transaction.display.Amount.toFixed(2),
+      }
     }
   });
 };
 
 const updateTransactions = function(transactions) {
-  //Save the data to localStorage
-  localStorage.setItem("transaction-data", JSON.stringify(transactions));
+  //Type check values (possible type mismatch from JSON parse)
+  transactions = typeCheckTransactions(transactions);
 
-  //Filter out transactions
-  transactions = filterTransactions(transactions);
+  //Filter out transaction display data for the transaction table
+  //transactions = filterTransactions(transactions);
 
-  //Format the transaction data
+  //Assign category & notes from description
+  transactions = transactions.map(transaction=>validateDescription(transaction));
+
+  //Format the transaction data for the transaction table
   transactions = formatTransactions(transactions);
 
+  //Save the data to localStorage
+  localStorage.setItem("transaction-data", JSON.stringify(transactions));
+  window.transactions = transactions;
+  
   //Render the transactions table
   renderTable(transactions);
 };
@@ -200,73 +318,17 @@ const renderTable = function(transactions) {
 }
 
 const renderTransactions = function(transactions) {
-  const validateDescription = function(description) {
-    //Bills
-    if (description.match(/Spectrum 855-707-7328 SC/i))  return {category: "Spectrum Internet", description: "Charge to CCD *3991", notes: null};
-    if (description.match(/Simplisafe 888-957-4675 Ma/i))  return {category: "SimpliSafe (for mom)", description: "Charge to CCD *3991", notes: null};
-    if (description.match(/SDC\*Laurens Electric C Laurens SC/i))  return {category: "Laurens Electric ProTec Security", description: "Charge to CCD *3991", notes: null};
-    if (description.match(/SJWD Water District 8649492805 SC/i))  return {category: "SJWD Water District", description: "Charge to CCD *3991", notes: null};
-    if (description.match(/State Farm Insurance 8009566310 Il/i))  return {category: "State Farm auto insurance", description: "Charge to CCD *3991", notes: null};
-    if (description.match(/Spotify USA New York NY/i))  return {category: "Spotify Premium subscription", description: "Charge to CCD *3991", notes: null};
-    if (description.match(/Netflix.Com Netflix.Com Ca/i))  return {category: "Netflix Premium subscription", description: "Charge to CCD *3991", notes: null};
-    if (description.match(/Ddv \*Discoveryplus 0123456789 TN/i))  return {category: "Discovery Plus subscription", description: "Charge to CCD *3991", notes: null};
-    if (description.match(/AT&T \*Payment 800-288-2020 TX/i))  return {category: "AT&T Internet", description: "Charge to CCD *3991", notes: null};
-
-    //Recurring expenses
-
-    //Gas
-    if (description.match(/QT \d+ (?:OUTSIDE|\w+ \w{2})/i)) return {category: "Gas", description: "QuikTrip", notes: null};
-    if (description.match(/CIRCLE K # \d+ \w+ \w{2}/i)) return {category: "Gas", description: "Circle K", notes: null};
-    if (description.match(/7-ELEVEN \d+ \w+ \w{2}/i)) return {category: "Gas", description: "7-Eleven", notes: null};
-
-    //Groceries & Necessities
-    if (description.match(/Walmart Grocery [\d-]+ Ar/i)) return {category: "Groceries/Necessities", description: "Walmart Supercenter", notes: "grocery pickup"};
-    if (description.match(/Target #\d+ \w+ \w{2}/i)) return {category: "Groceries/Necessities", description: "Target", notes: null};
-    if (description.match(/Ingles Markets #\d+ \w+ \w{2}/i)) return {category: "Groceries/Necessities", description: "Ingles", notes: null};
-    if (description.match(/Publix #\d+ \w+ \w{2}/i)) return {category: "Groceries/Necessities", description: "Publix", notes: "grocery pickup"};
-    if (description.match(/(?:SamsClub #8142 Spartanburg SC|Sams Club #8142 864-574-3480 SC)/i)) return {category: "Groceries/Necessities", description: "Sam's Club", notes: null};
-
-    if (description.match(/Walgreens #\d+/i)) return {category: "Groceries/Necessities", description: "Walgreens", notes: null};
-
-    //Family Outings
-    if (description.match(/McDonald's \w+ \w+ \w{2}/i))  return {category: "Family Outings", description: "McDonald's", notes: null};
-    if (description.match(/Burger King #\d+(?: \w+ \w+ \w{2})?/i))  return {category: "Family Outings", description: "Burger King", notes: null};
-    if (description.match(/PDQ \d+ OLO \w+ \w{2}/i))  return {category: "Family Outings", description: "PDQ", notes: null};
-    if (description.match(/Chick-Fil-A #\d+ \w+ \w{2}/i))  return {category: "Family Outings", description: "Chick-fil-A", notes: null};
-    if (description.match(/Bojangles \d+ \w+/i))  return {category: "Family Outings", description: "Bojangles", notes: null};
-    if (description.match(/Cook Out [\w ]+(?: \w+ \w{2})?/i))  return {category: "Family Outings", description: "Cook Out", notes: null};
-    if (description.match(/Wendys #\d+ \w+ \w{2}/i))  return {category: "Family Outings", description: "Wendy's", notes: null};
-    if (description.match(/Sweet Basil Thai Cusin Greenville SC/i))  return {category: "Family Outings", description: "Sweet Basil Thai Cusine", notes: null};
-    if (description.match(/Panda Hibachi Duncan SC/i))  return {category: "Family Outings", description: "Panda Hibachi", notes: null};
-    if (description.match(/El Molcajete Duncan Sc/i))  return {category: "Family Outings", description: "El Molcajete", notes: null};
-    if (description.match(/(?:Chipotle \d+ \w \w{2}|Chipotle Online 1800\d{6} CA)/i))  return {category: "Family Outings", description: "Chipotle", notes: null};
-    if (description.match(/La Fogata Mexican Rest Simpsonville Sc/i))  return {category: "Family Outings", description: "La Fogata", notes: null};
-    if (description.match(/Pizza Hut \d+ \d+ \w{2}/i))  return {category: "Family Outings", description: "Pizza Hut", notes: null};
-    if (description.match(/Tutti Frutti Spartanburg SC/i))  return {category: "Family Outings", description: "Tutti Frutti", notes: null};
-
-    //Church
-    if (description.match(/Brookwood Church Donat Simpsonville Sc/i))  return {category: "Church", description: "Brookwood Church", notes: "online giving"};
-
-    //Other
-    if (description.match(/Dollartree \w+ \w{2}/i))  return {category: null, description: "Dollar Tree", notes: null};
-    if (description.match(/[\w\* ]+ amzn.com\/billwa/i))  return {category: null, description: "Amazon", notes: null};
-
-    //if (description.match(//i))  return {category: null, description: "desc", notes: null};
-    return {category: null, description: `*${description}`, notes: null};
-  };
-
   const tableData = transactions.map(transaction=>{
-    const {Description, PostedDate, TransactionDate, Type, Amount} = transaction;
-    const {description, notes, category} = validateDescription(Description);
+    const {Description, PostedDate, TransactionDate, Type, Amount, Notes, Category} = transaction.display;
 
     return `<tr>
-      <td>${PostedDate}</td>
-      <td>${TransactionDate}</td>
-      <td>${Type}</td>
-      <td>${(category ? category : "")}</td>
-      <td>${description}</td>
-      <td>${(notes ? notes : "")}</td>
-      <td>${Amount}</td>
+      <td>${(PostedDate ? PostedDate : "")}</td>
+      <td>${(TransactionDate ? TransactionDate : "")}</td>
+      <td>${(Type ? Type : "")}</td>
+      <td>${(Category ? Category : "")}</td>
+      <td>${(Description ? Description : "")}</td>
+      <td>${(Notes ? Notes : "")}</td>
+      <td>${(Amount ? Amount : "")}</td>
     </tr>`
   })
     .join("\r\n");
@@ -291,7 +353,7 @@ form.addEventListener("submit", event=>{
   event.preventDefault();
 
   //Get the transaction data
-  const transactionData = form.querySelector(".form-input").value;
+  const transactionData = form.querySelector("#transaction-import-input").value;
 
   //Import the transaction data into an array of transaction objects
   const transactions = importTransactions(transactionData);

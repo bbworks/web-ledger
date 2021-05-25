@@ -17,11 +17,12 @@
   <body>
     <div class="container">
       <h1 class="display-1">Ledger</h1>
+      <!-- <button class="btn btn-dark" type="button" data-toggle="collapse" data-target="#transaction-form">Import Transactions</button> -->
       <form id="transaction-form" class="transaction-form" action="" method="">
         <div>
           <label class="form-label">Transactions</label>
           <div class="input-group mb-2">
-            <input class="form-control" type="text" />
+            <input id="transaction-import-input" class="form-control" type="text" />
             <button class="btn btn-primary input-group-text" type="submit">Import</button>
           </div>
           <p class="form-text">Paste transaction data for parsing.</p>
