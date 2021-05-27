@@ -123,6 +123,12 @@ const importTransactions = function(transactionData, isCSV) {
       .reverse();
     }
 
+    //Assign category & notes from description
+    transactions = transactions.map(transaction=>validateDescription(transaction));
+
+    //Format the transaction data for the transaction table
+    transactions = formatTransactions(transactions);
+
     //Update the transactions
     updateTransactions(transactions);
 
@@ -155,9 +161,9 @@ const typeCheckTransactions = function (transactions) {
       },
       display: {
         ...transaction.display,
-        PostedDate: transaction.display.PostedDate && new Date(transaction.display.PostedDate),
-        TransactionDate: transaction.display.TransactionDate && new Date(transaction.display.TransactionDate),
-        Amount: Number(transaction.display.Amount),
+        // PostedDate: transaction.display.PostedDate && new Date(transaction.display.PostedDate),
+        // TransactionDate: transaction.display.TransactionDate && new Date(transaction.display.TransactionDate),
+        //Amount: Number(transaction.display.Amount),
       },
     }
   ));
@@ -250,10 +256,10 @@ const formatTransactions = function(transactions) {
       ...transaction,
       display: {
         ...transaction.display,
-        PostedDate: (transaction.display.PostedDate ? new Date(transaction.display.PostedDate).toLocaleDateString() : ""),
-        TransactionDate: (transaction.display.TransactionDate ? new Date(transaction.display.TransactionDate).toLocaleDateString() : ""),
+        PostedDate: (transaction.display.PostedDate ? new Date(transaction.display.PostedDate).toLocaleDateString().toString() : ""),
+        TransactionDate: (transaction.display.TransactionDate ? new Date(transaction.display.TransactionDate).toLocaleDateString().toString() : ""),
         Description: transaction.display.Description && transaction.display.Description.replace(/([\w\'&]+)/g, p1=>p1[0].toUpperCase() + p1.substring(1).toLowerCase()),
-        Amount: transaction.display.Amount.toFixed(2),
+        Amount: Number(transaction.display.Amount).toFixed(2),
       }
     }
   });
@@ -266,16 +272,10 @@ const updateTransactions = function(transactions) {
   //Filter out transaction display data for the transaction table
   //transactions = filterTransactions(transactions);
 
-  //Assign category & notes from description
-  transactions = transactions.map(transaction=>validateDescription(transaction));
-
-  //Format the transaction data for the transaction table
-  transactions = formatTransactions(transactions);
-
   //Save the data to localStorage
   localStorage.setItem("transaction-data", JSON.stringify(transactions));
   window.transactions = transactions;
-  
+
   //Render the transactions table
   renderTable(transactions);
 };
