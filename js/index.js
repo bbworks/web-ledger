@@ -3,6 +3,7 @@ const form = document.getElementById("transaction-form");
 const fileInput = document.getElementById("transaction-form-input-file");
 const dataDiv = document.querySelector(".transaction-data");
 const table = dataDiv.querySelector("table");
+const transactionLocalStorageItemKey = "transaction-data"
 
 //Create utility functions
 const createDOMNode = function(HTML) {
@@ -15,7 +16,7 @@ const createDOMNode = function(HTML) {
 
 const addTransactionModal = function(transaction, buttonsOptions = {okButton: "OK", cancelButton: "Cancel"}) {
   const header = "Transaction Detail";
-  const {PostedDate, TransactionDate, Card, Amount, Description, Category, Notes} = transaction.display;
+  const {PostedDate, TransactionDate, Card, Amount, Description, Category, Notes, Tags} = transaction.display;
   const transactionFields= [
     {name: "posted-date", placeholder: "PostedDate", value: PostedDate, tag: "input", tagType: "text",},
     {name: "transaction-date", placeholder: "TransactionDate", value: TransactionDate, tag: "input", tagType: "text",},
@@ -24,6 +25,7 @@ const addTransactionModal = function(transaction, buttonsOptions = {okButton: "O
     {name: "description", placeholder: "Description", value: Description, tag: "input", tagType: "text",},
     {name: "category", placeholder: "Category", value: Category, tag: "input", tagType: "text",},
     {name: "notes", placeholder: "Notes", value: Notes, tag: "textarea", tagType: null,},
+    {name: "tags", placeholder: "Tags", value: Tags, tag: "input", tagType: "text",},
   ];
   //Create a modal DOM element
   const modalNode = createDOMNode(`<div id="transaction-modal" class="modal fade">
@@ -44,6 +46,8 @@ const addTransactionModal = function(transaction, buttonsOptions = {okButton: "O
   </div>`);
 
   transactionFields.forEach((transactionField, i)=>{
+    if (transactionField.name === "tags") transactionField.value = transactionField.value.join(", ");
+    
     const transactionFieldElementContainer = createDOMNode("<div></div>"); //disabled inputs don't fire events; wrap in something that will fire an event
     const transactionFieldElement = createDOMNode(`<${transactionField.tag} class="transaction-modal-input-text form-control" ${(transactionField.tag === "input" ? `value="${(transactionField.value ? transactionField.value : '')}"` : '')} name="${transactionField.name}" ${(transactionField.tagType ? `type="${transactionField.tagType}"` : '')} placeholder="${transactionField.placeholder}" tabindex="${i+1}" disabled>${(transactionField.tag !== "input" ? (transactionField.value ? transactionField.value : '') : '')}</${transactionField.tag}>`)
     const transactionModalForm = modalNode.querySelector("form");
@@ -159,6 +163,7 @@ const importTransactions = function(transactionData, isCSV) {
               Description: transaction.Description,
               Type: type,
               Amount: Number(`${(type === "Charges" ? "-" : "")}${transaction[type]}`),
+              Tags: [],
             };
 
             return {
@@ -192,6 +197,7 @@ const importTransactions = function(transactionData, isCSV) {
           Description: matches[7],
           Type: matches[8],
           Amount: Number(`${matches[9]}${matches[10]}`.replace(",","")) * -1,
+          Tags: [],
         };
 
         return {
@@ -201,12 +207,6 @@ const importTransactions = function(transactionData, isCSV) {
       })
       .reverse();
     }
-
-    //Assign category & notes from description
-    transactions = transactions.map(transaction=>validateDescription(transaction));
-
-    //Format the transaction data for the transaction table
-    transactions = formatTransactions(transactions);
 
     //Update the transactions
     updateTransactions(transactions);
@@ -219,15 +219,6 @@ const importTransactions = function(transactionData, isCSV) {
   }
 };
 
-// const formatTransactions = function(transactions) {
-//   return transactions.map(transaction=>{
-//     const {PostedDate, TransactionDate, Card, Description, Type, Amount} = transaction;
-//     return `${Description}\t\t${Amount}`;
-//   })
-//   .join("\r\n");
-// };
-
-//Initialize functions
 const typeCheckTransactions = function (transactions) {
   return transactions.map(transaction=>(
     {
@@ -258,8 +249,8 @@ const filterTransactions = function (transactions) {
 };
 
 const validateDescription = function(transaction) {
-  const {Description: description} = transaction.display;
-  let validation = {Category: null, Description: `*${description}`, Notes: null};
+  const {Description: description, Tags: tags} = transaction.data;
+  let validation = {Category: null, Description: `*${description}`, Notes: null, Tags: tags || [],};
 
   //Skip the transaction if there is no description
   if (!description) return {
@@ -330,29 +321,39 @@ const validateDescription = function(transaction) {
 };
 
 const formatTransactions = function(transactions) {
-  return transactions.map(transaction=>{
-    return {
+  return transactions.map(transaction=>(
+    {
       ...transaction,
       display: {
         ...transaction.display,
-        PostedDate: (transaction.display.PostedDate ? new Date(transaction.display.PostedDate).toLocaleDateString().toString() : ""),
-        TransactionDate: (transaction.display.TransactionDate ? new Date(transaction.display.TransactionDate).toLocaleDateString().toString() : ""),
+        PostedDate: (transaction.data.PostedDate ? new Date(transaction.data.PostedDate).toLocaleDateString().toString() : ""),
+        TransactionDate: (transaction.data.TransactionDate ? new Date(transaction.data.TransactionDate).toLocaleDateString().toString() : ""),
         Description: transaction.display.Description && transaction.display.Description.replace(/([\w\'&]+)/g, p1=>p1[0].toUpperCase() + p1.substring(1).toLowerCase()),
-        Amount: Number(transaction.display.Amount).toFixed(2),
+        Amount: Number(transaction.data.Amount)
+          .toFixed(2)
+          .toString()
+          .replace(/\d{4,}/, (p0)=>p0.split('').reverse().join('').replace(/(\d{3})(?=\d)/g, "$1,").split('').reverse().join('')) //add commas
+          .replace(/(\d)/, "$$$1"), //add $
       }
     }
-  });
+  ));
 };
 
 const updateTransactions = function(transactions) {
   //Type check values (possible type mismatch from JSON parse)
   transactions = typeCheckTransactions(transactions);
 
+  //Assign category & notes from description
+  transactions = transactions.map(transaction=>validateDescription(transaction));
+
   //Filter out transaction display data for the transaction table
   //transactions = filterTransactions(transactions);
 
+  //Format the transaction data for the transaction table
+  transactions = formatTransactions(transactions);
+
   //Save the data to localStorage
-  localStorage.setItem("transaction-data", JSON.stringify(transactions));
+  localStorage.setItem(transactionLocalStorageItemKey, JSON.stringify(transactions));
   window.transactions = transactions;
 
   //Render the transactions table
@@ -370,6 +371,8 @@ const renderTable = function(transactions) {
         <th>Description</th>
         <th>Notes</th>
         <th>Amount</th>
+        <th>Tags</th>
+        <th></th>
       </tr>
     </thead>`;
 
@@ -402,7 +405,7 @@ const renderTransactions = function(transactions) {
   tableBody.innerHTML = "";
 
   transactions.forEach(transaction=>{
-    const {Description, PostedDate, TransactionDate, Type, Amount, Notes, Category} = transaction.display;
+    const {Description, PostedDate, TransactionDate, Type, Amount, Notes, Category, Tags} = transaction.display;
 
     const transactionElement = createDOMNode(`<tr class="transaction">
       <td>${(PostedDate ? PostedDate : "")}</td>
@@ -412,6 +415,7 @@ const renderTransactions = function(transactions) {
       <td>${(Description ? Description : "")}</td>
       <td>${(Notes ? Notes : "")}</td>
       <td>${(Amount ? Amount : "")}</td>
+      <td>${(Tags ? Tags.map(tag=>`<span class="badge rounded-pill bg-secondary">${tag}</span>`).join('') : "")}</td>
       <td><button class="transaction-button btn" type="button"><i class="transaction-button-icon fas fa-edit"></i></button></td>
     </tr>`);
 
@@ -426,7 +430,7 @@ const renderTransactions = function(transactions) {
 
 const fetchTransactions = function() {
   //Attempt to fetch the transaction data from localStorage
-  const transactions = JSON.parse(localStorage.getItem("transaction-data"));
+  const transactions = JSON.parse(localStorage.getItem(transactionLocalStorageItemKey));
   if (!transactions) return;
 
   //Update the transactions
