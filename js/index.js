@@ -5,6 +5,85 @@ const dataDiv = document.querySelector(".transaction-data");
 const table = dataDiv.querySelector("table");
 
 //Create utility functions
+const createDOMNode = function(HTML) {
+  //If inserting a table row, use tbody as the container
+  let container = document.createElement("div");
+  if (HTML.match(/^\s*<tr/)) container = document.createElement("tbody");
+  container.innerHTML = HTML;
+  return container.firstChild;
+};
+
+const addTransactionModal = function(transaction, buttonsOptions = {okButton: "OK", cancelButton: "Cancel"}) {
+  const header = "Transaction Detail";
+  const {PostedDate, TransactionDate, Card, Amount, Description, Category, Notes} = transaction.display;
+  const transactionFields= [
+    {name: "posted-date", placeholder: "PostedDate", value: PostedDate, tag: "input", tagType: "text",},
+    {name: "transaction-date", placeholder: "TransactionDate", value: TransactionDate, tag: "input", tagType: "text",},
+    {name: "card", placeholder: "Card", value: Card, tag: "input", tagType: "text",},
+    {name: "amount", placeholder: "Amount", value: Amount, tag: "input", tagType: "text",},
+    {name: "description", placeholder: "Description", value: Description, tag: "input", tagType: "text",},
+    {name: "category", placeholder: "Category", value: Category, tag: "input", tagType: "text",},
+    {name: "notes", placeholder: "Notes", value: Notes, tag: "textarea", tagType: null,},
+  ];
+  //Create a modal DOM element
+  const modalNode = createDOMNode(`<div id="transaction-modal" class="modal fade">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">${header}</h3>
+          <button class="btn-close" type="button" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form class="transaction-modal-form"></form>
+        </div>
+        <div class="modal-footer">
+          ${Object.entries(buttonsOptions).map(buttonObj=>`<button class="btn ${(buttonObj[0] === "okButton" ? "btn-primary" : (buttonObj[0] === "cancelButton" ? "btn-secondary" : ''))}" type="button" ${(buttonObj[0] === "cancelButton" ? `data-bs-dismiss="modal"` : '')}>${buttonObj[1]}</button>`).join('')}
+        </div>
+      </div>
+    </div>
+  </div>`);
+
+  transactionFields.forEach((transactionField, i)=>{
+    const transactionFieldElementContainer = createDOMNode("<div></div>"); //disabled inputs don't fire events; wrap in something that will fire an event
+    const transactionFieldElement = createDOMNode(`<${transactionField.tag} class="transaction-modal-input-text form-control" ${(transactionField.tag === "input" ? `value="${(transactionField.value ? transactionField.value : '')}"` : '')} name="${transactionField.name}" ${(transactionField.tagType ? `type="${transactionField.tagType}"` : '')} placeholder="${transactionField.placeholder}" tabindex="${i+1}" disabled>${(transactionField.tag !== "input" ? (transactionField.value ? transactionField.value : '') : '')}</${transactionField.tag}>`)
+    const transactionModalForm = modalNode.querySelector("form");
+
+    transactionFieldElementContainer.addEventListener("click", event=>{
+      transactionFieldElement.disabled = false;
+      transactionFieldElement.focus();
+    });
+    transactionFieldElement.addEventListener("blur", event=>{
+      transactionFieldElement.disabled = true;
+    });
+    transactionFieldElement.addEventListener("keypress", event=>{
+      if (event.keyCode === 13 /* Enter */) return transactionFieldElement.disabled = true;
+    });
+    transactionFieldElement.addEventListener("keydown", event=>{
+      if (event.keyCode === 9 /* Tab */) {
+        const nextOrPrevious = (event.shiftKey === true ? -1 : 1);
+        event.preventDefault();
+        const inputsArray = [...transactionModalForm.querySelectorAll("input")];
+        const nextInput = inputsArray[inputsArray.indexOf(transactionFieldElement)+nextOrPrevious];
+        if (nextInput) {
+          nextInput.disabled = false;
+          nextInput.focus();
+        }
+      }
+    });
+
+    modalNode.querySelector(".transaction-modal-form").appendChild(transactionFieldElementContainer).appendChild(transactionFieldElement);
+  });
+
+  //Turn it into a Bootstrap Modal object
+  const modal = new bootstrap.Modal(modalNode, {focus: true});
+
+  modalNode.addEventListener("hidden.bs.modal", event=>{modal.dispose(); modalNode.remove();});
+
+  document.body.appendChild(modalNode);
+
+  modal.show();
+}
+
 const convertCSVToJSON = function(csv, delimiter = ",") {
   //Initialize variables
   const csvData = csv.split(/(?:\r\n|\r|\n)/).map(line=>line.split(delimiter));
@@ -318,10 +397,14 @@ const renderTable = function(transactions) {
 }
 
 const renderTransactions = function(transactions) {
-  const tableData = transactions.map(transaction=>{
+  //Empty the table
+  const tableBody = table.querySelector("tbody");
+  tableBody.innerHTML = "";
+
+  transactions.forEach(transaction=>{
     const {Description, PostedDate, TransactionDate, Type, Amount, Notes, Category} = transaction.display;
 
-    return `<tr>
+    const transactionElement = createDOMNode(`<tr class="transaction">
       <td>${(PostedDate ? PostedDate : "")}</td>
       <td>${(TransactionDate ? TransactionDate : "")}</td>
       <td>${(Type ? Type : "")}</td>
@@ -329,14 +412,16 @@ const renderTransactions = function(transactions) {
       <td>${(Description ? Description : "")}</td>
       <td>${(Notes ? Notes : "")}</td>
       <td>${(Amount ? Amount : "")}</td>
-    </tr>`
-  })
-    .join("\r\n");
+      <td><button class="transaction-button btn" type="button"><i class="transaction-button-icon fas fa-edit"></i></button></td>
+    </tr>`);
 
-  //Append the table data to the table body
-  const tableBody = table.querySelector("tbody");
-  tableBody.innerHTML = "";
-  tableBody.innerHTML += tableData;
+    transactionElement.querySelector(".transaction-button").addEventListener("click", (event)=>{
+      addTransactionModal(transaction, {okButton: "Save", cancelButton: "Cancel"});
+    });
+
+    //Append the table data to the table body
+    tableBody.appendChild(transactionElement);
+  });
 };
 
 const fetchTransactions = function() {

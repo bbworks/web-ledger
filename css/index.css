@@ -1,0 +1,20 @@
+.transaction-button {
+  visibility: hidden;
+}
+
+.transaction:hover .transaction-button {
+  visibility: visible;
+}
+
+.transaction-modal-input-text[disabled] {
+  background: none;
+  border: none;
+  outline: none;
+  transition: color 0.2s, background 0.2s;
+}
+
+.transaction-modal-input-text[disabled]:hover {
+  color: rgb(100,100,100);
+  background: rgb(245,245,245);
+  cursor: pointer;
+}
