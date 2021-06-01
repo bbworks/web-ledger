@@ -6,6 +6,15 @@ const table = dataDiv.querySelector("table");
 const transactionLocalStorageItemKey = "transaction-data"
 
 //Create utility functions
+const isFalsy = function(value) {
+  return value !== 0 && (!value || value == false);
+};
+
+const nullCoalesce = function(value) {
+  if(isFalsy(arguments)) throw new Error("Function cannot accept 0 parameters.");
+  return [...arguments].reduce((accumulator, value)=>accumulator = (isFalsy(accumulator) && !isFalsy(value) ? value : accumulator), null);
+};
+
 const createDOMNode = function(HTML) {
   //If inserting a table row, use tbody as the container
   let container = document.createElement("div");
@@ -16,41 +25,80 @@ const createDOMNode = function(HTML) {
 
 const addTransactionModal = function(transaction, buttonsOptions = {okButton: "OK", cancelButton: "Cancel"}) {
   const header = "Transaction Detail";
-  const {PostedDate, TransactionDate, Card, Amount, Description, Category, Notes, Tags} = transaction.display;
+  const {PostedDate, TransactionDate, Card, Amount, Description, Category, Notes} = transaction.display;
+  const {Type, Tags} = transaction.data;
+
   const transactionFields= [
-    {name: "posted-date", placeholder: "PostedDate", value: PostedDate, tag: "input", tagType: "text",},
-    {name: "transaction-date", placeholder: "TransactionDate", value: TransactionDate, tag: "input", tagType: "text",},
-    {name: "card", placeholder: "Card", value: Card, tag: "input", tagType: "text",},
-    {name: "amount", placeholder: "Amount", value: Amount, tag: "input", tagType: "text",},
-    {name: "description", placeholder: "Description", value: Description, tag: "input", tagType: "text",},
-    {name: "category", placeholder: "Category", value: Category, tag: "input", tagType: "text",},
-    {name: "notes", placeholder: "Notes", value: Notes, tag: "textarea", tagType: null,},
-    {name: "tags", placeholder: "Tags", value: Tags, tag: "input", tagType: "text",},
+    {name: "PostedDate", placeholder: "PostedDate", value: PostedDate, tag: "input", tagType: "text",},
+    {name: "TransactionDate", placeholder: "TransactionDate", value: TransactionDate, tag: "input", tagType: "text",},
+    {name: "Card", placeholder: "Card", value: Card, tag: "input", tagType: "text",},
+    {name: "Amount", placeholder: "Amount", value: Amount, tag: "input", tagType: "text",},
+    {name: "Description", placeholder: "Description", value: Description, tag: "input", tagType: "text",},
+    {name: "Category", placeholder: "Category", value: Category, tag: "input", tagType: "text",},
+    {name: "Type", placeholder: "Type", value: Type, tag: "input", tagType: "text",},
+    {name: "Notes", placeholder: "Notes", value: Notes, tag: "textarea", tagType: null,},
+    {name: "Tags", placeholder: "Tags", value: Tags, tag: "input", tagType: "text",},
   ];
   //Create a modal DOM element
   const modalNode = createDOMNode(`<div id="transaction-modal" class="modal fade">
     <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3 class="modal-title">${header}</h3>
-          <button class="btn-close" type="button" data-bs-dismiss="modal"></button>
+      <form class="transaction-modal-form">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="modal-title">${header}</h3>
+            <button class="btn-close" type="button" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            ${Object.entries(buttonsOptions).map(buttonObj=>`<button class="btn ${(buttonObj[0] === "okButton" ? "btn-primary" : (buttonObj[0] === "cancelButton" ? "btn-secondary" : ''))}" type="${(buttonObj[0] === "okButton" ? "submit" : "button")}" ${(buttonObj[0] === "cancelButton" ? `data-bs-dismiss="modal"` : '')}>${buttonObj[1]}</button>`).join('')}
+          </div>
         </div>
-        <div class="modal-body">
-          <form class="transaction-modal-form"></form>
-        </div>
-        <div class="modal-footer">
-          ${Object.entries(buttonsOptions).map(buttonObj=>`<button class="btn ${(buttonObj[0] === "okButton" ? "btn-primary" : (buttonObj[0] === "cancelButton" ? "btn-secondary" : ''))}" type="button" ${(buttonObj[0] === "cancelButton" ? `data-bs-dismiss="modal"` : '')}>${buttonObj[1]}</button>`).join('')}
-        </div>
-      </div>
-    </div>
-  </div>`);
+      </form>
+    </div>`);
+
+  const transactionModalBody = modalNode.querySelector(".modal-body");
+  const transactionModalForm = modalNode.querySelector("form");
 
   transactionFields.forEach((transactionField, i)=>{
-    if (transactionField.name === "tags") transactionField.value = transactionField.value.join(", ");
-    
     const transactionFieldElementContainer = createDOMNode("<div></div>"); //disabled inputs don't fire events; wrap in something that will fire an event
-    const transactionFieldElement = createDOMNode(`<${transactionField.tag} class="transaction-modal-input-text form-control" ${(transactionField.tag === "input" ? `value="${(transactionField.value ? transactionField.value : '')}"` : '')} name="${transactionField.name}" ${(transactionField.tagType ? `type="${transactionField.tagType}"` : '')} placeholder="${transactionField.placeholder}" tabindex="${i+1}" disabled>${(transactionField.tag !== "input" ? (transactionField.value ? transactionField.value : '') : '')}</${transactionField.tag}>`)
-    const transactionModalForm = modalNode.querySelector("form");
+    let transactionFieldElement;
+    let transactionFieldElementWrapper;
+
+    const addTagBadge = function(value, transactionFieldElementWrapper) {
+      const transactionModalTagsContainer = transactionFieldElementWrapper;
+      const tagsBadgeContainer = transactionFieldElementWrapper.querySelector(".transaction-modal-input-tags-badge-container");
+      const hiddenTagsInput = transactionModalTagsContainer.querySelector(".transaction-modal-input-tags-hidden");
+
+      //Add it to the hidden [name="Tags"] input
+      hiddenTagsInput.value = [hiddenTagsInput.value.split(/\s*,\s*/).filter(tag=>!isFalsy(tag)), value].join(",");
+
+      //Add a tag badge
+      const tagBadge = createDOMNode(`<span class="transaction-modal-input-tags-badge badge rounded-pill">${value}</span>`);
+      tagsBadgeContainer.appendChild(tagBadge);
+      tagBadge.addEventListener("click", event=>{
+        //Remove it from the hidden [name="Tags"] input
+        hiddenTagsInput.value = [hiddenTagsInput.value.split(/\s*,\s*/).filter(tag=>!(tag === value))].join(",");
+
+        //Remove tag badge
+        tagsBadgeContainer.removeChild(tagBadge);
+      });
+    };
+
+    if (transactionField.name === "Tags") {
+      transactionFieldElement = createDOMNode(`<input class="transaction-modal-input transaction-modal-input-tags form-control" type="text" placeholder="${transactionField.placeholder}" tabindex="${i+1}" />`);
+      transactionFieldElementWrapper = createDOMNode(`<div class="transaction-modal-input-tags-container form-control">
+          <input class="transaction-modal-input-tags-hidden form-control" type="hidden" name="Tags" value="" />
+          <div class="transaction-modal-input-tags-badge-container"></div>
+        </div>
+      `);
+      transactionField.value.forEach(tag=>addTagBadge(tag, transactionFieldElementWrapper));
+      transactionFieldElementWrapper.appendChild(transactionFieldElement);
+      transactionModalBody.appendChild(transactionFieldElementContainer).appendChild(transactionFieldElementWrapper);
+    }
+    else {
+      transactionFieldElement = createDOMNode(`<${transactionField.tag} class="transaction-modal-input transaction-modal-input-text form-control" ${(transactionField.tag === "input" ? `value="${(transactionField.value ? transactionField.value : '')}"` : '')} name="${transactionField.name}" ${(transactionField.tagType ? `type="${transactionField.tagType}"` : '')} placeholder="${transactionField.placeholder}" tabindex="${i+1}" disabled>${(transactionField.tag !== "input" ? (transactionField.value ? transactionField.value : '') : '')}</${transactionField.tag}>`);
+      transactionModalBody.appendChild(transactionFieldElementContainer).appendChild(transactionFieldElement);
+    }
 
     transactionFieldElementContainer.addEventListener("click", event=>{
       transactionFieldElement.disabled = false;
@@ -59,14 +107,26 @@ const addTransactionModal = function(transaction, buttonsOptions = {okButton: "O
     transactionFieldElement.addEventListener("blur", event=>{
       transactionFieldElement.disabled = true;
     });
+
     transactionFieldElement.addEventListener("keypress", event=>{
-      if (event.keyCode === 13 /* Enter */) return transactionFieldElement.disabled = true;
+      if (event.keyCode === 13 /* Enter */) {
+        event.preventDefault();
+
+        if (transactionField.name === "Tags") {
+          addTagBadge(transactionFieldElement.value, transactionFieldElementWrapper);
+
+          //Reset the input
+          transactionFieldElement.value = '';
+        }
+
+        transactionFieldElement.disabled = true;
+      }
     });
     transactionFieldElement.addEventListener("keydown", event=>{
       if (event.keyCode === 9 /* Tab */) {
         const nextOrPrevious = (event.shiftKey === true ? -1 : 1);
         event.preventDefault();
-        const inputsArray = [...transactionModalForm.querySelectorAll("input")];
+        const inputsArray = [...transactionModalForm.querySelectorAll(".transaction-modal-input")];
         const nextInput = inputsArray[inputsArray.indexOf(transactionFieldElement)+nextOrPrevious];
         if (nextInput) {
           nextInput.disabled = false;
@@ -74,19 +134,59 @@ const addTransactionModal = function(transaction, buttonsOptions = {okButton: "O
         }
       }
     });
-
-    modalNode.querySelector(".transaction-modal-form").appendChild(transactionFieldElementContainer).appendChild(transactionFieldElement);
   });
+
+  transactionModalForm.addEventListener("submit", event=>{
+    //Prevent the form from submitting
+    event.preventDefault();
+
+    //Aggregate the form data into an object
+    const data = [...transactionModalForm.querySelectorAll("[name]")].reduce((accumulator,input)=>{
+      const obj = {};
+      let {name, value} = input;
+      value = (name === "Tags" ? value.split(/\s*,\s*/): value);
+
+      obj[name] = nullCoalesce(value);
+      return accumulator = {...accumulator, ...obj};
+    }, {});
+    window.test = data;
+    console.log(data);
+
+    //Update the transaction with the new form data
+    const updatedTransaction = {
+      ...transaction,
+      display: {
+        ...transaction.display,
+        ...data,
+        Description: transaction.data.Description,
+      }
+    };
+    const transactionIndex = transactions.indexOf(transaction);
+    const updatedTransactions = [...transactions]; //create deep copy
+    updatedTransactions.splice(transactionIndex, 1, updatedTransaction);
+
+    //Update the transactions data
+    importTransactions(updatedTransactions.map(updatedTransaction=>updatedTransaction.display));
+
+    //Remove the modal dialog
+    modal.hide();
+  });
+
+  //Create functions
+  const destroyModal = function() {
+    modal.dispose();
+    modalNode.remove();
+  };
 
   //Turn it into a Bootstrap Modal object
   const modal = new bootstrap.Modal(modalNode, {focus: true});
 
-  modalNode.addEventListener("hidden.bs.modal", event=>{modal.dispose(); modalNode.remove();});
+  modalNode.addEventListener("hidden.bs.modal", event=>destroyModal());
 
   document.body.appendChild(modalNode);
 
   modal.show();
-}
+};
 
 const convertCSVToJSON = function(csv, delimiter = ",") {
   //Initialize variables
@@ -108,8 +208,8 @@ const convertCSVToJSON = function(csv, delimiter = ",") {
 };
 
 //Create functions
-const importTransactions = function(transactionData, isCSV) {
-  const convertDateStringToDate = function(dateString) {
+const importTransactions = function(transactionData, dataType) {
+  const convertMonthDayStringToDate = function(dateString) {
     //Initialize functions
     const returnMonthIndex = function(month) {
       if (month.match(/^Jan$/i)) return 0;
@@ -141,45 +241,20 @@ const importTransactions = function(transactionData, isCSV) {
     return date
   };
 
+  const convertDateStringToDate = function(dateString) {
+    //Initialize functions
+    return new Date(...dateString.replace(/(\d{1,2})\/(\d{1,2})\/(\d{4})/, (p0,p1,p2,p3)=>[p3, Number(p1)-1, p2]).split(/\s*,\s*/));
+  };
+
   try {
     let transactions = {};
 
-    //If this is CSV data
-    if (isCSV) {
-      //For each CSV file, convert the contents to JSON
-      transactions = transactionData.map(csvData=>
-        //Convert the CSV data to JSON
-        convertCSVToJSON(csvData)
-          //Format each transaction object
-          .map(transaction=>{
-            const type = (transaction.Charges ? "Charges" : (transaction.Payments ? "Payments" : null));
-            const dateIsMatch = transaction.Date.match(/(\d{2})\/(\d{2})\/(\d{4})/);
-            if (!type || !dateIsMatch) throw `Unable to read transaction.\r\n${transaction}`;
-
-            const transactionObj = {
-              PostedDate: null,
-              TransactionDate: new Date(dateIsMatch[3], Number(dateIsMatch[1])-1, dateIsMatch[2]),
-              Card: `*${transaction["Card No."]}`,
-              Description: transaction.Description,
-              Type: type,
-              Amount: Number(`${(type === "Charges" ? "-" : "")}${transaction[type]}`),
-              Tags: [],
-            };
-
-            return {
-              data: transactionObj,
-              display: transactionObj,
-            };
-          })
-      )
-        .flat();
-    }
-    //Otherwise, this is scraped from online app
-    else {
+    //if this is scraped from online app
+    if (dataType === "scraped") {
       //Spilt the string of transactions into an array
       const transactionsArray = transactionData.split("POSTED:")
         //Filter out empty data
-        .filter(transaction=>!!transaction)
+        .filter(transaction=>!isFalsy(transaction))
         //Remove unwanted data from the transactions
         .map(transaction=>transaction.replace("\tPending Transactions Ends", ""));
 
@@ -187,17 +262,17 @@ const importTransactions = function(transactionData, isCSV) {
       transactions = transactionsArray.map(transaction=>{
         //Parse the transaction string into an object
         const isMatch = transaction.match(/(PENDING|(\w+)\s*(\d+))\s*TRANSACTION:(\w+)\s*(\d+)\s+(?:Card No:([\*\d]+)\s*)?Description:(.+)\s*(Charges|Payments):(-?)\$([\d,]+\.\d{2})\s*/);
-        if (!isMatch) throw `Unable to read transaction.\r\n${transaction}`;
+        if (isFalsy(isMatch)) throw `Unable to read transaction.\r\n${transaction}`;
         const matches = isMatch.map(match=>(match ? match.trim() : match))
 
         const transactionObj = {
-          PostedDate: (matches[1] === "PENDING" ? null : convertDateStringToDate(`${matches[2]} ${matches[3]}`)),
-          TransactionDate: convertDateStringToDate(`${matches[4]} ${matches[5]}`),
+          PostedDate: (matches[1] === "PENDING" ? null : convertMonthDayStringToDate(`${matches[2]} ${matches[3]}`)),
+          TransactionDate: convertMonthDayStringToDate(`${matches[4]} ${matches[5]}`),
           Card: matches[6],
           Description: matches[7],
           Type: matches[8],
           Amount: Number(`${matches[9]}${matches[10]}`.replace(",","")) * -1,
-          Tags: [],
+          Tags: transaction.Tags || [],
         };
 
         return {
@@ -206,6 +281,36 @@ const importTransactions = function(transactionData, isCSV) {
         };
       })
       .reverse();
+    }
+    //Otherwise, this is CSV or JSON data
+    else {
+      //If CSV data, convert it to JSON
+      if (dataType === "csv") transactionData = transactionData.map(csvData=>convertCSVToJSON(csvData)).flat();
+
+      //For each CSV file, convert the contents to JSON
+      transactions = transactionData.map(transaction=>{
+        //Validate calculated values
+        const type = nullCoalesce(transaction.Type, (transaction.Charges ? "Charges" : (transaction.Payments ? "Payments" : null)));
+        const transactionDate = convertDateStringToDate(nullCoalesce(transaction.TransactionDate, transaction.Date));
+        if (isFalsy(type) || isFalsy(transactionDate)) throw `Unable to read transaction.\r\n${transaction}`;
+
+        const transactionObj = {
+          PostedDate: (!isFalsy(transaction.PostedDate) ? convertDateStringToDate(transaction.PostedDate) : null),
+          TransactionDate: transactionDate,
+          Card: nullCoalesce(transaction.Card, `*${transaction["Card No."]}`),
+          Description: transaction.Description,
+          Type: type,
+          Amount: Number(nullCoalesce(!isFalsy(transaction.Amount) && transaction.Amount.replace("$",''), `${(type === "Charges" ? "-" : "")}${transaction[type]}`)),
+          Category: nullCoalesce(transaction.Category),
+          Notes: nullCoalesce(transaction.Notes),
+          Tags: transaction.Tags || [],
+        };
+
+        return {
+          data: transactionObj,
+          display: transactionObj,
+        };
+      });
     }
 
     //Update the transactions
@@ -249,11 +354,11 @@ const filterTransactions = function (transactions) {
 };
 
 const validateDescription = function(transaction) {
-  const {Description: description, Tags: tags} = transaction.data;
-  let validation = {Category: null, Description: `*${description}`, Notes: null, Tags: tags || [],};
+  const {Description: description, Tags: tags, Category: category, Notes: notes} = transaction.data;
+  let validation = {Category: category, Description: `*${description}`, Notes: notes, Tags: tags || [],};
 
   //Skip the transaction if there is no description
-  if (!description) return {
+  if (isFalsy(description)) return {
     ...transaction,
     display: {
       ...transaction.display,
@@ -281,10 +386,11 @@ const validateDescription = function(transaction) {
 
   //Groceies & Necessities
   else if (description.match(/Walmart Grocery [\d-]+ Ar/i)) validation = {Category: "Groceries/Necessities", Description: "Walmart Supercenter", Notes: "grocery pickup"};
+  else if (description.match(/(?:Wal-Mart|WM Supercenter) #\d+ \w+ \w{2}/i)) validation = {Category: "Groceries/Necessities", Description: "Walmart Supercenter", Notes: "grocery pickup"};
   else if (description.match(/Target #\d+ \w+ \w{2}/i)) validation = {Category: "Groceries/Necessities", Description: "Target", Notes: null};
   else if (description.match(/Ingles Markets #\d+ \w+ \w{2}/i)) validation = {Category: "Groceries/Necessities", Description: "Ingles", Notes: null};
   else if (description.match(/Publix #\d+ \w+ \w{2}/i)) validation = {Category: "Groceries/Necessities", Description: "Publix", Notes: "grocery pickup"};
-  else if (description.match(/(?:SamsClub #8142 Spartanburg SC|Sams Club #8142 864-574-3480 SC)/i)) validation = {Category: "Groceries/Necessities", Description: "Sam's Club", Notes: null};
+  else if (description.match(/(?:Sams ?Club #8142 Spartanburg SC|Sams Club #8142 864-574-3480 SC)/i)) validation = {Category: "Groceries/Necessities", Description: "Sam's Club", Notes: null};
 
   else if (description.match(/Walgreens #\d+/i)) validation = {Category: "Groceries/Necessities", Description: "Walgreens", Notes: null};
 
@@ -431,7 +537,7 @@ const renderTransactions = function(transactions) {
 const fetchTransactions = function() {
   //Attempt to fetch the transaction data from localStorage
   const transactions = JSON.parse(localStorage.getItem(transactionLocalStorageItemKey));
-  if (!transactions) return;
+  if (isFalsy(transactions)) return;
 
   //Update the transactions
   updateTransactions(transactions);
@@ -445,7 +551,7 @@ form.addEventListener("submit", event=>{
   const transactionData = form.querySelector("#transaction-import-input").value;
 
   //Import the transaction data into an array of transaction objects
-  const transactions = importTransactions(transactionData);
+  const transactions = importTransactions(transactionData, "scraped");
 });
 
 fileInput.addEventListener("change", async event=>{
@@ -462,7 +568,7 @@ fileInput.addEventListener("change", async event=>{
   );
 
   //Import the transaction data into an array of transaction objects
-  const transactions = importTransactions(transactionDataArray, true);
+  const transactions = importTransactions(transactionDataArray, "csv");
 
   //Reset the file input
   fileInput.value = "";

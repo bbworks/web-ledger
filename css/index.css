@@ -6,15 +6,42 @@
   visibility: visible;
 }
 
-.transaction-modal-input-text[disabled] {
+.transaction-modal-input[disabled] {
   background: none;
   border: none;
   outline: none;
-  transition: color 0.2s, background 0.2s;
+  transition: color 0.2s, background-color 0.2s;
 }
 
-.transaction-modal-input-text[disabled]:hover {
+.transaction-modal-input[disabled]:hover {
   color: rgb(100,100,100);
   background: rgb(245,245,245);
   cursor: pointer;
+}
+
+.transaction-modal-input-tags-container {
+  display: flex;
+  align-items: center;
+}
+
+.transaction-modal-input-tags-badge-container {
+  display: flex;
+  align-items: center;
+}
+
+.transaction-modal-input-tags-badge {
+  cursor: pointer;
+  background-color: gray;
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.transaction-modal-input-tags-badge:hover {
+  color: rgb(150,150,150);
+  background-color: rgb(225,225,225);
+}
+
+.transaction-modal-input-tags {
+  border: none;
+  background: none;
+  outline: none;
 }
