@@ -532,6 +532,21 @@ const renderTransactions = function(transactions) {
     //Append the table data to the table body
     tableBody.appendChild(transactionElement);
   });
+
+  totalElement = createDOMNode(`<tr class="total">
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td>${Number(transactions.reduce((accumulator, transaction)=>accumulator += (transaction.data.Type == "Charges" ? transaction.data.Amount : 0), 0).toFixed(2))}</td>
+    <td></td>
+    <td></td>
+  </tr>`);
+
+  //Append the table data to the table body
+  tableBody.appendChild(totalElement);
 };
 
 const fetchTransactions = function() {
