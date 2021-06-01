@@ -20,8 +20,8 @@
   <body>
     <div class="container">
       <h1 class="display-1">Ledger</h1>
-      <!-- <button class="btn btn-dark" type="button" data-toggle="collapse" data-target="#transaction-form">Import Transactions</button> -->
-      <form id="transaction-form" class="transaction-form" action="" method="">
+      <!-- <button class="btn btn-dark" type="button" data-toggle="collapse" data-target="#transaction-import-form">Import Transactions</button> -->
+      <form id="transaction-import-form" class="transaction-import-form" action="" method="">
         <div>
           <label class="form-label">Transactions</label>
           <div class="input-group mb-2">
@@ -31,9 +31,9 @@
           <p class="form-text">Paste transaction data for parsing.</p>
           <div>
             <label class="form-label">Or, import a comma-separated values (*.csv) file.</label>
-            <input id="transaction-form-input-file" class="form-control" type="file" accept=".csv" multiple />
+            <input id="transaction-import-form-input-file" class="form-control" type="file" accept=".csv" multiple />
           </div>
-          <div id="transaction-form-status"></div>
+          <div id="transaction-import-form-status"></div>
         </div>
       </form>
       <div class="transaction-data">

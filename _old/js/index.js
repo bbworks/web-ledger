@@ -1,6 +1,6 @@
 //Initialize variables
-const form = document.getElementById("transaction-form");
-const fileInput = document.getElementById("transaction-form-input-file");
+const importForm = document.getElementById("transaction-import-form");
+const fileInput = document.getElementById("transaction-import-form-input-file");
 const dataDiv = document.querySelector(".transaction-data");
 const table = dataDiv.querySelector("table");
 const transactionLocalStorageItemKey = "transaction-data"
@@ -13,6 +13,14 @@ const isFalsy = function(value) {
 const nullCoalesce = function(value) {
   if(isFalsy(arguments)) throw new Error("Function cannot accept 0 parameters.");
   return [...arguments].reduce((accumulator, value)=>accumulator = (isFalsy(accumulator) && !isFalsy(value) ? value : accumulator), null);
+};
+
+const convertNumberToCurrency = function(value) {
+  return Number(value)
+    .toFixed(2)
+    .toString()
+    .replace(/\d{4,}/, (p0)=>p0.split('').reverse().join('').replace(/(\d{3})(?=\d)/g, "$1,").split('').reverse().join('')) //add commas
+    .replace(/(\d)/, "$$$1") //add $
 };
 
 const createDOMNode = function(HTML) {
@@ -57,7 +65,7 @@ const addTransactionModal = function(transaction, buttonsOptions = {okButton: "O
     </div>`);
 
   const transactionModalBody = modalNode.querySelector(".modal-body");
-  const transactionModalForm = modalNode.querySelector("form");
+  const transactionModalForm = modalNode.querySelector(".transaction-modal-form");
 
   transactionFields.forEach((transactionField, i)=>{
     const transactionFieldElementContainer = createDOMNode("<div></div>"); //disabled inputs don't fire events; wrap in something that will fire an event
@@ -435,11 +443,7 @@ const formatTransactions = function(transactions) {
         PostedDate: (transaction.data.PostedDate ? new Date(transaction.data.PostedDate).toLocaleDateString().toString() : ""),
         TransactionDate: (transaction.data.TransactionDate ? new Date(transaction.data.TransactionDate).toLocaleDateString().toString() : ""),
         Description: transaction.display.Description && transaction.display.Description.replace(/([\w\'&]+)/g, p1=>p1[0].toUpperCase() + p1.substring(1).toLowerCase()),
-        Amount: Number(transaction.data.Amount)
-          .toFixed(2)
-          .toString()
-          .replace(/\d{4,}/, (p0)=>p0.split('').reverse().join('').replace(/(\d{3})(?=\d)/g, "$1,").split('').reverse().join('')) //add commas
-          .replace(/(\d)/, "$$$1"), //add $
+        Amount: convertNumberToCurrency(transaction.data.Amount),
       }
     }
   ));
@@ -497,7 +501,7 @@ const renderTable = function(transactions) {
   renderTransactions(transactions);
 
   //Update the transaction import form status
-  const statusDiv = form.querySelector("#transaction-form-status");
+  const statusDiv = importForm.querySelector("#transaction-import-form-status");
   statusDiv.innerHTML = `<p class="text-success">Imported ${transactions.length} transactions.</p>`;
 
   //Update the number of transactions
@@ -533,6 +537,8 @@ const renderTransactions = function(transactions) {
     tableBody.appendChild(transactionElement);
   });
 
+  const totalAmount = Number(transactions.reduce((accumulator, transaction)=>accumulator += (transaction.data.Type == "Charges" ? transaction.data.Amount : 0), 0).toFixed(2));
+  const totalString = convertNumberToCurrency(totalAmount);
   totalElement = createDOMNode(`<tr class="total">
     <td></td>
     <td></td>
@@ -540,7 +546,7 @@ const renderTransactions = function(transactions) {
     <td></td>
     <td></td>
     <td></td>
-    <td>${Number(transactions.reduce((accumulator, transaction)=>accumulator += (transaction.data.Type == "Charges" ? transaction.data.Amount : 0), 0).toFixed(2))}</td>
+    <td>${totalString}</td>
     <td></td>
     <td></td>
   </tr>`);
@@ -558,12 +564,12 @@ const fetchTransactions = function() {
   updateTransactions(transactions);
 };
 
-form.addEventListener("submit", event=>{
+importForm.addEventListener("submit", event=>{
   //Prevent form submission
   event.preventDefault();
 
   //Get the transaction data
-  const transactionData = form.querySelector("#transaction-import-input").value;
+  const transactionData = importForm.querySelector("#transaction-import-input").value;
 
   //Import the transaction data into an array of transaction objects
   const transactions = importTransactions(transactionData, "scraped");
