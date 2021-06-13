@@ -1,0 +1,33 @@
+import {useState, useEffect} from 'react';
+import TransactionTableTransactions from './../TransactionTableTransactions';
+import {convertNumberToCurrency} from './../../utilities.js';
+import './index.css';
+
+const TransactionTableBody = ({ transactions, transactionButtonOnClick })=>{
+  const calculateTotalAmount = ()=>{
+    return Number(transactions.reduce((accumulator, transaction)=>accumulator += (transaction.data.Type == "Charges" ? transaction.data.Amount : 0), 0).toFixed(2));
+  };
+
+  const [totalAmount, setTotalAmount] = useState(0);
+
+  useEffect(()=>setTotalAmount(calculateTotalAmount()), [transactions]);
+
+  return (
+    <tbody>
+      <TransactionTableTransactions transactions={transactions} transactionButtonOnClick={transactionButtonOnClick} />
+      <tr className="total">
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>{convertNumberToCurrency(totalAmount)}</td>
+        <td></td>
+        <td></td>
+      </tr>
+    </tbody>
+  );
+};
+
+export default TransactionTableBody;

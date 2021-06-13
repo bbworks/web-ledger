@@ -1,3 +1,11 @@
+.transaction-table-container {
+  overflow-x: scroll;
+}
+
+.transaction-import-form {
+  margin-bottom: 1rem;
+}
+
 .transaction-button {
   visibility: hidden;
 }
@@ -29,13 +37,13 @@
   align-items: center;
 }
 
-.transaction-modal-input-tags-badge {
+.tag-badge {
   cursor: pointer;
   background-color: gray;
   transition: color 0.2s, background-color 0.2s;
 }
 
-.transaction-modal-input-tags-badge:hover {
+.transaction-modal .tag-badge:hover {
   color: rgb(150,150,150);
   background-color: rgb(225,225,225);
 }
