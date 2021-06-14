@@ -5,7 +5,7 @@ import './index.css';
 
 const TransactionTableBody = ({ transactions, transactionButtonOnClick })=>{
   const calculateTotalAmount = ()=>{
-    return Number(transactions.reduce((accumulator, transaction)=>accumulator += (transaction.data.Type == "Charges" ? transaction.data.Amount : 0), 0).toFixed(2));
+    return Number(transactions.reduce((accumulator, transaction)=>accumulator += (transaction.Type == "Charges" ? transaction.Amount : 0), 0).toFixed(2));
   };
 
   const [totalAmount, setTotalAmount] = useState(0);

@@ -92,9 +92,9 @@ const TransactionDetailModal = ({ transaction, buttonsOptions, isOpen, transacti
     const data = [...transactionModalForm.querySelectorAll("[name]")].reduce((accumulator,input)=>{
       const obj = {};
       let {name, value} = input;
-      value = (name === "Tags" ? value.split(/\s*,\s*/) : value);
+      value = (name === "Tags" ? (value ? value.split(/\s*,\s*/) : []) : value);
 
-      obj[name] = nullCoalesce(value);
+      obj[name] = (value instanceof Array && value.length === 0 ? [] : nullCoalesce(value));
       return accumulator = {...accumulator, ...obj};
     }, {});
     console.log("Data submitted from TransactionDetailModal", data);
@@ -143,7 +143,7 @@ const TransactionDetailModal = ({ transaction, buttonsOptions, isOpen, transacti
                         <transactionField.tag className="transaction-modal-input transaction-modal-input-tags form-control" type={transactionField.tagType} placeholder={transactionField.placeholder} tabIndex={i+1} onKeyDown={transactionFieldOnKeyDown}></transactionField.tag>
                       </div>
                     ) :
-                    <transactionField.tag className="transaction-modal-input transaction-modal-input-text form-control" value={transactionField.value} name={transactionField.name} type={transactionField.tagType} placeholder={transactionField.placeholder} tabindex={i+1} value={transactionField.value} disabled onKeyDown={transactionFieldOnKeyDown} onChange={event=>transactionField.setState(event.target.value)}>{transactionField.tag !== "input" ? transactionField.value : null}</transactionField.tag>
+                    <transactionField.tag className="transaction-modal-input transaction-modal-input-text form-control" value={transactionField.value} name={transactionField.name} type={transactionField.tagType} placeholder={transactionField.placeholder} tabIndex={i+1} value={transactionField.value} disabled onKeyDown={transactionFieldOnKeyDown} onChange={event=>transactionField.setState(event.target.value)}>{transactionField.tag !== "input" ? transactionField.value : null}</transactionField.tag>
                   )}
                 </div> //disabled inputs don't fire events; wrap in something that will fire an event
               ))}

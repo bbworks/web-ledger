@@ -5,28 +5,24 @@ import TransactionData from './../TransactionData';
 import TransactionDetailModal from './../TransactionDetailModal';
 
 import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON} from './../../utilities.js';
-import {importTransactions, updateTransactions, fetchTransactionData, importFormOnSubmit} from './transactions.js';
+import {importTransactions, updateTransactions, fetchTransactionData, importFormOnSubmit} from './../../transactions.js';
+
 import './index.css';
 
 const App = () => {
-  const [transactionData, setTransactionData] = useState(fetchTransactionData());
-  const [transactions, setTransactions] = useState([]);
+  const [transactionData, setTransactionData] = useState();
+  const [transactions, setTransactions] = useState(fetchTransactionData());
   const [transactionDetailTransaction, setTransactionDetailTransaction] = useState(null);
   const [isTransactionDetailModalOpen, setIsTransactionDetailModalOpen] = useState(false);
 
   useEffect(
     ()=>{
-      console.log("Transaction data: ", transactionData);
+      console.log("Creating transactions from data: ", transactionData);
       if (isFalsy(transactionData)) return;
       setTransactions(updateTransactions(transactionData));
     }
     , [transactionData]
   );
-
-  useEffect(()=>{
-    if(!transactions) return;
-    updateTransactions(transactions)
-  }, [transactions]);
 
   useEffect(()=>console.log("Transactions: ", transactions), [transactions]);
 

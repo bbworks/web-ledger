@@ -1,19 +1,35 @@
+import {useState, useEffect} from 'react';
+
 import TagBadge from './../TagBadge';
+import {nullCoalesce} from './../../utilities.js';
+import {formatTransactionDisplay} from './../../transactions.js';
 import './index.css';
 
 const TransactionTableTransaction = ({ transaction, transactionButtonOnClick })=>{
-  const {display: {PostedDate, TransactionDate, Type, Category, Description, Notes, Amount, Tags}} = transaction;
+  const [transactionDisplay, setTransactionDisplay] = useState({
+    PostedDate: "",
+    TransactionDate: "",
+    Type: "",
+    Category: "",
+    Description: "",
+    DescriptionDisplay: "",
+    Notes: "",
+    Amount: "",
+    Tags: [],
+  });
+
+  useEffect(()=>setTransactionDisplay(formatTransactionDisplay(transaction)), [transaction]);
 
   return (
     <tr className="transaction">
-      <td>{PostedDate ? PostedDate : ""}</td>
-      <td>{TransactionDate ? TransactionDate : ""}</td>
-      <td>{Type ? Type : ""}</td>
-      <td>{Category ? Category : ""}</td>
-      <td>{Description ? Description : ""}</td>
-      <td>{Notes ? Notes : ""}</td>
-      <td>{Amount ? Amount : ""}</td>
-      <td>{Tags.map(tag=><TagBadge key={tag} tag={tag} />)}</td>
+      <td>{transactionDisplay.PostedDate}</td>
+      <td>{transactionDisplay.TransactionDate}</td>
+      <td>{transactionDisplay.Type}</td>
+      <td>{transactionDisplay.Category}</td>
+      <td>{nullCoalesce(transactionDisplay.DescriptionDisplay, transactionDisplay.Description) ? nullCoalesce(transactionDisplay.DescriptionDisplay, transactionDisplay.Description) : ""}</td>
+      <td>{transactionDisplay.Notes}</td>
+      <td>{transactionDisplay.Amount}</td>
+      <td>{transactionDisplay.Tags.map(tag=><TagBadge key={tag} tag={tag} />)}</td>
       <td><button className="transaction-button btn" type="button" onClick={()=>transactionButtonOnClick(transaction)} data-bs-toggle="modal" data-bs-target="#transaction-modal"><i className="transaction-button-icon fas fa-edit"></i></button></td>
     </tr>
   );
