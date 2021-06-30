@@ -1,8 +1,13 @@
-import {useState, useEffect} from 'react';
-import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON} from './../../utilities.js';
-import './index.css';
+import {useState, useEffect, useRef} from 'react';
 
 import TagBadge from './../TagBadge';
+import InputDropdown from './../InputDropdown';
+
+import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON} from './../../utilities.js';
+import {formatTransactionDisplay} from './../../transactions.js';
+
+import './index.css';
+
 
 const TransactionDetailModal = ({ transaction, buttonsOptions, isOpen, transactionDetailModalOnSubmit })=>{
   const [PostedDate, setPostedDate] = useState(null);
@@ -18,16 +23,19 @@ const TransactionDetailModal = ({ transaction, buttonsOptions, isOpen, transacti
   useEffect(()=>{
     if(!transaction) return;
     console.log("Updating TransactionDetailModal state based on updated prop \"transaction\".", transaction, PostedDate, TransactionDate, Card, Amount, Description, Category, Notes, Type, Tags)
-    setPostedDate(transaction.display.PostedDate);
-    setTransactionDate(transaction.display.TransactionDate);
-    setCard(transaction.display.Card);
-    setAmount(transaction.display.Amount);
-    setDescription(transaction.display.Description);
-    setCategory(transaction.display.Category);
-    setNotes(transaction.display.Notes);
-    setType(transaction.data.Type);
-    setTags(transaction.data.Tags);
+    const transactionDisplay = formatTransactionDisplay(transaction);
+    setPostedDate(transactionDisplay.PostedDate);
+    setTransactionDate(transactionDisplay.TransactionDate);
+    setCard(transactionDisplay.Card);
+    setAmount(transactionDisplay.Amount);
+    setDescription(nullCoalesce(transactionDisplay.DescriptionDisplay, transactionDisplay.Description));
+    setCategory(transactionDisplay.Category);
+    setNotes(transactionDisplay.Notes);
+    setType(transactionDisplay.Type);
+    setTags(transactionDisplay.Tags);
   }, [transaction]);
+
+  const transactionModalForm = useRef(null);
 
   const transactionFields= [
     {name: "PostedDate", placeholder: "PostedDate", value: PostedDate, tag: "input", tagType: "text", setState: setPostedDate},
@@ -57,8 +65,8 @@ const TransactionDetailModal = ({ transaction, buttonsOptions, isOpen, transacti
     if (event.keyCode === 9 /* Tab */) {
       event.preventDefault();
       const nextOrPrevious = (event.shiftKey === true ? -1 : 1);
-      const inputsArray = [...document.querySelectorAll(".transaction-modal-input")];
-      const nextInput = inputsArray[inputsArray.indexOf(transactionFieldElement)+nextOrPrevious];
+      const inputsArray = [...new Set([...document.querySelector(".transaction-modal-form").querySelectorAll(".transaction-modal-input"), ...document.querySelector(".transaction-modal-form").querySelectorAll("[tabIndex]")])];
+      const nextInput = inputsArray[(inputsArray.indexOf(transactionFieldElement)+nextOrPrevious+inputsArray.length)%inputsArray.length];
       if (nextInput) {
         nextInput.disabled = false;
         nextInput.focus();
@@ -102,15 +110,9 @@ const TransactionDetailModal = ({ transaction, buttonsOptions, isOpen, transacti
     //Update the transaction with the new form data
     const updatedTransaction = {
       ...transaction,
-      data: {
-        ...transaction.data,
-        Tags: data.Tags,
-      },
-      display: {
-        ...transaction.display,
-        ...data,
-        Description: transaction.data.Description,
-      }
+      ...data,
+      Description: transaction.Description,
+      DescriptionDisplay: (data.Description === formatTransactionDisplay(transaction).DescriptionDisplay ? null : data.Description),
     };
 
     console.log("Updated transaction submitted from TransactionDetailModal", updatedTransaction);
@@ -120,10 +122,37 @@ const TransactionDetailModal = ({ transaction, buttonsOptions, isOpen, transacti
 
   const tagBadgeOnClick = tag=>setTags(Tags.filter(t=>t!==tag));
 
+  const categories = [
+    "",
+    "Savings",
+    "Gas",
+    "Church",
+    "Groceries/Necessities",
+    "LoveInAction",
+    "Family Outings",
+    "Personal Spending",
+    "Miscellaneous",
+    "Sharonview mortgage & escrow",
+    "HOA dues",
+    "Duke Energy",
+    "SJWD Water District",
+    "Piedmont Natural Gas",
+    "Kirby Sanitation",
+    "Laurens Electric ProTec Security",
+    "SimpliSafe (for mom)",
+    "AT&T Internet",
+    "State Farm auto insurance",
+    "AT&T phone bill",
+    "Spotify Premium subscription",
+    "Netflix Premium subscription",
+    "Discovery Plus subscription",
+    "YMCA membership",
+  ];
+
   return (
     <div id="transaction-modal" className="modal fade">
       <div className="modal-dialog">
-        <form className="transaction-modal-form" onSubmit={transactionModalFormOnSubmit}>
+        <form className="transaction-modal-form" onSubmit={transactionModalFormOnSubmit} ref={transactionModalForm}>
           <div className="modal-content">
             <div className="modal-header">
               <h3 className="modal-title">Transaction Detail</h3>
@@ -142,15 +171,19 @@ const TransactionDetailModal = ({ transaction, buttonsOptions, isOpen, transacti
                         </div>
                         <transactionField.tag className="transaction-modal-input transaction-modal-input-tags form-control" type={transactionField.tagType} placeholder={transactionField.placeholder} tabIndex={i+1} onKeyDown={transactionFieldOnKeyDown}></transactionField.tag>
                       </div>
-                    ) :
-                    <transactionField.tag className="transaction-modal-input transaction-modal-input-text form-control" value={transactionField.value} name={transactionField.name} type={transactionField.tagType} placeholder={transactionField.placeholder} tabIndex={i+1} value={transactionField.value} disabled onKeyDown={transactionFieldOnKeyDown} onChange={event=>transactionField.setState(event.target.value)}>{transactionField.tag !== "input" ? transactionField.value : null}</transactionField.tag>
-                  )}
+                    ) : (
+                    transactionField.name === "Category" ?
+                      <InputDropdown value={transactionField.value} items={categories} name={transactionField.name} tabIndex={i+1} onKeyDown={transactionFieldOnKeyDown} onChange={event=>transactionField.setState(event.target.value)} />
+                    :
+                      <transactionField.tag className="transaction-modal-input transaction-modal-input-text form-control" value={transactionField.value} name={transactionField.name} type={transactionField.tagType} placeholder={transactionField.placeholder} tabIndex={i+1} value={transactionField.value} disabled onKeyDown={transactionFieldOnKeyDown} onChange={event=>transactionField.setState(event.target.value)}>{transactionField.tag !== "input" ? transactionField.value : null}</transactionField.tag>
+                  )
+                )}
                 </div> //disabled inputs don't fire events; wrap in something that will fire an event
               ))}
             </div>
             <div className="modal-footer">
-              {Object.entries(buttonsOptions).map(buttonObj=>(
-                <button key={buttonObj[0]} className={`btn ${(buttonObj[0] === "okButton" ? "btn-primary" : (buttonObj[0] === "cancelButton" ? "btn-secondary" : ''))}`} type={(buttonObj[0] === "okButton" ? "submit" : "button")} {...(buttonObj[0] === "cancelButton" ? {"data-bs-dismiss": "modal"} : '')}>{buttonObj[1]}</button>
+              {Object.entries(buttonsOptions).map((buttonObj, i)=>(
+                <button key={buttonObj[0]} className={`btn ${(buttonObj[0] === "okButton" ? "btn-primary" : (buttonObj[0] === "cancelButton" ? "btn-secondary" : ''))}`} type={(buttonObj[0] === "okButton" ? "submit" : "button")} {...(buttonObj[0] === "cancelButton" ? {"data-bs-dismiss": "modal"} : '')} tabIndex={transactionFields.length+i+1} onKeyDown={transactionFieldOnKeyDown} >{buttonObj[1]}</button>
               ))}
             </div>
           </div>

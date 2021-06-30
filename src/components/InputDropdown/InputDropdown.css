@@ -1,0 +1,81 @@
+:root {
+  --selected-color: #3f51b5;
+  --selected-highlight-color: yellow;
+}
+
+.dropdown {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 20rem;
+  height: 3rem;
+  border: 2px solid gray;
+  border-radius: 0.25rem;
+  background-color: white;
+  outline: none;
+  cursor: pointer;
+}
+
+.dropdown-input {
+  width: 100%;
+  height: 100%;
+  padding: 0.25rem 0.5rem;
+  font-size: 1rem;
+  border: none;
+  background: none;
+  outline: none;
+  cursor: pointer;
+}
+
+.dropdown-chevron-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.75rem;
+}
+
+.dropdown-chevron {
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid gray;
+}
+
+.dropdown-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  display: none;
+  width: 100%;
+  background-color: white;
+  border: 1px solid lightblue;
+  border-radius: 0.25rem;
+  margin: 2px;
+  padding: 0;
+  font-size: 1rem;
+  max-height: 10rem;
+  overflow-y: auto;
+}
+
+.dropdown.open .dropdown-list {
+  display: block;
+}
+
+.dropdown-list-item {
+  list-style-type: none;
+  margin: 0;
+  padding: 0.5rem 1rem;
+  min-height: 2.25rem; /* for empty dropdown list items */
+}
+
+.dropdown-list-item.selected {
+  color: white;
+  background-color: var(--selected-color);
+}
+
+.dropdown-list-item.hidden {
+  display: none;
+}
+
+.dropdown-selected-highlight {
+  background-color: var(--selected-highlight-color);
+}

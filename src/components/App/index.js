@@ -26,6 +26,13 @@ const App = () => {
 
   useEffect(()=>console.log("Transactions: ", transactions), [transactions]);
 
+  const onImportFormSubmit = event=>{
+    const transactions = importFormOnSubmit(event);
+
+    //Set the new transaction data
+    setTransactionData(transactions);
+  };
+
   const fileInputOnChange = async event=>{
     //Prevent default behavior
     event.preventDefault();
@@ -62,7 +69,7 @@ const App = () => {
     // //Update the transactions data
     // importTransactions(updatedTransactions.map(updatedTransaction=>updatedTransaction.display));
 
-    setTransactions(updatedTransactions);
+    setTransactionData(updatedTransactions);
 
     setIsTransactionDetailModalOpen(false);
   };
@@ -72,7 +79,7 @@ const App = () => {
       <div className="container">
         <h1 className="display-1">Ledger</h1>
         {/* <button className="btn btn-dark" type="button" data-toggle="collapse" data-target="#transaction-import-form">Import Transactions</button> */}
-        <ImportForm onImportFormSubmit={importFormOnSubmit} onFileInputChange={fileInputOnChange} />
+        <ImportForm onImportFormSubmit={onImportFormSubmit} onFileInputChange={fileInputOnChange} />
         <TransactionData transactions={transactions} transactionButtonOnClick={transactionButtonOnClick} />
       </div>
       <TransactionDetailModal transaction={transactionDetailTransaction} buttonsOptions={{okButton: "Save", cancelButton: "Cancel"}} isOpen={isTransactionDetailModalOpen} transactionDetailModalOnSubmit={transactionDetailModalOnSubmit} />
