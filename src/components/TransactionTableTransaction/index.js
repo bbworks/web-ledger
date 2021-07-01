@@ -3,7 +3,7 @@ import {useState, useEffect} from 'react';
 import TagBadge from './../TagBadge';
 import {nullCoalesce} from './../../utilities.js';
 import {formatTransactionDisplay} from './../../transactions.js';
-import './index.css';
+import './index.scss';
 
 const TransactionTableTransaction = ({ transaction, transactionButtonOnClick })=>{
   const [transactionDisplay, setTransactionDisplay] = useState({

@@ -1,0 +1,70 @@
+:root {
+  /* alert colors */
+  --alert-info-foreground-color: rgb(49,112,143);
+  --alert-info-background-color: rgb(217,237,247);
+  --alert-success-foreground-color: rgb(79,138,12);
+  --alert-success-background-color: rgb(223,242,191);
+  --alert-warning-foreground-color: rgb(159,96,0);
+  --alert-warning-background-color: rgb(254,239,179);
+  --alert-error-foreground-color: rgb(216,0,12);
+  --alert-error-background-color: rgb(255,186,186);
+  /* standard colors */
+  --dark-color: rgb(30,30,30);
+  --dark-accent-color: rgb(50,50,50);
+  --light-color: rgb(245,245,245);
+  --light-accent-color: rgb(235,235,235);
+  --muted-color: gray;
+  /* default theme colors */
+  --primary-color: #586A6A;
+  --secondary-color: #B9A394;
+  --text-primary-color: var(--dark-color);
+  --text-secondary-color: var(--light-color);
+  --background-primary-color: var(--light-color);
+  --background-primary-accent-color: var(--light-accent-color);
+  --background-secondary-color: var(--dark-color);
+  --background-secondary-accent-color: var(--dark-accent-color);
+  /* theme colors */
+  --theme-dark-primary-color: var(--secondary-color);
+  --theme-dark-secondary-color: var(--primary-color);
+  --theme-dark-text-primary-color: var(--light-color);
+  --theme-dark-text-secondary-color: var(--dark-color);
+  --theme-dark-background-primary-color: var(--dark-color);
+  --theme-dark-background-primary-accent-color: var(--dark-accent-color);
+  --theme-dark-background-secondary-color: var(--light-color);
+  --theme-dark-background-secondary-accent-color: var(--light-accent-color);
+  --theme-royalty-primary-color: #45062E;
+  --theme-royalty-secondary-color: #EBD2BE;
+  --theme-royalty-text-primary-color: var(--dark-color);
+  --theme-royalty-text-secondary-color: var(--light-color);
+  --theme-royalty-background-primary-color: #fff6fc;
+  --theme-royalty-background-primary-accent-color: var(--light-accent-color);
+  --theme-royalty-background-secondary-color: var(--dark-color);
+  --theme-royalty-background-secondary-accent-color: var(--dark-accent-color);
+  --theme-nautical-primary-color: #043150;
+  --theme-nautical-secondary-color: #f54f4f;
+  --theme-nautical-text-primary-color: var(--dark-color);
+  --theme-nautical-text-secondary-color: var(--light-color);
+  --theme-nautical-background-primary-color: #f7fffe;
+  --theme-nautical-background-primary-accent-color: var(--light-accent-color);
+  --theme-nautical-background-secondary-color: var(--dark-color);
+  --theme-nautical-background-secondary-accent-color: var(--dark-accent-color);
+}
+
+/*************
+** UNIVERSAL
+*************/
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+body {
+  background-color: whitesmoke;
+  font-family: sans-serif;
+  overflow-x: hidden;
+}
+
+a {
+  text-decoration: none;
+  color: unset;
+}

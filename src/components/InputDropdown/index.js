@@ -2,7 +2,7 @@ import {useState, useEffect} from 'react';
 
 import './InputDropdown.js';
 import './InputDropdown.css';
-import './index.css';
+import './index.scss';
 
 const InputDropdown = ({ value: initialValue, items, onKeyDown, onChange: onChangeProp })=>{
   const [value, setValue] = useState(initialValue);
@@ -17,13 +17,13 @@ const InputDropdown = ({ value: initialValue, items, onKeyDown, onChange: onChan
 
 
   return (
-    <div className="dropdown">
-      <input className="dropdown-input transaction-modal-input" placeholder="Choose one..." required value={value} onChange={onChange} onKeyDown={onKeyDown} />
-      <div className="dropdown-chevron-container">
-          <i className="dropdown-chevron"></i>
+    <div className="input-dropdown">
+      <input className="input-dropdown-input transaction-modal-input" placeholder="Choose one..." required value={value} onChange={onChange} onKeyDown={onKeyDown} />
+      <div className="input-dropdown-chevron-container">
+          <i className="input-dropdown-chevron"></i>
         </div>
-      <ul className="dropdown-list">
-        {items.map(item=><li key={item} className="dropdown-list-item">{item}</li>)}
+      <ul className="input-dropdown-list">
+        {items.map(item=><li key={item} className="input-dropdown-list-item">{item}</li>)}
       </ul>
     </div>
   );

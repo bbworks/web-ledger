@@ -1,6 +1,6 @@
 import TransactionTableHeaders from './../TransactionTableHeaders';
 import TransactionTableBody from './../TransactionTableBody';
-import './index.css';
+import './index.scss';
 
 const TransactionTable = ({ transactions, transactionButtonOnClick })=>{
   return (

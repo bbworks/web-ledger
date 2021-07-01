@@ -1,7 +1,7 @@
 import {useState, useEffect} from 'react';
 import TransactionTableTransactions from './../TransactionTableTransactions';
 import {convertNumberToCurrency} from './../../utilities.js';
-import './index.css';
+import './index.scss';
 
 const TransactionTableBody = ({ transactions, transactionButtonOnClick })=>{
   const calculateTotalAmount = ()=>{

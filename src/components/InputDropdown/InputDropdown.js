@@ -1,8 +1,8 @@
 // ## FEATUERS
 // - Dropdown list opens when:
 //    * click anywhere inside
-//    * when the .dropdown-input receives input
-//    * when the "Up" or "Down" keys are pressed with the .dropdown-input focused
+//    * when the .input-dropdown-input receives input
+//    * when the "Up" or "Down" keys are pressed with the .input-dropdown-input focused
 // - Dropdown list closes when:
 //    * a selection is clicked or chosen with the "Enter" key
 //    * a click occurs outside of the dropdown
@@ -10,8 +10,8 @@
 //    * the "Esc" key is pressed
 // - Dropdown list items can be selected by:
 //    * clicking on a list item using
-//    * using the "Up" and "Down" keys along with the "Enter" key (when .dropdown-input focused)
-// - Dropdown list items can be filtered/highlighted by inputting into .dropdown-input
+//    * using the "Up" and "Down" keys along with the "Enter" key (when .input-dropdown-input focused)
+// - Dropdown list items can be filtered/highlighted by inputting into .input-dropdown-input
 // ## DESIGN
 // - Dropdown input takes 100% of dropdown width
 // - Dropdown list height maxes out and scrolls afterward
@@ -34,11 +34,11 @@ const isDescendantOf = (element, potentialAncestor) => {
 
 const isDescendantOfDropdown = element => {
   if (
-    !element.classList.contains("dropdown") &&
+    !element.classList.contains("input-dropdown") &&
     element.parentElement
   ) return isDescendantOfDropdown(element.parentElement);
 
-  if (element.classList.contains("dropdown")) return element;
+  if (element.classList.contains("input-dropdown")) return element;
 
   return false;
 };
@@ -52,10 +52,10 @@ const dropdownMasterEventListener = event=>{
 
   //Declare variables
   const eventListeners = [];
-  const dropdownItem = event.target.classList.contains("dropdown-list-item") && event.target;
-  const dropdownInput = dropdown.querySelector(".dropdown-input");
-  const dropdownList = dropdown.querySelector(".dropdown-list");
-  const dropdownListItems = [...dropdown.querySelectorAll(".dropdown-list-item")];
+  const dropdownItem = event.target.classList.contains("input-dropdown-list-item") && event.target;
+  const dropdownInput = dropdown.querySelector(".input-dropdown-input");
+  const dropdownList = dropdown.querySelector(".input-dropdown-list");
+  const dropdownListItems = [...dropdown.querySelectorAll(".input-dropdown-list-item")];
   const previousSelectedValue = dropdownInput.value;
 
 
@@ -75,7 +75,7 @@ const dropdownMasterEventListener = event=>{
     dropdownListItems.filter(dropdownListItem=>!dropdownListItem.innerText.match(regEx)).forEach(dropdownListItem=>dropdownListItem.classList.add("hidden"));
 
     //Add a highlight to matched text in unfiltered items
-   dropdownListItems.filter(dropdownListItem=>dropdownListItem.innerText.match(regEx)).forEach(dropdownListItem=>dropdownListItem.innerHTML = dropdownListItem.innerHTML.replace(regEx, `<mark class="dropdown-selected-highlight">$1</mark>`));
+   dropdownListItems.filter(dropdownListItem=>dropdownListItem.innerText.match(regEx)).forEach(dropdownListItem=>dropdownListItem.innerHTML = dropdownListItem.innerHTML.replace(regEx, `<mark class="input-dropdown-selected-highlight">$1</mark>`));
   };
 
   const unFilterDropdownItems = ()=> dropdownListItems.forEach(dropdownListItem=>{
@@ -92,7 +92,7 @@ const dropdownMasterEventListener = event=>{
   const resetDropdownItemsSelection = ()=> dropdownListItems.forEach(dropdownListItem=>dropdownListItem.classList.remove("selected"));
 
   const setDropdownSelection = value=>{
-    const dropdownInput = dropdown.querySelector(".dropdown-input");
+    const dropdownInput = dropdown.querySelector(".input-dropdown-input");
     if (!dropdownInput) throw new Error();
     dropdownInput.value = value;
     unFilterDropdownItems();
@@ -104,7 +104,7 @@ const dropdownMasterEventListener = event=>{
 
   const checkDropdownListSelectionScroll = ()=>{
     //Delare variables
-    const selectedDropdownListItem = dropdownList.querySelector(".dropdown-list-item.selected");
+    const selectedDropdownListItem = dropdownList.querySelector(".input-dropdown-list-item.selected");
 
     //IF there is no selected item, exit
     if(!selectedDropdownListItem) return;
@@ -174,7 +174,7 @@ const dropdownMasterEventListener = event=>{
 
   //Declare event listeners
   const dropdownListItemOnMouseEnter = event=>{
-    const dropdownListItems = [...dropdown.querySelectorAll(".dropdown-list-item")];
+    const dropdownListItems = [...dropdown.querySelectorAll(".input-dropdown-list-item")];
     const selectedDropdownListItem = event.target;
     setDropdownItemsSelection(selectedDropdownListItem);
   };
@@ -194,7 +194,7 @@ const dropdownMasterEventListener = event=>{
     filterDropdownItems(value);
 
     //Set the selected value to the first option
-    setDropdownItemsSelection(dropdown.querySelector(".dropdown-list-item:not(.hidden)"));
+    setDropdownItemsSelection(dropdown.querySelector(".input-dropdown-list-item:not(.hidden)"));
 
     //Make sure the selected value is within visibility
     checkDropdownListSelectionScroll();
@@ -210,7 +210,7 @@ const dropdownMasterEventListener = event=>{
       event.preventDefault();
 
       //Declare variables
-      const dropdownListItems = [...dropdown.querySelectorAll(".dropdown-list-item:not(.hidden)")];
+      const dropdownListItems = [...dropdown.querySelectorAll(".input-dropdown-list-item:not(.hidden)")];
 
       //Assure the dropdown is open if we pressed the "Up" or "Down" arrow
       const dropdownWasOpen = dropdownIsOpen();
@@ -222,7 +222,7 @@ const dropdownMasterEventListener = event=>{
           const upOrDown = (event.keyCode === 38 ? -1 : 1);
           const wrapAround = (event.keyCode === 38 ? dropdownListItems.length : -1);
 
-          const currentSelectedDropdownListItem = dropdown.querySelector(".dropdown-list-item.selected");
+          const currentSelectedDropdownListItem = dropdown.querySelector(".input-dropdown-list-item.selected");
           const currentSelectedDropdownListItemIndex = (dropdownListItems.indexOf(currentSelectedDropdownListItem) === -1 ? wrapAround : dropdownListItems.indexOf(currentSelectedDropdownListItem));
           const newlySelectedDropdownListItem = dropdownListItems[(currentSelectedDropdownListItemIndex+upOrDown+dropdownListItems.length)%dropdownListItems.length];
           setDropdownItemsSelection(newlySelectedDropdownListItem);
@@ -244,7 +244,7 @@ const dropdownMasterEventListener = event=>{
       event.preventDefault();
 
       //Declare variables
-      const dropdownListItems = [...dropdown.querySelectorAll(".dropdown-list-item")];
+      const dropdownListItems = [...dropdown.querySelectorAll(".input-dropdown-list-item")];
 
       const currentSelectedDropdownListItem = dropdownListItems.filter(dropdownListItem=>dropdownListItem.classList.contains("selected"))[0];
       if (!currentSelectedDropdownListItem) return;

@@ -1,5 +1,5 @@
 import TransactionTable from './../TransactionTable';
-import './index.css';
+import './index.scss';
 
 const TransactionData = ({ transactions, transactionButtonOnClick })=>{
   return (

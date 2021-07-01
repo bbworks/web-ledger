@@ -6,7 +6,7 @@ import InputDropdown from './../InputDropdown';
 import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON} from './../../utilities.js';
 import {formatTransactionDisplay} from './../../transactions.js';
 
-import './index.css';
+import './index.scss';
 
 
 const TransactionDetailModal = ({ transaction, buttonsOptions, isOpen, transactionDetailModalOnSubmit })=>{
