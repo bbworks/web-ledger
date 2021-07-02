@@ -1,0 +1,30 @@
+.dashboard-overview-budget-graph-bar-outer {
+  position: relative;
+  background-color: rgb(245,245,245);
+  width: 100%;
+  height: 36px;
+  border-radius: 0.55rem;
+  overflow: hidden;
+  padding: 0.5rem;
+}
+
+.dashboard-overview-budget-graph-bar-stats {
+  position: relative;
+  z-index: 2;
+  font-size: 1rem
+}
+
+.dashboard-overview-budget-graph-bar-remaining {
+  position: absolute;
+  z-index: 2;
+  top: 0.5rem;
+  right: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.dashboard-overview-budget-graph-bar-inner {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  height: 100%;
+}

@@ -5,8 +5,11 @@ import {convertNumberToCurrency} from './../../utilities.js';
 import './index.scss';
 
 const DashboardTop = ()=>{
-  const [accountsData, setAccountsData] = useState(JSON.parse(localStorage.getItem("accounts-data")));
-  const [creditScore, setCreditScore] = useState(JSON.parse(localStorage.getItem("account-data")).creditScore);
+  const initialAccountsData = JSON.parse(localStorage.getItem("accounts-data"));
+  const initialAccountData = JSON.parse(localStorage.getItem("account-data"));
+
+  const [accountsData, setAccountsData] = useState(initialAccountsData || null);
+  const [creditScore, setCreditScore] = useState(initialAccountData && initialAccountData.creditScore || null);
 
   useEffect(()=>console.log("Accounts data:", accountsData), [accountsData]);
 
@@ -22,7 +25,7 @@ const DashboardTop = ()=>{
             Total in Accounts:
             <span className="dashboard-accounts-total">{convertNumberToCurrency(accountsData && accountsData[0].balance ? accountsData.reduce((total,accountData)=>total+=Number(accountData.balance), 0) : 0)}</span>
           </div>
-          <div className="dashboard-credit-score-container col text-center fw-bold h4 d-flex flex-column border-end border-2">
+          <div className="dashboard-credit-score-container col text-center fw-bold h4 d-flex flex-column">
             Credit Score:
             <span className="dashboard-credit-score">{creditScore}</span>
           </div>
