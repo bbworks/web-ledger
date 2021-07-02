@@ -4,7 +4,7 @@ import DashboardHeader from './../DashboardHeader';
 import DashboardTop from './../DashboardTop';
 import DashboardContent from './../DashboardContent';
 
-const DashboardView = ()=>{
+const DashboardView = ({ transactions })=>{
   return (
     <div className="view dashboard-view d-flex flex-column">
       <DashboardHeader />

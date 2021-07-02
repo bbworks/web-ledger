@@ -2,7 +2,7 @@ import BudgetGraph from './../BudgetGraph';
 
 import './index.scss';
 
-const BudgetsView = ()=>{
+const BudgetsView = ({ transactions })=>{
   return (
     <div className="view budgets-view container-fluid py-2">
       <h2 className="budgets-title text-center fw-bold">Month Overview</h2>
