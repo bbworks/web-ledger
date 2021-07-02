@@ -1,8 +1,10 @@
 import {useState, useEffect} from 'react';
+
 import {BrowserRouter as Router, Switch, Route, Link} from 'react-router-dom';
 
-import TransactionsView from './../TransactionsView';
 import DashboardView from './../DashboardView';
+import BudgetsView from './../BudgetsView';
+import TransactionsView from './../TransactionsView';
 import FooterNavbar from './../FooterNavbar';
 
 import './main.css';
@@ -13,6 +15,9 @@ const App = () => {
     <div className="App">
       <Router>
         <Switch>
+          <Route path="/budgets" exact>
+            <BudgetsView />
+          </Route>
           <Route path="/transactions" exact>
             <TransactionsView />
           </Route>

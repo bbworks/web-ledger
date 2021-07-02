@@ -6,7 +6,7 @@ import DashboardContent from './../DashboardContent';
 
 const DashboardView = ()=>{
   return (
-    <div className="dashboard-view d-flex flex-column">
+    <div className="view dashboard-view d-flex flex-column">
       <DashboardHeader />
       <main className="main flex-grow-1">
         <DashboardTop />

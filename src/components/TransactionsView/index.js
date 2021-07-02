@@ -75,7 +75,7 @@ const TransactionsView = ()=>{
   };
 
   return (
-    <div className="transactions-view">
+    <div className="view transactions-view">
       <div className="container">
         <h1 className="display-1">Ledger</h1>
         {/* <button className="btn btn-dark" type="button" data-toggle="collapse" data-target="#transaction-import-form">Import Transactions</button> */}

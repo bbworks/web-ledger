@@ -1,0 +1,8 @@
+.transaction-edit-button {
+  visibility: hidden;
+}
+
+.transaction:hover .transaction-edit-button {
+  visibility: visible;
+}
+

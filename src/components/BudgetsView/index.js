@@ -4,7 +4,7 @@ import './index.scss';
 
 const BudgetsView = ()=>{
   return (
-    <div className="budgets-view container">
+    <div className="view budgets-view container-fluid py-2">
       <h2 className="budgets-title text-center fw-bold">Month Overview</h2>
 
       <BudgetGraph budget={{title: "Groceries & Necessities", color: "green", budgetedAmount: 900, amountSpent: 123}}/>
