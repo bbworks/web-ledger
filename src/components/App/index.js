@@ -15,11 +15,10 @@ import './index.scss';
 const App = () => {
   const [transactionData, setTransactionData] = useState();
   const [transactions, setTransactions] = useState(fetchTransactionData());
-  const [isTransactionDetailModalOpen, setIsTransactionDetailModalOpen] = useState(false);
 
   useEffect(
     ()=>{
-      console.log("Creating transactions from data: ", transactionData);
+      console.log("Updating transaction data: ", transactionData);
       if (isFalsy(transactionData)) return;
       setTransactions(updateTransactions(transactionData));
     }
@@ -35,7 +34,7 @@ const App = () => {
     setTransactionData(transactions);
   };
 
-  const fileInputOnChange = async event=>{
+  const onTransactionsImportFormFileInputChange = async event=>{
     //Prevent default behavior
     event.preventDefault();
 
@@ -48,38 +47,33 @@ const App = () => {
       })
     );
 
-    console.log("Setting transaction data from fileInputOnChange.", transactionData);
+    console.log("Setting transaction data from onTransactionsImportFormFileInputChange.", transactionData);
     setTransactionData(importTransactions(transactionDataArray, "csv"));
 
     //Reset the file input
     event.target.value = "";
   };
 
-  const transactionDetailModalOnSubmit = (transaction, updatedTransaction)=>{
-    const transactionIndex = transactions.indexOf(transaction);
+  const onTransactionDetailModalSubmit = (oldTransaction, updatedTransaction)=>{
+    //Update transactions with the new transaction
     const updatedTransactions = [...transactions]; //create deep copy
-    updatedTransactions.splice(transactionIndex, 1, updatedTransaction);
-
-    // //Update the transactions data
-    // importTransactions(updatedTransactions.map(updatedTransaction=>updatedTransaction.display));
+    updatedTransactions.splice(transactions.indexOf(oldTransaction), 1, updatedTransaction);
 
     setTransactionData(updatedTransactions);
-
-    setIsTransactionDetailModalOpen(false);
   };
 
   return (
     <div className="App">
       <Router>
         <Switch>
+          <Route path={["/dashboard", "/"]} exact>
+            <DashboardView transactions={transactions} />
+          </Route>
           <Route path="/budgets" exact>
             <BudgetsView transactions={transactions} />
           </Route>
           <Route path="/transactions" exact>
-            <TransactionsView transactions={transactions} onImportFormSubmit={onImportFormSubmit} fileInputOnChange={fileInputOnChange} transactionDetailModalOnSubmit={transactionDetailModalOnSubmit} isTransactionDetailModalOpen={isTransactionDetailModalOpen} setIsTransactionDetailModalOpen={setIsTransactionDetailModalOpen} />
-          </Route>
-          <Route path={["/dashboard", "/"]} exact>
-            <DashboardView transactions={transactions} />
+            <TransactionsView transactions={transactions} onImportFormSubmit={onImportFormSubmit} onTransactionsImportFormFileInputChange={onTransactionsImportFormFileInputChange} onTransactionDetailModalSubmit={onTransactionDetailModalSubmit} />
           </Route>
         </Switch>
       </Router>

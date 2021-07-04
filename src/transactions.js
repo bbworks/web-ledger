@@ -11,7 +11,7 @@ const typeCheckTransactions = function (transactions) {
       ...transaction,
       PostedDate: transaction.PostedDate && new Date(transaction.PostedDate),
       TransactionDate: transaction.TransactionDate && new Date(transaction.TransactionDate),
-      Amount: (isNaN(transaction.Amount) ? Number(transaction.Amount.replace("$", "")) : transaction.Amount),
+      Amount: (isNaN(transaction.Amount) ? Number(transaction.Amount.replace(/(\$|,)/g, "")) : transaction.Amount),
     }
   ));
 };
@@ -108,9 +108,10 @@ const categorizeTransactionByDescription = function(transaction) {
 
   //Final categorizedTransactionData
   categorizedTransactionData = {
-    Category: categorizedTransactionData.Category, //always update the category based on the description
-    DescriptionDisplay: nullCoalesce(DescriptionDisplay, categorizedTransactionData.DescriptionDisplay), //only create/update the displayed description if there isn't already one
-    Notes: categorizedTransactionData.Notes, //always update the notes based on the description
+    //only add a category/displayed description/notes, based on the description, if one is not already present
+    Category: nullCoalesce(Category, categorizedTransactionData.Category),
+    DescriptionDisplay: nullCoalesce(DescriptionDisplay, categorizedTransactionData.DescriptionDisplay),
+    Notes: nullCoalesce(Notes, categorizedTransactionData.Notes),
   };
 
   //Return the transaction with updated categorization data

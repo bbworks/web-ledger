@@ -3,7 +3,7 @@ import TransactionTableTransactions from './../TransactionTableTransactions';
 import {convertNumberToCurrency} from './../../utilities.js';
 import './index.scss';
 
-const TransactionTableBody = ({ transactions, transactionButtonOnClick })=>{
+const TransactionTableBody = ({ transactions, onTransactionEditButtonClick })=>{
   const calculateTotalAmount = ()=>{
     return Number(transactions.reduce((accumulator, transaction)=>accumulator += (transaction.Type == "Charges" ? transaction.Amount : 0), 0).toFixed(2));
   };
@@ -14,7 +14,7 @@ const TransactionTableBody = ({ transactions, transactionButtonOnClick })=>{
 
   return (
     <tbody>
-      <TransactionTableTransactions transactions={transactions} transactionButtonOnClick={transactionButtonOnClick} />
+      <TransactionTableTransactions transactions={transactions} onTransactionEditButtonClick={onTransactionEditButtonClick} />
       <tr className="total">
         <td></td>
         <td></td>

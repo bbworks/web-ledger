@@ -5,7 +5,7 @@ import {nullCoalesce} from './../../utilities.js';
 import {formatTransactionDisplay} from './../../transactions.js';
 import './index.scss';
 
-const TransactionTableTransaction = ({ transaction, transactionButtonOnClick })=>{
+const TransactionTableTransaction = ({ transaction, onTransactionEditButtonClick })=>{
   const [transactionDisplay, setTransactionDisplay] = useState({
     PostedDate: "",
     TransactionDate: "",
@@ -30,7 +30,7 @@ const TransactionTableTransaction = ({ transaction, transactionButtonOnClick })=
       <td>{transactionDisplay.Notes}</td>
       <td>{transactionDisplay.Amount}</td>
       <td>{transactionDisplay.Tags.map(tag=><TagBadge key={tag} tag={tag} />)}</td>
-      <td><button className="transaction-edit-button btn" type="button" onClick={()=>transactionButtonOnClick(transaction)} data-bs-toggle="modal" data-bs-target="#transaction-modal"><i className="transaction-edit-button-icon fas fa-edit"></i></button></td>
+      <td><button className="transaction-edit-button btn" type="button" onClick={()=>onTransactionEditButtonClick(transaction)}><i className="transaction-edit-button-icon fas fa-edit"></i></button></td>
     </tr>
   );
 };

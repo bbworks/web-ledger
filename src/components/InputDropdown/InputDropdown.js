@@ -75,7 +75,7 @@ const dropdownMasterEventListener = event=>{
     dropdownListItems.filter(dropdownListItem=>!dropdownListItem.innerText.match(regEx)).forEach(dropdownListItem=>dropdownListItem.classList.add("hidden"));
 
     //Add a highlight to matched text in unfiltered items
-   dropdownListItems.filter(dropdownListItem=>dropdownListItem.innerText.match(regEx)).forEach(dropdownListItem=>dropdownListItem.innerHTML = dropdownListItem.innerHTML.replace(regEx, `<mark class="input-dropdown-selected-highlight">$1</mark>`));
+   dropdownListItems.filter(dropdownListItem=>dropdownListItem.innerText.match(regEx)).forEach(dropdownListItem=>dropdownListItem.innerHTML = dropdownListItem.innerHTML.replace(regEx, `<mark class="dropdown-selected-highlight">$1</mark>`));
   };
 
   const unFilterDropdownItems = ()=> dropdownListItems.forEach(dropdownListItem=>{
@@ -128,14 +128,14 @@ const dropdownMasterEventListener = event=>{
 
   const addTemporaryEventListeners = ()=>{
     document.addEventListener("click", checkIfClickedOrFocusedOutsideOfDropdown);
-    document.addEventListener("focusin", checkIfClickedOrFocusedOutsideOfDropdown);
+    document.addEventListener("focus", checkIfClickedOrFocusedOutsideOfDropdown);
 
     dropdownListItems.forEach(dropdownListItem=>dropdownListItem.addEventListener("mouseenter", dropdownListItemOnMouseEnter));
   };
 
   const removeTemporaryEventListeners = ()=>{
     document.removeEventListener("click", checkIfClickedOrFocusedOutsideOfDropdown);
-    document.removeEventListener("focusin", checkIfClickedOrFocusedOutsideOfDropdown);
+    document.removeEventListener("focus", checkIfClickedOrFocusedOutsideOfDropdown);
     //dropdownListItems.forEach(dropdownListItem=>dropdownListItem.removeEventListener("mouseenter", setDropdownSelection));
     //dropdownList.removeEventListener("mouseleave", dropdownListOnMouseLeave);
      dropdownListItems.forEach(dropdownListItem=>dropdownListItem.removeEventListener("mouseenter", dropdownListItemOnMouseEnter));
