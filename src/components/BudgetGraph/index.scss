@@ -1,4 +1,4 @@
-.dashboard-overview-budget-graph-bar-outer {
+.budget-graph-bar-outer {
   position: relative;
   background-color: rgb(245,245,245);
   width: 100%;
@@ -8,13 +8,13 @@
   padding: 0.5rem;
 }
 
-.dashboard-overview-budget-graph-bar-stats {
+.budget-graph-bar-stats {
   position: relative;
   z-index: 2;
   font-size: 1rem
 }
 
-.dashboard-overview-budget-graph-bar-remaining {
+.budget-graph-bar-remaining {
   position: absolute;
   z-index: 2;
   top: 0.5rem;
@@ -22,9 +22,13 @@
   font-size: 0.8rem;
 }
 
-.dashboard-overview-budget-graph-bar-inner {
+.budget-graph-bar-inner {
   position: absolute;
   z-index: 1;
   top: 0;
   height: 100%;
+}
+
+.budget-graph-status-icon-container {
+  font-size: 0.6rem;
 }

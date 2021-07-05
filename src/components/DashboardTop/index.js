@@ -4,13 +4,7 @@ import {convertNumberToCurrency} from './../../utilities.js';
 
 import './index.scss';
 
-const DashboardTop = ()=>{
-  const initialAccountsData = JSON.parse(localStorage.getItem("accounts-data"));
-  const initialAccountData = JSON.parse(localStorage.getItem("account-data"));
-
-  const [accountsData, setAccountsData] = useState(initialAccountsData || null);
-  const [creditScore, setCreditScore] = useState(initialAccountData && initialAccountData.creditScore || null);
-
+const DashboardTop = ({ accountsData, accountData, budgetCycle })=>{
   useEffect(()=>console.log("Accounts data:", accountsData), [accountsData]);
 
   return (
@@ -27,13 +21,15 @@ const DashboardTop = ()=>{
           </div>
           <div className="dashboard-credit-score-container col text-center fw-bold h4 d-flex flex-column">
             Credit Score:
-            <span className="dashboard-credit-score">{creditScore}</span>
+            <span className="dashboard-credit-score">{accountData.creditScore}</span>
           </div>
         </div>
       </div>
       <div className="dashboard-month-dropdown dropdown">
         <button id="dashboardMonthDropdown" className="btn dropdown-toggle container-fluid" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-          <strong className="dashboard-month-dropdown-month h2 d-block mb-0">June 2021</strong>
+          <strong className="dashboard-month-dropdown-month h2 d-block mb-0">
+            {budgetCycle}
+          </strong>
           <em className="dashboard-month-dropdown-month-description d-block text-muted h6">(current)</em>
         </button>
         <ul className="dropdown-menu container-fluid ">

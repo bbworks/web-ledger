@@ -5,28 +5,68 @@ import {convertNumberToCurrency} from './../../utilities.js';
 import './index.scss';
 
 const BudgetGraph = ({ budget })=>{
-  const overBudget = budget.amountSpent > budget.budgetedAmount;
+  const isExpenseBudget = budget.budgetedAmount <= 0
+  const overBudget = (isExpenseBudget ? budget.amountSpent < budget.budgetedAmount : budget.amountSpent > budget.budgetedAmount);
+
+  const BudgetGraphStatusIcon = ({ budget })=> {
+    let iconClass;
+    let iconText;
+    let iconColor;
+
+    if (budget.isSinglePaymentBill) {
+      if (budget.amountSpent) {
+        if (!overBudget) {
+          iconClass = "fas fa-check-circle";
+          iconText = "Paid";
+          iconColor = "success";
+        }
+        else {
+          iconClass = "fas fa-times-circle";
+          iconText = "Overpaid";
+          iconColor = "danger";
+        }
+      }
+      else {
+        iconClass = "";
+        iconText = "Pending";
+        iconColor = "secondary";
+      }
+    }
+
+    if (budget.isSinglePaymentBill) {
+      return (
+        <div className={`budget-graph-status-icon-container d-inline-block badge rounded-pill text-${iconColor} bg-light ms-1 border border-${iconColor}`}>
+          <i className={`budget-graph-status-icon fas fa-xs ${iconClass} me-1`}></i>
+          <span>{iconText}</span>
+        </div>
+      )
+    }
+
+    return null;
+  };
+
 
   return (
-    <div className="dashboard-overview-budget-graph-container">
-      <h4 className="dashboard-overview-budget-graph-title">{budget.title}</h4>
-      <div className="dashboard-overview-budget-graph-bar-outer">
-        <h5 className="dashboard-overview-budget-graph-bar-stats" style={
+    <div className="budget-graph-container my-4">
+      <h5 className="budget-graph-title d-inline-block">{budget.title}</h5>
+      <BudgetGraphStatusIcon budget={budget} />
+      <div className="budget-graph-bar-outer">
+        <h6 className="budget-graph-bar-stats" style={
           {
             color: (!overBudget
-              ? "rgb(245,245,245)"
+              ? "black" //"rgb(245,245,245)"
               : "red"
             ),
           }
         }>
-          {convertNumberToCurrency(budget.amountSpent)} of {convertNumberToCurrency(budget.budgetedAmount)} spent
-        </h5>
-        <h5 className="dashboard-overview-budget-graph-bar-remaining text-muted" >
+          {convertNumberToCurrency(Math.abs(budget.amountSpent))} of {convertNumberToCurrency(Math.abs(budget.budgetedAmount))} spent
+        </h6>
+        <h6 className="budget-graph-bar-remaining text-muted" >
           {convertNumberToCurrency(budget.budgetedAmount - budget.amountSpent)} {(overBudget ? "overspent" : "remaining")}
-        </h5>
-        <div className="dashboard-overview-budget-graph-bar-inner" style={
+        </h6>
+        <div className="budget-graph-bar-inner" style={
           {
-            backgroundColor: budget.color,
+            backgroundColor: (!isExpenseBudget ? "green" :  (overBudget ? "red" : budget.color)),
             width: (overBudget
               ? `calc(100% * ${(budget.amountSpent - budget.budgetedAmount)/budget.budgetedAmount})`
               : `calc(100% * ${budget.amountSpent/budget.budgetedAmount})`
