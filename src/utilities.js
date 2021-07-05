@@ -33,3 +33,7 @@ export const convertCSVToJSON = function(csv, delimiter = ",") {
 
   return obj;
 };
+
+export const getBudgetAmountSpentFromTransactions = (budgetName, transactions)=>{
+  return transactions.reduce((amountSpent,i)=>amountSpent+=(i.Category === budgetName ? i.Amount : 0), 0);
+};

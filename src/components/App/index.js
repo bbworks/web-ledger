@@ -39,126 +39,166 @@ localStorage.setItem("budgets-data", JSON.stringify([
 	{
 		name: "Primary payroll",
 		amount: 4357.28,
+		type: "Income",
 		isSinglePaymentBill: false,
 	},
 	{
 		name: "Other income",
 		amount: 0.00,
+		type: "Income",
 		isSinglePaymentBill: false,
 	},
 	{
 		name: "Sharonview mortgage & escrow",
 		amount: -1153.04,
+		type: "Bill",
 		isSinglePaymentBill: true,
+    dueDate: "15th"
 	},
 	{
 		name: "HOA dues",
 		amount: -37.50,
+		type: "Bill",
 		isSinglePaymentBill: true,
+    dueDate: "15th"
 	},
 	{
 		name: "Duke Energy",
 		amount: -145.00,
+		type: "Bill",
 		isSinglePaymentBill: true,
+    dueDate: "3rd"
 	},
 	{
 		name: "SJWD Water District",
 		amount: -35.00,
+		type: "Bill",
 		isSinglePaymentBill: true,
+    dueDate: "16th"
 	},
 	{
 		name: "Piedmont Natural Gas",
 		amount: -30.00,
+		type: "Bill",
 		isSinglePaymentBill: true,
+    dueDate: "26th"
 	},
 	{
 		name: "Kirby Sanitation",
 		amount: -19.00,
+		type: "Bill",
 		isSinglePaymentBill: true,
+    dueDate: "1st"
 	},
 	{
 		name: "State Farm auto insurance",
 		amount: -145.00,
+		type: "Bill",
 		isSinglePaymentBill: true,
+    dueDate: "17th"
 	},
 	{
 		name: "Laurens Electric ProTec Security",
 		amount: -29.95,
+		type: "Bill",
 		isSinglePaymentBill: true,
+    dueDate: "14th"
 	},
 	{
 		name: "SimpliSafe (for mom)",
 		amount: -24.99,
+		type: "Bill",
 		isSinglePaymentBill: true,
+    dueDate: "12th"
 	},
 	{
 		name: "AT&T Internet",
 		amount: -50.70,
+		type: "Bill",
 		isSinglePaymentBill: true,
+    dueDate: "11th"
 	},
 	{
 		name: "AT&T phone bill",
 		amount: -65.00,
+		type: "Bill",
 		isSinglePaymentBill: true,
+    dueDate: "15th"
 	},
 	{
 		name: "Spotify Premium subscription",
 		amount: -10.69,
+		type: "Bill",
 		isSinglePaymentBill: true,
+    dueDate: "23rd"
 	},
 	{
 		name: "Netflix Premium subscription",
 		amount: -19.25,
+		type: "Bill",
 		isSinglePaymentBill: true,
+    dueDate: "14th"
 	},
 	{
 		name: "Discovery Plus subscription",
 		amount: -7.48,
+		type: "Bill",
 		isSinglePaymentBill: true,
+    dueDate: "17th"
 	},
 	{
 		name: "YMCA membership",
 		amount: -84.00,
+		type: "Bill",
 		isSinglePaymentBill: true,
+    dueDate: "9th"
 	},
 	{
 		name: "Savings",
 		amount: -1100.00,
+		type: "Savings",
 		isSinglePaymentBill: false,
 	},
 	{
 		name: "Gas",
 		amount: -150.00,
+		type: "Expense",
 		isSinglePaymentBill: false,
 	},
 	{
 		name: "Church",
 		amount: -440.00,
+		type: "Expense",
 		isSinglePaymentBill: false,
 	},
 	{
 		name: "Groceries/Necessities",
 		amount: -400.00,
+		type: "Expense",
 		isSinglePaymentBill: false,
 	},
 	{
 		name: "LoveInAction",
 		amount: 0,
+		type: "Expense",
 		isSinglePaymentBill: false,
 	},
 	{
 		name: "Family Outings",
 		amount: -250.00,
+		type: "Expense",
 		isSinglePaymentBill: false,
 	},
 	{
 		name: "Personal Spending",
 		amount: -50.00,
+		type: "Expense",
 		isSinglePaymentBill: false,
 	},
 	{
 		name: "Miscellaneous",
 		amount: 0,
+		type: "Expense",
 		isSinglePaymentBill: false,
 	}, //Surplus
 ]));
@@ -237,7 +277,6 @@ localStorage.setItem("budgets-data", JSON.stringify([
 
   const [budgetCycle, setBudgetCycle] = useState(getBillingCycleFromDate(new Date()));
 
-  console.log(budgetCycle);
   const onImportFormSubmit = event=>{
     const transactions = importFormOnSubmit(event);
 
@@ -278,10 +317,10 @@ localStorage.setItem("budgets-data", JSON.stringify([
       <Router>
         <Switch>
           <Route path={["/dashboard", "/"]} exact>
-            <DashboardView transactions={transactions} accountsData={accountsData} accountData={accountData} budgetCycle={budgetCycle}/>
+            <DashboardView transactions={transactions} accountsData={accountsData} accountData={accountData} budgetsData={budgetsData} budgetCycle={budgetCycle}/>
           </Route>
           <Route path="/budgets" exact>
-            <BudgetsView transactions={transactions} budgetsData={budgetsData}/>
+            <BudgetsView transactions={transactions} budgetsData={budgetsData} />
           </Route>
           <Route path="/transactions" exact>
             <TransactionsView transactions={transactions} onImportFormSubmit={onImportFormSubmit} onTransactionsImportFormFileInputChange={onTransactionsImportFormFileInputChange} onTransactionDetailModalSubmit={onTransactionDetailModalSubmit} />

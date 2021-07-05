@@ -1,13 +1,11 @@
 import BudgetGraph from './../BudgetGraph';
 
+import {getBudgetAmountSpentFromTransactions} from './../../utilities.js';
+
 import './index.scss';
 
 const BudgetsView = ({ transactions, budgetsData })=>{
   console.log(transactions);
-
-  const getBudgetAmountSpentFromTransactions = budgetName=>{
-    return transactions.reduce((amountSpent,i)=>amountSpent+=(i.Category === budgetName ? i.Amount : 0), 0);
-  };
 
   return (
     <div className="view budgets-view container-fluid py-2">
@@ -17,7 +15,7 @@ const BudgetsView = ({ transactions, budgetsData })=>{
         {
           budgetsData.map(budgetData=>{
             const {name, amount, isSinglePaymentBill} = budgetData;
-            return <BudgetGraph key={name} budget={{title: name, color: "#2196f3", budgetedAmount: amount, amountSpent: getBudgetAmountSpentFromTransactions(name), isSinglePaymentBill: isSinglePaymentBill}}/>
+            return <BudgetGraph key={name} budget={{title: name, color: "#2196f3", budgetedAmount: amount, amountSpent: getBudgetAmountSpentFromTransactions(name, transactions), isSinglePaymentBill: isSinglePaymentBill}}/>
         })
         }
       </div>
