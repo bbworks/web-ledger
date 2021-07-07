@@ -7,6 +7,7 @@ import {importTransactions, updateTransactions, fetchTransactionData, importForm
 import DashboardView from './../DashboardView';
 import BudgetsView from './../BudgetsView';
 import TransactionsView from './../TransactionsView';
+import SettingsView from './../SettingsView';
 import FooterNavbar from './../FooterNavbar';
 
 import './main.css';
@@ -39,167 +40,142 @@ localStorage.setItem("budgets-data", JSON.stringify([
 	{
 		name: "Primary payroll",
 		amount: 4357.28,
-		type: "Income",
-		isSinglePaymentBill: false,
+		type: "income",
 	},
 	{
 		name: "Other income",
 		amount: 0.00,
-		type: "Income",
-		isSinglePaymentBill: false,
+		type: "income",
 	},
 	{
 		name: "Sharonview mortgage & escrow",
 		amount: -1153.04,
-		type: "Bill",
-		isSinglePaymentBill: true,
-    dueDate: "15th"
+		type: "bill",
+	  dueDate: "15th"
 	},
 	{
 		name: "HOA dues",
 		amount: -37.50,
-		type: "Bill",
-		isSinglePaymentBill: true,
-    dueDate: "15th"
+		type: "bill",
+	  dueDate: "15th"
 	},
 	{
 		name: "Duke Energy",
 		amount: -145.00,
-		type: "Bill",
-		isSinglePaymentBill: true,
-    dueDate: "3rd"
+		type: "bill",
+	  dueDate: "3rd"
 	},
 	{
 		name: "SJWD Water District",
 		amount: -35.00,
-		type: "Bill",
-		isSinglePaymentBill: true,
-    dueDate: "16th"
+		type: "bill",
+	  dueDate: "16th"
 	},
 	{
 		name: "Piedmont Natural Gas",
 		amount: -30.00,
-		type: "Bill",
-		isSinglePaymentBill: true,
-    dueDate: "26th"
+		type: "bill",
+	  dueDate: "26th"
 	},
 	{
 		name: "Kirby Sanitation",
 		amount: -19.00,
-		type: "Bill",
-		isSinglePaymentBill: true,
-    dueDate: "1st"
+		type: "bill",
+	  dueDate: "1st"
 	},
 	{
 		name: "State Farm auto insurance",
 		amount: -145.00,
-		type: "Bill",
-		isSinglePaymentBill: true,
-    dueDate: "17th"
+		type: "bill",
+	  dueDate: "17th"
 	},
 	{
 		name: "Laurens Electric ProTec Security",
 		amount: -29.95,
-		type: "Bill",
-		isSinglePaymentBill: true,
-    dueDate: "14th"
+		type: "bill",
+	  dueDate: "14th"
 	},
 	{
 		name: "SimpliSafe (for mom)",
 		amount: -24.99,
-		type: "Bill",
-		isSinglePaymentBill: true,
-    dueDate: "12th"
+		type: "bill",
+	  dueDate: "12th"
 	},
 	{
 		name: "AT&T Internet",
 		amount: -50.70,
-		type: "Bill",
-		isSinglePaymentBill: true,
-    dueDate: "11th"
+		type: "bill",
+	  dueDate: "11th"
 	},
 	{
 		name: "AT&T phone bill",
 		amount: -65.00,
-		type: "Bill",
-		isSinglePaymentBill: true,
-    dueDate: "15th"
+		type: "bill",
+	  dueDate: "15th"
 	},
 	{
 		name: "Spotify Premium subscription",
 		amount: -10.69,
-		type: "Bill",
-		isSinglePaymentBill: true,
-    dueDate: "23rd"
+		type: "bill",
+	  dueDate: "23rd"
 	},
 	{
 		name: "Netflix Premium subscription",
 		amount: -19.25,
-		type: "Bill",
-		isSinglePaymentBill: true,
-    dueDate: "14th"
+		type: "bill",
+	  dueDate: "14th"
 	},
 	{
 		name: "Discovery Plus subscription",
 		amount: -7.48,
-		type: "Bill",
-		isSinglePaymentBill: true,
-    dueDate: "17th"
+		type: "bill",
+	  dueDate: "17th"
 	},
 	{
 		name: "YMCA membership",
 		amount: -84.00,
-		type: "Bill",
-		isSinglePaymentBill: true,
-    dueDate: "9th"
+		type: "bill",
+	  dueDate: "9th"
 	},
 	{
 		name: "Savings",
 		amount: -1100.00,
-		type: "Savings",
-		isSinglePaymentBill: false,
+		type: "savings",
 	},
 	{
 		name: "Gas",
 		amount: -150.00,
-		type: "Expense",
-		isSinglePaymentBill: false,
+		type: "expense",
 	},
 	{
 		name: "Church",
 		amount: -440.00,
-		type: "Expense",
-		isSinglePaymentBill: false,
+		type: "expense",
 	},
 	{
 		name: "Groceries/Necessities",
 		amount: -400.00,
-		type: "Expense",
-		isSinglePaymentBill: false,
+		type: "expense",
 	},
 	{
 		name: "LoveInAction",
 		amount: 0,
-		type: "Expense",
-		isSinglePaymentBill: false,
+		type: "expense",
 	},
 	{
 		name: "Family Outings",
 		amount: -250.00,
-		type: "Expense",
-		isSinglePaymentBill: false,
+		type: "expense",
 	},
 	{
 		name: "Personal Spending",
 		amount: -50.00,
-		type: "Expense",
-		isSinglePaymentBill: false,
+		type: "expense",
 	},
 	{
 		name: "Miscellaneous",
 		amount: 0,
-		type: "Expense",
-		isSinglePaymentBill: false,
+		type: "expense",
 	}, //Surplus
 ]));
 */
@@ -213,6 +189,7 @@ localStorage.setItem("budgets-data", JSON.stringify([
   const [budgetsData, setBudgetsData] = useState(initialBudgetsData || null);
   const [accountsData, setAccountsData] = useState(initialAccountsData || null);
   const [accountData, setAccountData] = useState(initialAccountData || null);
+  const [footerNavbar, setFooterNavbar] = useState(null);
 
   useEffect(
     ()=>{
@@ -317,17 +294,20 @@ localStorage.setItem("budgets-data", JSON.stringify([
       <Router>
         <Switch>
           <Route path={["/dashboard", "/"]} exact>
-            <DashboardView transactions={transactions} accountsData={accountsData} accountData={accountData} budgetsData={budgetsData} budgetCycle={budgetCycle}/>
+            <DashboardView transactions={transactions} accountsData={accountsData} accountData={accountData} budgetsData={budgetsData} budgetCycle={budgetCycle} setFooterNavbar={setFooterNavbar} />
           </Route>
           <Route path="/budgets" exact>
-            <BudgetsView transactions={transactions} budgetsData={budgetsData} />
+            <BudgetsView transactions={transactions} budgetsData={budgetsData} setFooterNavbar={setFooterNavbar} />
           </Route>
           <Route path="/transactions" exact>
-            <TransactionsView transactions={transactions} onImportFormSubmit={onImportFormSubmit} onTransactionsImportFormFileInputChange={onTransactionsImportFormFileInputChange} onTransactionDetailModalSubmit={onTransactionDetailModalSubmit} />
+            <TransactionsView transactions={transactions} onImportFormSubmit={onImportFormSubmit} onTransactionsImportFormFileInputChange={onTransactionsImportFormFileInputChange} onTransactionDetailModalSubmit={onTransactionDetailModalSubmit} setFooterNavbar={setFooterNavbar} />
+          </Route>
+          <Route path="/settings" exact>
+            <SettingsView setFooterNavbar={setFooterNavbar} />
           </Route>
         </Switch>
       </Router>
-      <FooterNavbar />
+      <FooterNavbar active={footerNavbar} />
     </div>
   );
 };

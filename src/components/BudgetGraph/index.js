@@ -13,7 +13,7 @@ const BudgetGraph = ({ budget })=>{
     let iconText;
     let iconColor;
 
-    if (budget.isSinglePaymentBill) {
+    if (budget.type === "bill") {
       if (budget.amountSpent) {
         if (!overBudget) {
           iconClass = "fas fa-check-circle";
@@ -33,7 +33,7 @@ const BudgetGraph = ({ budget })=>{
       }
     }
 
-    if (budget.isSinglePaymentBill) {
+    if (budget.type === "bill") {
       return (
         <div className={`budget-graph-status-icon-container d-inline-block badge rounded-pill text-${iconColor} bg-light ms-1 border border-${iconColor}`}>
           <i className={`budget-graph-status-icon fas fa-xs ${iconClass} me-1`}></i>

@@ -1,11 +1,18 @@
+import {useEffect} from 'react';
+import {useLocation} from 'react-router-dom';
+
 import BudgetGraph from './../BudgetGraph';
 
 import {getBudgetAmountSpentFromTransactions} from './../../utilities.js';
 
 import './index.scss';
 
-const BudgetsView = ({ transactions, budgetsData })=>{
-  console.log(transactions);
+const BudgetsView = ({ transactions, budgetsData, setFooterNavbar })=>{
+  //Send the route to the footer navbar
+  const route = useLocation().pathname;
+  useEffect(()=>{
+    setFooterNavbar(route);
+  }, []);
 
   return (
     <div className="view budgets-view container-fluid py-2">
@@ -14,8 +21,8 @@ const BudgetsView = ({ transactions, budgetsData })=>{
 
         {
           budgetsData.map(budgetData=>{
-            const {name, amount, isSinglePaymentBill} = budgetData;
-            return <BudgetGraph key={name} budget={{title: name, color: "#2196f3", budgetedAmount: amount, amountSpent: getBudgetAmountSpentFromTransactions(name, transactions), isSinglePaymentBill: isSinglePaymentBill}}/>
+            const {name, amount, type} = budgetData;
+            return <BudgetGraph key={name} budget={{title: name, type: type, color: "#2196f3", budgetedAmount: amount, amountSpent: getBudgetAmountSpentFromTransactions(name, transactions)}}/>
         })
         }
       </div>

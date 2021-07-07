@@ -1,4 +1,5 @@
 import {useState, useEffect} from 'react';
+import {useLocation} from 'react-router-dom';
 
 import TransactionsImportForm from './../TransactionsImportForm';
 import TransactionData from './../TransactionData';
@@ -6,7 +7,13 @@ import TransactionDetailModal from './../TransactionDetailModal';
 
 import './index.scss';
 
-const TransactionsView = ({ transactions, onImportFormSubmit, onTransactionsImportFormFileInputChange, onTransactionDetailModalSubmit:onTransactionDetailModalSubmitProp })=>{
+const TransactionsView = ({ transactions, onImportFormSubmit, onTransactionsImportFormFileInputChange, onTransactionDetailModalSubmit:onTransactionDetailModalSubmitProp, setFooterNavbar })=>{
+  //Send the route to the footer navbar
+  const route = useLocation().pathname;
+  useEffect(()=>{
+    setFooterNavbar(route);
+  }, []);
+
   const [transactionDetailModalTransaction, setTransactionDetailModalTransaction] = useState(null);
   const [isTransactionDetailModalOpen, setIsTransactionDetailModalOpen] = useState(false);
 
