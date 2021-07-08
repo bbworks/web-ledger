@@ -39,7 +39,7 @@ const DashboardInsights = ({ transactions, budgetsData })=>{
     // }
 
     /* Check if a bill has gone up */
-    const bills = budgetsData.filter(budgetData=>budgetData.type==="Bill");
+    const bills = budgetsData.filter(budgetData=>budgetData.type==="bill");
     bills.forEach(bill=>{
       const amountSpent = getBudgetAmountSpentFromTransactions(bill.name, transactions)
       if (!amountSpent) return;
@@ -58,13 +58,11 @@ const DashboardInsights = ({ transactions, budgetsData })=>{
     runInsights();
   }, [transactions, budgetsData]);
 
-  useEffect(()=>console.log({insights}), [insights]);
-
   return (
     <div className="dashboard-insights container mt-5">
       <h2 className="text-center mb-4">Insights</h2>
-      {insights.map(insight=>(
-        <DashboardInsight insight={insight} />
+      {insights.map((insight,i)=>(
+        <DashboardInsight key={i} insight={insight} />
       ))}
     </div>
   );

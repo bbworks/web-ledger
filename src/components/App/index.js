@@ -306,8 +306,8 @@ localStorage.setItem("budgets-data", JSON.stringify([
             <SettingsView setFooterNavbar={setFooterNavbar} />
           </Route>
         </Switch>
+        <FooterNavbar active={footerNavbar} />
       </Router>
-      <FooterNavbar active={footerNavbar} />
     </div>
   );
 };
