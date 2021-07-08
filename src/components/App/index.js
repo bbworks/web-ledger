@@ -1,8 +1,7 @@
 import {useState, useEffect} from 'react';
 import {BrowserRouter as Router, Switch, Route, Link} from 'react-router-dom';
 
-import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON} from './../../utilities.js';
-import {importTransactions, updateTransactions, fetchTransactionData, importFormOnSubmit} from './../../transactions.js';
+import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON, getMonthFromNumber, getCurrentYear, getBillingCycleFromDate, importTransactions, updateTransactions, fetchTransactionData} from './../../utilities';
 
 import DashboardView from './../DashboardView';
 import BudgetsView from './../BudgetsView';
@@ -180,6 +179,7 @@ localStorage.setItem("budgets-data", JSON.stringify([
 ]));
 */
 
+  //Set application state
   const initialBudgetsData = JSON.parse(localStorage.getItem("budgets-data"));
   const initialAccountsData = JSON.parse(localStorage.getItem("accounts-data"));
   const initialAccountData = JSON.parse(localStorage.getItem("account-data"));
@@ -190,7 +190,10 @@ localStorage.setItem("budgets-data", JSON.stringify([
   const [accountsData, setAccountsData] = useState(initialAccountsData || null);
   const [accountData, setAccountData] = useState(initialAccountData || null);
   const [footerNavbar, setFooterNavbar] = useState(null);
+  const [budgetCycle, setBudgetCycle] = useState(getBillingCycleFromDate(new Date()));
 
+  //Every time we get new transaction data,
+  // transform it into transactions
   useEffect(
     ()=>{
       console.log("Updating transaction data: ", transactionData);
@@ -200,85 +203,20 @@ localStorage.setItem("budgets-data", JSON.stringify([
     , [transactionData]
   );
 
+  //Log transactions
   useEffect(()=>console.log("Transactions: ", transactions), [transactions]);
 
-  const getMonthFromNumber = number=>{
-    switch (number) {
-      case 0:
-        return "January";
-        break;
-      case 1:
-        return "February";
-        break;
-      case 2:
-        return "March";
-        break;
-      case 3:
-        return "April";
-        break;
-      case 4:
-        return "May";
-        break;
-      case 5:
-        return "June";
-        break;
-      case 6:
-        return "July";
-        break;
-      case 7:
-        return "August";
-        break;
-      case 8:
-        return "September";
-        break;
-      case 9:
-        return "October";
-        break;
-      case 10:
-        return "November";
-        break;
-      case 11:
-        return "December";
-        break;
-    }
-    return null;
-  };
-
-  const getCurrentYear = (date)=>{
-    return date.getFullYear();
-  };
-
-  const getBillingCycleFromDate = date=>{
-    return `${getMonthFromNumber(date.getMonth())} ${getCurrentYear(date)}`;
-  };
-
-  const [budgetCycle, setBudgetCycle] = useState(getBillingCycleFromDate(new Date()));
-
-  const onImportFormSubmit = event=>{
-    const transactions = importFormOnSubmit(event);
+  //Create event listeners
+  const onTransactionsImportFormSubmit = scrapedTransactionData=>{
+    //Import the scraped transaction data
+    const transactionData = importTransactions(scrapedTransactionData, "scraped");
 
     //Set the new transaction data
-    setTransactionData(transactions);
+    setTransactionData(transactionData);
   };
 
-  const onTransactionsImportFormFileInputChange = async event=>{
-    //Prevent default behavior
-    event.preventDefault();
-
-    //Get the transaction data
-    const transactionDataArray = [];
-    await Promise.all(  //Promise.all handles an array of Promises
-      [...event.target.files].map(async file=>{
-        const fileContent = await file.text();
-        transactionDataArray.push(fileContent);
-      })
-    );
-
-    console.log("Setting transaction data from onTransactionsImportFormFileInputChange.", transactionData);
+  const onTransactionsImportFormFileInputChange = transactionDataArray=>{
     setTransactionData(importTransactions(transactionDataArray, "csv"));
-
-    //Reset the file input
-    event.target.value = "";
   };
 
   const onTransactionDetailModalSubmit = (oldTransaction, updatedTransaction)=>{
@@ -300,7 +238,7 @@ localStorage.setItem("budgets-data", JSON.stringify([
             <BudgetsView transactions={transactions} budgetsData={budgetsData} setFooterNavbar={setFooterNavbar} />
           </Route>
           <Route path="/transactions" exact>
-            <TransactionsView transactions={transactions} onImportFormSubmit={onImportFormSubmit} onTransactionsImportFormFileInputChange={onTransactionsImportFormFileInputChange} onTransactionDetailModalSubmit={onTransactionDetailModalSubmit} setFooterNavbar={setFooterNavbar} />
+            <TransactionsView transactions={transactions} onTransactionsImportFormSubmit={onTransactionsImportFormSubmit} onTransactionsImportFormFileInputChange={onTransactionsImportFormFileInputChange} onTransactionDetailModalSubmit={onTransactionDetailModalSubmit} setFooterNavbar={setFooterNavbar} />
           </Route>
           <Route path="/settings" exact>
             <SettingsView setFooterNavbar={setFooterNavbar} />

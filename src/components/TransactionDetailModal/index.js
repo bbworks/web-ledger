@@ -1,13 +1,12 @@
 import {useState, useEffect} from 'react';
+
 import Modal from 'react-bootstrap/Modal';
 import ModalBody from "react-bootstrap/ModalBody";
 import ModalHeader from "react-bootstrap/ModalHeader";
 import ModalFooter from "react-bootstrap/ModalFooter";
-
 import TransactionDetailModalInput from './../TransactionDetailModalInput';
 
-import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON} from './../../utilities.js';
-import {formatTransactionDisplay} from './../../transactions.js';
+import {nullCoalesce, formatTransactionDisplay} from './../../utilities';
 
 import './index.scss';
 

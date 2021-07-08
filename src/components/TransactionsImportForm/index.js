@@ -1,6 +1,41 @@
-const TransactionsImportForm = ({ onSubmit, onImportFormSubmit, onFileInputChange })=>{
+const TransactionsImportForm = ({ onSubmit:onSubmitProp, onFileInputChange:onFileInputChangeProp })=>{
+  const onSubmit = event=>{
+    //Prevent form submission
+    event.preventDefault();
+
+    const transactionImportInput = event.target.querySelector("#transaction-import-input");
+
+    //Get the transaction data
+    const scrapedTransactionData = transactionImportInput.value;
+
+    //Reset the input
+    transactionImportInput.value = '';
+
+    onSubmitProp(scrapedTransactionData);
+  };
+
+  const onFileInputChange = async event=>{
+    //Prevent default behavior
+    event.preventDefault();
+
+    //Get the transaction data
+    const transactionDataArray = [];
+    await Promise.all(  //Promise.all handles an array of Promises
+      [...event.target.files].map(async file=>{
+        const fileContent = await file.text();
+        transactionDataArray.push(fileContent);
+      })
+    );
+
+    //Reset the file input
+    event.target.value = "";
+
+    //Call the parent handler
+    onFileInputChangeProp(transactionDataArray);
+  };
+
   return (
-    <form id="transaction-import-form" className="transaction-import-form mb-4" onSubmit={onImportFormSubmit}>
+    <form id="transaction-import-form" className="transaction-import-form mb-4" onSubmit={onSubmit}>
       <div>
         <label className="form-label">Transactions</label>
         <div className="input-group mb-2">

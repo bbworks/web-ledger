@@ -1,7 +1,7 @@
 import {useState, useEffect} from 'react';
 
 import DashboardInsight from './../DashboardInsight';
-import {convertNumberToCurrency, getBudgetAmountSpentFromTransactions} from './../../utilities.js';
+import {convertNumberToCurrency, getBudgetAmountSpentFromTransactions} from './../../utilities';
 
 import './index.scss';
 

@@ -3,7 +3,7 @@ import {useLocation} from 'react-router-dom';
 
 import BudgetGraph from './../BudgetGraph';
 
-import {getBudgetAmountSpentFromTransactions} from './../../utilities.js';
+import {getBudgetAmountSpentFromTransactions} from './../../utilities';
 
 import './index.scss';
 

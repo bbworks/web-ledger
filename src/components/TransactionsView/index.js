@@ -7,7 +7,7 @@ import TransactionDetailModal from './../TransactionDetailModal';
 
 import './index.scss';
 
-const TransactionsView = ({ transactions, onImportFormSubmit, onTransactionsImportFormFileInputChange, onTransactionDetailModalSubmit:onTransactionDetailModalSubmitProp, setFooterNavbar })=>{
+const TransactionsView = ({ transactions, onTransactionsImportFormSubmit, onTransactionsImportFormFileInputChange, onTransactionDetailModalSubmit:onTransactionDetailModalSubmitProp, setFooterNavbar })=>{
   //Send the route to the footer navbar
   const route = useLocation().pathname;
   useEffect(()=>{
@@ -40,7 +40,7 @@ const TransactionsView = ({ transactions, onImportFormSubmit, onTransactionsImpo
       <div className="container">
         <h1 className="display-1">Ledger</h1>
         {/* <button className="btn btn-dark" type="button" data-toggle="collapse" data-target="#transaction-import-form">Import Transactions</button> */}
-        <TransactionsImportForm onImportFormSubmit={onImportFormSubmit} onFileInputChange={onTransactionsImportFormFileInputChange} />
+        <TransactionsImportForm onSubmit={onTransactionsImportFormSubmit} onFileInputChange={onTransactionsImportFormFileInputChange} />
         <TransactionData transactions={transactions} onTransactionEditButtonClick={onTransactionEditButtonClick} />
       </div>
       <TransactionDetailModal transaction={transactionDetailModalTransaction} buttonsOptions={{okButton: "Save", cancelButton: "Cancel"}} isOpen={isTransactionDetailModalOpen} onClose={closeTransactionDetailModal} onSubmit={onTransactionDetailModalSubmit} />

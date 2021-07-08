@@ -1,5 +1,4 @@
-//Imports
-import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON} from './utilities.js';
+import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON, getBudgetAmountSpentFromTransactions, getMonthFromNumber, getCurrentYear, getBillingCycleFromDate} from './utilities.js';
 
 //Initialize variables
 const transactionLocalStorageItemKey = "transaction-data";
@@ -251,25 +250,6 @@ export const fetchTransactionData = function() {
   //Attempt to fetch the transaction data from localStorage
   const transactions = JSON.parse(localStorage.getItem(transactionLocalStorageItemKey));
   if (isFalsy(transactions)) return [];
-
-  //Return the transactions
-  return transactions;
-};
-
-export const importFormOnSubmit = event=>{
-  //Prevent form submission
-  event.preventDefault();
-
-  const transactionImportInput = event.target.querySelector("#transaction-import-input");
-
-  //Get the transaction data
-  const transactionData = transactionImportInput.value;
-
-  //Import the transaction data into an array of transaction objects
-  const transactions = importTransactions(transactionData, "scraped");
-
-  //Reset the input
-  transactionImportInput.value = '';
 
   //Return the transactions
   return transactions;

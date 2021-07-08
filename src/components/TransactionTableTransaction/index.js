@@ -1,8 +1,9 @@
 import {useState, useEffect} from 'react';
 
 import TagBadge from './../TagBadge';
-import {nullCoalesce} from './../../utilities.js';
-import {formatTransactionDisplay} from './../../transactions.js';
+
+import {nullCoalesce, formatTransactionDisplay} from './../../utilities';
+
 import './index.scss';
 
 const TransactionTableTransaction = ({ transaction, onTransactionEditButtonClick })=>{

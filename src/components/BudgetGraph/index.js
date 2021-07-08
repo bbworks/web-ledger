@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react';
 
-import {convertNumberToCurrency} from './../../utilities.js';
+import {convertNumberToCurrency} from './../../utilities';
 
 import './index.scss';
 
