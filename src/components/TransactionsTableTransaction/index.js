@@ -6,7 +6,7 @@ import {nullCoalesce, formatTransactionDisplay} from './../../utilities';
 
 import './index.scss';
 
-const TransactionTableTransaction = ({ transaction, onTransactionEditButtonClick })=>{
+const TransactionsTableTransaction = ({ transaction, onTransactionEditButtonClick })=>{
   const [transactionDisplay, setTransactionDisplay] = useState({
     PostedDate: "",
     TransactionDate: "",
@@ -36,4 +36,4 @@ const TransactionTableTransaction = ({ transaction, onTransactionEditButtonClick
   );
 };
 
-export default TransactionTableTransaction;
+export default TransactionsTableTransaction;

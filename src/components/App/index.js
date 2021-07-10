@@ -1,7 +1,7 @@
 import {useState, useEffect} from 'react';
 import {BrowserRouter as Router, Switch, Route, Link} from 'react-router-dom';
 
-import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON, getMonthFromNumber, getCurrentYear, getBillingCycleFromDate, importTransactions, updateTransactions, fetchTransactionData} from './../../utilities';
+import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON, getMonthFromNumber, getCurrentYear, getBillingCycleFromDate, areObjectsEqual, typeCheckTransactions, categorizeTransactionByDescription, saveTransactions, importTransactions, fetchTransactionsData} from './../../utilities';
 
 import DashboardView from './../DashboardView';
 import BudgetsView from './../BudgetsView';
@@ -184,39 +184,91 @@ localStorage.setItem("budgets-data", JSON.stringify([
   const initialAccountsData = JSON.parse(localStorage.getItem("accounts-data"));
   const initialAccountData = JSON.parse(localStorage.getItem("account-data"));
 
-  const [transactionData, setTransactionData] = useState();
-  const [transactions, setTransactions] = useState(fetchTransactionData());
+  const [transactionsData, setTransactionsData] = useState(fetchTransactionsData());
+  const [transactions, setTransactions] = useState([]);
   const [budgetsData, setBudgetsData] = useState(initialBudgetsData || null);
   const [accountsData, setAccountsData] = useState(initialAccountsData || null);
   const [accountData, setAccountData] = useState(initialAccountData || null);
   const [footerNavbar, setFooterNavbar] = useState(null);
   const [budgetCycle, setBudgetCycle] = useState(getBillingCycleFromDate(new Date()));
+  const [transactionsImportDuplicatesModalNewTransactions, setTransactionsImportDuplicatesModalNewTransactions] = useState([]);
+  const [transactionsImportDuplicatesModalDuplicates, setTransactionsImportDuplicatesModalDuplicates] = useState([]);
+  const [isTransactionsImportDuplicatesModalOpen, setIsTransactionsImportDuplicatesModalOpen] = useState(false);
 
-  //Every time we get new transaction data,
+  //Every time there is new transactions data,
   // transform it into transactions
   useEffect(
     ()=>{
-      console.log("Updating transaction data: ", transactionData);
-      if (isFalsy(transactionData)) return;
-      setTransactions(updateTransactions(transactionData));
+      console.log("Updating transactions data: ", transactionsData);
+      if (isFalsy(transactionsData)) return;
+
+      setTransactionsHandler(typeCheckTransactions(transactionsData));
     }
-    , [transactionData]
+    , [transactionsData]
   );
+
+  //Whenever the transactions are updated, save them off as well
+  useEffect(()=>{
+    //Save transactions to localStorage
+    saveTransactions(transactions);
+  }, [transactions]);
 
   //Log transactions
   useEffect(()=>console.log("Transactions: ", transactions), [transactions]);
 
-  //Create event listeners
-  const onTransactionsImportFormSubmit = scrapedTransactionData=>{
-    //Import the scraped transaction data
-    const transactionData = importTransactions(scrapedTransactionData, "scraped");
+  //Create state handlers
+  const setTransactionsHandler = newTransactions=>{
+    setTransactions(previousTransactions=>{
+      //If there are no previous transactions to append to, short-circuit
+      if (!previousTransactions.length) return newTransactions;
 
-    //Set the new transaction data
-    setTransactionData(transactionData);
+      //Look for possible duplicate transactions,
+      // and confirm if they are duplicates (shouldn't be added),
+      // or not duplicates (should be added)
+      const duplicates = [];
+      newTransactions.forEach(newTransaction=>{
+        const duplicate = previousTransactions.find(previousTransaction=>areObjectsEqual(newTransaction, previousTransaction));
+        if (duplicate) {
+          duplicates.push(duplicate);
+        }
+      });
+
+      //If there were no duplicates, append the new transactions
+      if (!duplicates.length) return [...previousTransactions, ...newTransactions];
+
+      //Ask user to confirm true duplicates
+      console.log("Duplicates: ", duplicates);
+      setTransactionsImportDuplicatesModalNewTransactions(newTransactions);
+      setTransactionsImportDuplicatesModalDuplicates(duplicates);
+      openTransactionsImportDuplicatesModal();
+
+      //Return the previous transactions
+      return previousTransactions;
+    });
   };
 
-  const onTransactionsImportFormFileInputChange = transactionDataArray=>{
-    setTransactionData(importTransactions(transactionDataArray, "csv"));
+  const setTransactionsDataFromImportHandler = transactionsData=>{
+    //Type check transactions data to convert from strings to the correct type
+    const typeCheckedTransactionsData = typeCheckTransactions(transactionsData);
+
+    //Assign category & notes from description
+    const categorizedTransactionsData = typeCheckedTransactionsData.map(transactionsData=>categorizeTransactionByDescription(transactionsData));
+
+    //Update the transactions data
+    setTransactionsData(categorizedTransactionsData);
+  };
+
+  //Create event listeners
+  const onTransactionsImportFormSubmit = scrapedTransactionsData=>{
+    //Import the scraped transactions data
+    const transactionsData = importTransactions(scrapedTransactionsData, "scraped");
+
+    //Set the new transactions data
+    setTransactionsDataFromImportHandler(transactionsData);
+  };
+
+  const onTransactionsImportFormFileInputChange = transactionsDataArray=>{
+    setTransactionsDataFromImportHandler(importTransactions(transactionsDataArray, "csv"));
   };
 
   const onTransactionDetailModalSubmit = (oldTransaction, updatedTransaction)=>{
@@ -224,7 +276,23 @@ localStorage.setItem("budgets-data", JSON.stringify([
     const updatedTransactions = [...transactions]; //create deep copy
     updatedTransactions.splice(transactions.indexOf(oldTransaction), 1, updatedTransaction);
 
-    setTransactionData(updatedTransactions);
+    setTransactionsDataFromImportHandler(updatedTransactions);
+  };
+
+  const openTransactionsImportDuplicatesModal = ()=>{
+    setIsTransactionsImportDuplicatesModalOpen(true);
+  };
+
+  const closeTransactionsImportDuplicatesModal = ()=>{
+    setIsTransactionsImportDuplicatesModalOpen(false);
+  };
+
+  const onTransactionsImportDuplicatesModalSubmit = (filteredNewTransactions)=>{
+    //Update transactions with the new transaction
+    setTransactions(previousTransactions=>[...previousTransactions, ...filteredNewTransactions]);
+
+    //Reset the duplicates
+    //setTransactionsImportDuplicatesModalDuplicates([]);
   };
 
   return (
@@ -238,7 +306,7 @@ localStorage.setItem("budgets-data", JSON.stringify([
             <BudgetsView transactions={transactions} budgetsData={budgetsData} setFooterNavbar={setFooterNavbar} />
           </Route>
           <Route path="/transactions" exact>
-            <TransactionsView transactions={transactions} onTransactionsImportFormSubmit={onTransactionsImportFormSubmit} onTransactionsImportFormFileInputChange={onTransactionsImportFormFileInputChange} onTransactionDetailModalSubmit={onTransactionDetailModalSubmit} setFooterNavbar={setFooterNavbar} />
+            <TransactionsView transactions={transactions} transactionsImportDuplicatesModalNewTransactions={transactionsImportDuplicatesModalNewTransactions} transactionsImportDuplicatesModalDuplicates={transactionsImportDuplicatesModalDuplicates} isTransactionsImportDuplicatesModalOpen={isTransactionsImportDuplicatesModalOpen} onTransactionsImportDuplicatesModalClose={closeTransactionsImportDuplicatesModal} onTransactionsImportDuplicatesModalSubmit={onTransactionsImportDuplicatesModalSubmit} onTransactionsImportFormSubmit={onTransactionsImportFormSubmit} onTransactionsImportFormFileInputChange={onTransactionsImportFormFileInputChange} onTransactionDetailModalSubmit={onTransactionDetailModalSubmit} setFooterNavbar={setFooterNavbar} />
           </Route>
           <Route path="/settings" exact>
             <SettingsView setFooterNavbar={setFooterNavbar} />

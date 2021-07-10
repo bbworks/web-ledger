@@ -87,3 +87,50 @@ export const getCurrentYear = (date)=>{
 export const getBillingCycleFromDate = date=>{
   return `${getMonthFromNumber(date.getMonth())} ${getCurrentYear(date)}`;
 };
+
+export const areObjectsEqual = (a,b)=>{
+  //## typeof values
+  //"undefined"
+  //"boolean"
+  //"number"
+  //"bigint"
+  //"string"
+  //"symbol"
+  //"function" (non-primitive)
+  //"object"  (non-primitive) //includes null
+
+  //
+  if (a === null) {
+    if (b === null) {
+      return true;
+    }
+    return false;
+  }
+
+  //First, if not the same type, exit
+  const typeofA = typeof a;
+  const typeofB = typeof b;
+  if (typeofA !== typeofB) return false;
+
+  //If these are objects, recurse into them
+  if (typeofA === "object") {
+    const aValues = Object.entries(a);
+    const bValues = Object.entries(b);
+
+    //Short-circuit if the number of properties aren't the same
+    if(aValues.length !== bValues.length) return false;
+
+    for(let i = 0; i < aValues.length; i++) {
+      const [aKey, aValue] = aValues[i];
+      const [bKey, bValue] = bValues[i];
+      if(aKey !== bKey) return false;
+      if (!areObjectsEqual(aValue, bValue)) return false;
+    }
+
+    //If the objects properties/arrays values are all the same, return true
+    return true;
+  }
+
+  //Otherwise, compare the values
+  return a === b;
+};

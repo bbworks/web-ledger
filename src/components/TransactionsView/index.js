@@ -2,12 +2,13 @@ import {useState, useEffect} from 'react';
 import {useLocation} from 'react-router-dom';
 
 import TransactionsImportForm from './../TransactionsImportForm';
-import TransactionData from './../TransactionData';
+import TransactionsData from './../TransactionsData';
 import TransactionDetailModal from './../TransactionDetailModal';
+import TransactionsImportDuplicatesModal from './../TransactionsImportDuplicatesModal';
 
 import './index.scss';
 
-const TransactionsView = ({ transactions, onTransactionsImportFormSubmit, onTransactionsImportFormFileInputChange, onTransactionDetailModalSubmit:onTransactionDetailModalSubmitProp, setFooterNavbar })=>{
+const TransactionsView = ({ transactions, transactionsImportDuplicatesModalNewTransactions, transactionsImportDuplicatesModalDuplicates, isTransactionsImportDuplicatesModalOpen, onTransactionsImportDuplicatesModalClose, onTransactionsImportDuplicatesModalSubmit, onTransactionsImportFormSubmit, onTransactionsImportFormFileInputChange, onTransactionDetailModalSubmit:onTransactionDetailModalSubmitProp, setFooterNavbar })=>{
   //Send the route to the footer navbar
   const route = useLocation().pathname;
   useEffect(()=>{
@@ -41,9 +42,10 @@ const TransactionsView = ({ transactions, onTransactionsImportFormSubmit, onTran
         <h1 className="display-1">Ledger</h1>
         {/* <button className="btn btn-dark" type="button" data-toggle="collapse" data-target="#transaction-import-form">Import Transactions</button> */}
         <TransactionsImportForm onSubmit={onTransactionsImportFormSubmit} onFileInputChange={onTransactionsImportFormFileInputChange} />
-        <TransactionData transactions={transactions} onTransactionEditButtonClick={onTransactionEditButtonClick} />
+        <TransactionsData transactions={transactions} onTransactionEditButtonClick={onTransactionEditButtonClick} />
       </div>
-      <TransactionDetailModal transaction={transactionDetailModalTransaction} buttonsOptions={{okButton: "Save", cancelButton: "Cancel"}} isOpen={isTransactionDetailModalOpen} onClose={closeTransactionDetailModal} onSubmit={onTransactionDetailModalSubmit} />
+      <TransactionDetailModal transaction={transactionDetailModalTransaction} buttonsOptions={{cancelButton: "Cancel", okButton: "Save"}} isOpen={isTransactionDetailModalOpen} onClose={closeTransactionDetailModal} onSubmit={onTransactionDetailModalSubmit} />
+      <TransactionsImportDuplicatesModal newTransactions={transactionsImportDuplicatesModalNewTransactions} duplicates={transactionsImportDuplicatesModalDuplicates} isOpen={isTransactionsImportDuplicatesModalOpen} onClose={onTransactionsImportDuplicatesModalClose} onSubmit={onTransactionsImportDuplicatesModalSubmit} />
     </div>
   );
 };

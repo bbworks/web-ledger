@@ -1,6 +1,6 @@
 import './index.scss';
 
-const TransactionTableHeaders = ()=>{
+const TransactionsTableHeaders = ()=>{
   const headers = [
     "Posted Date",
     "Transaction Date",
@@ -22,4 +22,4 @@ const TransactionTableHeaders = ()=>{
   );
 };
 
-export default TransactionTableHeaders;
+export default TransactionsTableHeaders;

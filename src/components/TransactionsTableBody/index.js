@@ -1,9 +1,9 @@
 import {useState, useEffect} from 'react';
-import TransactionTableTransactions from './../TransactionTableTransactions';
+import TransactionsTableTransactions from './../TransactionsTableTransactions';
 import {convertNumberToCurrency} from './../../utilities';
 import './index.scss';
 
-const TransactionTableBody = ({ transactions, onTransactionEditButtonClick })=>{
+const TransactionsTableBody = ({ transactions, onTransactionEditButtonClick })=>{
   const calculateTotalAmount = ()=>{
     return Number(transactions.reduce((accumulator, transaction)=>accumulator += (transaction.Type == "Charges" ? transaction.Amount : 0), 0).toFixed(2));
   };
@@ -14,7 +14,7 @@ const TransactionTableBody = ({ transactions, onTransactionEditButtonClick })=>{
 
   return (
     <tbody>
-      <TransactionTableTransactions transactions={transactions} onTransactionEditButtonClick={onTransactionEditButtonClick} />
+      <TransactionsTableTransactions transactions={transactions} onTransactionEditButtonClick={onTransactionEditButtonClick} />
       <tr className="total">
         <td></td>
         <td></td>
@@ -30,4 +30,4 @@ const TransactionTableBody = ({ transactions, onTransactionEditButtonClick })=>{
   );
 };
 
-export default TransactionTableBody;
+export default TransactionsTableBody;

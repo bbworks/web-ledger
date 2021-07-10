@@ -5,25 +5,25 @@ const TransactionsImportForm = ({ onSubmit:onSubmitProp, onFileInputChange:onFil
 
     const transactionImportInput = event.target.querySelector("#transaction-import-input");
 
-    //Get the transaction data
-    const scrapedTransactionData = transactionImportInput.value;
+    //Get the transactions data
+    const scrapedTransactionsData = transactionImportInput.value;
 
     //Reset the input
     transactionImportInput.value = '';
 
-    onSubmitProp(scrapedTransactionData);
+    onSubmitProp(scrapedTransactionsData);
   };
 
   const onFileInputChange = async event=>{
     //Prevent default behavior
     event.preventDefault();
 
-    //Get the transaction data
-    const transactionDataArray = [];
+    //Get the transactions data
+    const transactionsDataArray = [];
     await Promise.all(  //Promise.all handles an array of Promises
       [...event.target.files].map(async file=>{
         const fileContent = await file.text();
-        transactionDataArray.push(fileContent);
+        transactionsDataArray.push(fileContent);
       })
     );
 
@@ -31,7 +31,7 @@ const TransactionsImportForm = ({ onSubmit:onSubmitProp, onFileInputChange:onFil
     event.target.value = "";
 
     //Call the parent handler
-    onFileInputChangeProp(transactionDataArray);
+    onFileInputChangeProp(transactionsDataArray);
   };
 
   return (
@@ -42,7 +42,7 @@ const TransactionsImportForm = ({ onSubmit:onSubmitProp, onFileInputChange:onFil
           <input id="transaction-import-input" className="form-control" type="text" />
           <button className="btn btn-primary input-group-text" type="submit">Import</button>
         </div>
-        <p className="form-text">Paste transaction data for parsing.</p>
+        <p className="form-text">Paste transactions data for parsing.</p>
         <div>
           <label className="form-label">Or, import a comma-separated values (*.csv) file.</label>
           <input id="transaction-import-form-input-file" className="form-control" type="file" accept=".csv" multiple onChange={onFileInputChange} />

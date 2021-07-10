@@ -4,7 +4,17 @@ import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON, getBud
 const transactionLocalStorageItemKey = "transaction-data";
 
 //Declare private functions
-const typeCheckTransactions = function (transactions) {
+// const filterTransactions = function (transactions) {
+//   return transactions.map(transaction=>(
+//     {
+//       ...transaction,
+//       display: (transaction.display.Description && transaction.display.Description.toUpperCase() === "PAYMENT - THANK YOU ATLANTA GA" ? null : transaction.display),
+//     }
+//   ));
+// };
+
+//Declare public functions
+export const typeCheckTransactions = function (transactions) {
   return transactions.map(transaction=>(
     {
       ...transaction,
@@ -15,16 +25,7 @@ const typeCheckTransactions = function (transactions) {
   ));
 };
 
-// const filterTransactions = function (transactions) {
-//   return transactions.map(transaction=>(
-//     {
-//       ...transaction,
-//       display: (transaction.display.Description && transaction.display.Description.toUpperCase() === "PAYMENT - THANK YOU ATLANTA GA" ? null : transaction.display),
-//     }
-//   ));
-// };
-
-const categorizeTransactionByDescription = function(transaction) {
+export const categorizeTransactionByDescription = function(transaction) {
   const {DescriptionDisplay, Description, Tags, Category, Notes} = transaction;
 
   //Skip the transaction if there is no Description
@@ -120,8 +121,7 @@ const categorizeTransactionByDescription = function(transaction) {
   };
 };
 
-//Declare public functions
-export const importTransactions = function(transactionData, dataType) {
+export const importTransactions = function(transactionsData, dataType) {
   const convertMonthDayStringToDate = function(dateString) {
     //Initialize functions
     const returnMonthIndex = function(month) {
@@ -165,7 +165,7 @@ export const importTransactions = function(transactionData, dataType) {
     //if this is scraped from online app
     if (dataType === "scraped") {
       //Spilt the string of transactions into an array
-      const transactionsArray = transactionData.split("POSTED:")
+      const transactionsArray = transactionsData.split("POSTED:")
         //Filter out empty data
         .filter(transaction=>!isFalsy(transaction))
         //Remove unwanted data from the transactions
@@ -196,10 +196,10 @@ export const importTransactions = function(transactionData, dataType) {
     //Otherwise, this is CSV or JSON data
     else {
       //If CSV data, convert it to JSON
-      if (dataType === "csv") transactionData = transactionData.map(csvData=>convertCSVToJSON(csvData)).flat();
+      if (dataType === "csv") transactionsData = transactionsData.map(csvData=>convertCSVToJSON(csvData)).flat();
 
       //For each CSV file, convert the contents to JSON
-      transactions = transactionData.map(transaction=>{
+      transactions = transactionsData.map(transaction=>{
         //Validate calculated values
         const type = nullCoalesce(transaction.Type, (transaction.Charges ? "Charges" : (transaction.Payments ? "Payments" : null)));
         const transactionDate = convertDateStringToDate(nullCoalesce(transaction.TransactionDate, transaction.Date));
@@ -230,24 +230,12 @@ export const importTransactions = function(transactionData, dataType) {
   }
 };
 
-export const updateTransactions = function(transactions) {
-  //Type check values (possible type mismatch from JSON parse)
-  transactions = typeCheckTransactions(transactions);
-
-  //Assign category & notes from description
-  transactions = transactions.map(transaction=>categorizeTransactionByDescription(transaction));
-
-  //Filter out transaction display data for the transaction table
-  //transactions = filterTransactions(transactions);
-
-  //Save the data to localStorage
+export const saveTransactions = function(transactions) {
   localStorage.setItem(transactionLocalStorageItemKey, JSON.stringify(transactions));
-
-  return transactions;
 };
 
-export const fetchTransactionData = function() {
-  //Attempt to fetch the transaction data from localStorage
+export const fetchTransactionsData = function() {
+  //Attempt to fetch the transactions data from localStorage
   const transactions = JSON.parse(localStorage.getItem(transactionLocalStorageItemKey));
   if (isFalsy(transactions)) return [];
 

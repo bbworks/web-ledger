@@ -1,9 +1,6 @@
 import {useState, useEffect} from 'react';
 
 import Modal from 'react-bootstrap/Modal';
-import ModalBody from "react-bootstrap/ModalBody";
-import ModalHeader from "react-bootstrap/ModalHeader";
-import ModalFooter from "react-bootstrap/ModalFooter";
 import TransactionDetailModalInput from './../TransactionDetailModalInput';
 
 import {nullCoalesce, formatTransactionDisplay} from './../../utilities';
@@ -130,11 +127,11 @@ const TransactionDetailModal = ({ transaction, buttonsOptions, isOpen, onClose, 
 
   return (
     <Modal id="transaction-modal" show={isOpen} onHide={onClose}>
+      <Modal.Header>
+        <Modal.Title className="modal-title">Transaction Detail</Modal.Title>
+        <button className="btn-close" type="button" onClick={onClose}></button>
+      </Modal.Header>
       <form className="transaction-modal-form" onSubmit={transactionModalFormOnSubmit}>
-        <Modal.Header>
-          <h3 className="modal-title">Transaction Detail</h3>
-          <button className="btn-close" type="button" data-bs-dismiss="modal"></button>
-        </Modal.Header>
         <Modal.Body>
           {transactionDetails.map((transactionDetail, i)=>(
             <TransactionDetailModalInput key={transactionDetail.name} transactionDetail={transactionDetail} tabIndex={i+1} onClick={onTransactionDetailInputContainerClick} onBlur={onTransactionDetailInputContainerBlur} onChange={(event)=>onTransactionDetailInputChange(event, transactionDetail)} onKeyDown={onTransactionDetailInputKeyDown} onTagBadgeClick={onTagBadgeClick} />
@@ -142,7 +139,7 @@ const TransactionDetailModal = ({ transaction, buttonsOptions, isOpen, onClose, 
         </Modal.Body>
         <Modal.Footer>
           {Object.entries(buttonsOptions).map((buttonObj, i)=>(
-            <button key={buttonObj[0]} className={`btn ${(buttonObj[0] === "okButton" ? "btn-primary" : (buttonObj[0] === "cancelButton" ? "btn-secondary" : ''))}`} type={(buttonObj[0] === "okButton" ? "submit" : "button")} {...(buttonObj[0] === "cancelButton" ? {"data-bs-dismiss": "modal"} : '')} tabIndex={transactionDetails.length+i+1} onKeyDown={onTransactionDetailInputKeyDown} >{buttonObj[1]}</button>
+            <button key={buttonObj[0]} className={`btn ${(buttonObj[0] === "okButton" ? "btn-primary" : (buttonObj[0] === "cancelButton" ? "btn-secondary" : ''))}`} type={(buttonObj[0] === "okButton" ? "submit" : "button")} {...(buttonObj[0] === "cancelButton" ? {"data-bs-dismiss": "modal"} : '')} tabIndex={transactionDetails.length+i+1} onKeyDown={onTransactionDetailInputKeyDown} {...(buttonObj[0] === "cancelButton" ? {onClick: onClose} : '')} >{buttonObj[1]}</button>
           ))}
         </Modal.Footer>
       </form>
