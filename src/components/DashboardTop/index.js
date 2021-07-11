@@ -21,7 +21,7 @@ const DashboardTop = ({ accountsData, accountData, budgetCycle })=>{
           </div>
           <div className="dashboard-credit-score-container col text-center fw-bold h4 d-flex flex-column">
             Credit Score:
-            <span className="dashboard-credit-score">{accountData.creditScore}</span>
+            <span className="dashboard-credit-score">{(accountData && accountData.creditScore ? accountData.creditScore : "--")}</span>
           </div>
         </div>
       </div>

@@ -20,10 +20,14 @@ const BudgetsView = ({ transactions, budgetsData, setFooterNavbar })=>{
         <h2 className="budgets-title text-center fw-bold">Month Overview</h2>
 
         {
-          budgetsData.map(budgetData=>{
-            const {name, amount, type} = budgetData;
-            return <BudgetGraph key={name} budget={{title: name, type: type, color: "#2196f3", budgetedAmount: amount, amountSpent: getBudgetAmountSpentFromTransactions(name, transactions)}}/>
-        })
+          (
+            !budgetsData ?
+            '' :
+            budgetsData.map(budgetData=>{
+              const {name, amount, type} = budgetData;
+              return <BudgetGraph key={name} budget={{title: name, type: type, color: "#2196f3", budgetedAmount: amount, amountSpent: getBudgetAmountSpentFromTransactions(name, transactions)}}/>
+            })
+          )
         }
       </div>
     </div>
