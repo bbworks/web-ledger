@@ -230,7 +230,7 @@ localStorage.setItem("budgets-data", JSON.stringify([
     openTransactionsImportDuplicatesModal();
 
     return previousTransactions;
-  }
+  };
 
   const setTransactionsHandler = (previousTransactions, newTransactions, callback, oldTransaction)=>{
     //If there are no new transactions, short-circuit
