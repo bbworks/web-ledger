@@ -234,7 +234,7 @@ export const saveTransactions = function(transactions) {
   localStorage.setItem(transactionLocalStorageItemKey, JSON.stringify(transactions));
 };
 
-export const fetchTransactionsData = function() {
+export const fetchTransactions = function() {
   //Attempt to fetch the transactions data from localStorage
   const transactions = JSON.parse(localStorage.getItem(transactionLocalStorageItemKey));
   if (isFalsy(transactions)) return [];
