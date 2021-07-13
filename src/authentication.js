@@ -1,52 +1,45 @@
-//-----------------------
-// AUTHENTICATION
-//-----------------------
+const scopes = [
+  "https://www.googleapis.com/auth/drive",
+  "https://www.googleapis.com/auth/drive.file",
+  "https://www.googleapis.com/auth/spreadsheets",
+];
+const discoveryDocs = ["https://sheets.googleapis.com/$discovery/rest?version=v4"];
 
-//const apiKey = "";
-//const clientId = "";
-const scopes = ["https://www.googleapis.com/auth/youtube"];
-const discoveryDocs = ["https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest"];
-
-const authorizeButton = document.getElementById("authorize-button");
-const signoutButton = document.getElementById("signout-button");
+const authorizeButton = document.querySelector("[data-gapi-signin-button]");
+const signoutButton = document.querySelector("[data-gapi-signout-button]");
 
 //create helper function to retrieve authorization credentials stored outside of version control
-const fetchAuthCredentials = function(callback) {
+const fetchAuthCredentials = ()=>{
   console.info("Fetching authorization credentials...");
-  fetch("secret\\auth.json")
-    .then(response=>response.json())
-    .then(data=>{
-      window.apiKey = data.web.api_key;
-      window.clientId = data.web.client_id;
-      console.info("Fetched authorization credentials.");
-      callback();
-    })
-    .catch(err=>{
-      console.error(err);
-      const creds = window.prompt("Failed to get authorization credentials.\r\nPlease enter the api key, followed by the client ID, separated by a comma.", "api_key,client_id");
-      if (creds && creds.indexOf(",") !== -1) {
-        const credsArray = creds.split(",");
-        window.apiKey = credsArray[0];
-        window.clientId = credsArray[1];
-        callback();
-      } else {
-        window.alert("Failed to get authorization credentials. The application failed.", err);
-      }
-    });
+  const creds = localStorage.getItem("creds");
+  if (!creds) throw new Error("Failed to get authorization credentials.");
+  return JSON.parse(creds);
 };
 
 //Load the Google Client, OAuth2.0 libraries
-const initAuthorization = function(loginCallback, logoutCallback) {
-  fetchAuthCredentials(()=>{loadGoogleApis(loginCallback, logoutCallback)});
+export const initAuthorization = (loginCallback, logoutCallback)=>{
+  try {
+    //Attempt to get the credentials
+    const creds = fetchAuthCredentials();
+
+    //Load the Google APIs
+    loadGoogleApis(loginCallback, logoutCallback)
+  }
+  catch (err) {
+    const errorMsg = `The application failed.\r\n${err}`;
+    console.log(errorMsg);
+    window.alert(errorMsg);
+    throw new Error(errorMsg);
+  }
 };
 
-const loadGoogleApis = function(loginCallback, logoutCallback) {
+const loadGoogleApis = (loginCallback, logoutCallback)=>{
   console.info("Loading Google Client, OAuth2.0 APIs...");
   gapi.load("client:auth2", ()=>{initializeGoogleApis(loginCallback, logoutCallback)});
 };
 
 //Initialize Google Client library (which simultaneously initializes Google OAuth2.0 library) and set up sign in listeners
-const initializeGoogleApis = function(loginCallback, logoutCallback) {
+const initializeGoogleApis = (loginCallback, logoutCallback)=>{
   console.info("Loaded Google Client, OAuth2.0 APIs.");
   console.info("Initializing Google Client API...");
   gapi.client.init({
@@ -65,8 +58,8 @@ const initializeGoogleApis = function(loginCallback, logoutCallback) {
       //Handle initial sign in state
       updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get(), loginCallback, logoutCallback);
 
-      addClickEventListener(authorizeButton, handleAuthClick);
-      addClickEventListener(signoutButton, handleSignoutClick);
+      authorizeButton.addEventListener("click", signIn);
+      signoutButton.addEventListener("click", signOut);
     })
     .catch(err=>{
       console.error("Failed to initialize Google Client API.", err.error, err.details);
@@ -75,7 +68,7 @@ const initializeGoogleApis = function(loginCallback, logoutCallback) {
 };
 
 //Update UI sign in state changes
-const updateSigninStatus = function(isSignedIn, loginCallback, logoutCallback) {
+const updateSigninStatus = (isSignedIn, loginCallback, logoutCallback)=>{
   console.info("Updating sign in status...");
   if (isSignedIn) {
     authorizeButton.style.display = "none";
@@ -95,18 +88,16 @@ const updateSigninStatus = function(isSignedIn, loginCallback, logoutCallback) {
   console.info("Updated sign in status.");
 };
 
-//Handle login
-const handleAuthClick = function() {
+const signIn = ()=>{
   gapi.auth2.getAuthInstance().signIn();
 };
 
-//Handle logout
-const handleSignoutClick = function() {
+const signOut = ()=>{
   gapi.auth2.getAuthInstance().signOut();
 };
 
 //Get channel from API
-const getChannel = function(channel) {
+const getChannel = channel=>{
   gapi.client.youtube.channels.list({
     part: "snippet,contentDetails,statistics",
     id: [channel.id],

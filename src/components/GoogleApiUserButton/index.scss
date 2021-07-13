@@ -1,0 +1,11 @@
+.user-button {
+  &-image {
+    width: 2rem;
+    border-radius: 50%;
+  }
+
+  &-name {
+    font-size: 0.75rem;
+    margin-left: 0.25rem;
+  }
+}

@@ -2,7 +2,9 @@ import {useState, useEffect} from 'react';
 import {BrowserRouter as Router, Switch, Route, Link} from 'react-router-dom';
 
 import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON, getMonthFromNumber, getCurrentYear, getBillingCycleFromDate, areObjectsEqual, typeCheckTransactions, categorizeTransactionByDescription, saveTransactions, importTransactions, fetchTransactions} from './../../utilities';
+import {initAuthorization} from './../../googleApi';
 
+import SignInView from './../SignInView';
 import DashboardView from './../DashboardView';
 import BudgetsView from './../BudgetsView';
 import TransactionsView from './../TransactionsView';
@@ -13,177 +15,12 @@ import './main.css';
 import './index.scss';
 
 const App = () => {
-/*
-localStorage.setItem("account-data", JSON.stringify({
-  creditScore: 771,
-}));
-localStorage.setItem("accounts-data", JSON.stringify([
-  {
-    name: "Checking *7740",
-    balance: "8587.26",
-  },
-  {
-    name: "BILLING *9416",
-    balance: "1282.95",
-  },
-  {
-    name: "SAVINGS *0844",
-    balance: "12846.97",
-  },
-  {
-    name: "CONTINGNCY *8627",
-    balance: "10000.13",
-  },
-]));
-localStorage.setItem("budgets-data", JSON.stringify([
-	{
-		name: "Primary payroll",
-		amount: 4357.28,
-		type: "income",
-	},
-	{
-		name: "Other income",
-		amount: 0.00,
-		type: "income",
-	},
-	{
-		name: "Sharonview mortgage & escrow",
-		amount: -1153.04,
-		type: "bill",
-	  dueDate: "15th"
-	},
-	{
-		name: "HOA dues",
-		amount: -37.50,
-		type: "bill",
-	  dueDate: "15th"
-	},
-	{
-		name: "Duke Energy",
-		amount: -145.00,
-		type: "bill",
-	  dueDate: "3rd"
-	},
-	{
-		name: "SJWD Water District",
-		amount: -35.00,
-		type: "bill",
-	  dueDate: "16th"
-	},
-	{
-		name: "Piedmont Natural Gas",
-		amount: -30.00,
-		type: "bill",
-	  dueDate: "26th"
-	},
-	{
-		name: "Kirby Sanitation",
-		amount: -19.00,
-		type: "bill",
-	  dueDate: "1st"
-	},
-	{
-		name: "State Farm auto insurance",
-		amount: -145.00,
-		type: "bill",
-	  dueDate: "17th"
-	},
-	{
-		name: "Laurens Electric ProTec Security",
-		amount: -29.95,
-		type: "bill",
-	  dueDate: "14th"
-	},
-	{
-		name: "SimpliSafe (for mom)",
-		amount: -24.99,
-		type: "bill",
-	  dueDate: "12th"
-	},
-	{
-		name: "AT&T Internet",
-		amount: -50.70,
-		type: "bill",
-	  dueDate: "11th"
-	},
-	{
-		name: "AT&T phone bill",
-		amount: -65.00,
-		type: "bill",
-	  dueDate: "15th"
-	},
-	{
-		name: "Spotify Premium subscription",
-		amount: -10.69,
-		type: "bill",
-	  dueDate: "23rd"
-	},
-	{
-		name: "Netflix Premium subscription",
-		amount: -19.25,
-		type: "bill",
-	  dueDate: "14th"
-	},
-	{
-		name: "Discovery Plus subscription",
-		amount: -7.48,
-		type: "bill",
-	  dueDate: "17th"
-	},
-	{
-		name: "YMCA membership",
-		amount: -84.00,
-		type: "bill",
-	  dueDate: "9th"
-	},
-	{
-		name: "Savings",
-		amount: -1100.00,
-		type: "savings",
-	},
-	{
-		name: "Gas",
-		amount: -150.00,
-		type: "expense",
-	},
-	{
-		name: "Church",
-		amount: -440.00,
-		type: "expense",
-	},
-	{
-		name: "Groceries/Necessities",
-		amount: -400.00,
-		type: "expense",
-	},
-	{
-		name: "LoveInAction",
-		amount: 0,
-		type: "expense",
-	},
-	{
-		name: "Family Outings",
-		amount: -250.00,
-		type: "expense",
-	},
-	{
-		name: "Personal Spending",
-		amount: -50.00,
-		type: "expense",
-	},
-	{
-		name: "Miscellaneous",
-		amount: 0,
-		type: "expense",
-	}, //Surplus
-]));
-*/
-
   //Set application state
   const initialTransactionsData = typeCheckTransactions(fetchTransactions());
   const initialBudgetsData = JSON.parse(localStorage.getItem("budgets-data"));
   const initialAccountsData = JSON.parse(localStorage.getItem("accounts-data"));
   const initialAccountData = JSON.parse(localStorage.getItem("account-data"));
+  const spreadsheetData = JSON.parse(localStorage.getItem("spreadsheet-data")) || {};
 
   const [transactions, setTransactions] = useState(initialTransactionsData || []);
   const [budgetsData, setBudgetsData] = useState(initialBudgetsData || null);
@@ -194,6 +31,7 @@ localStorage.setItem("budgets-data", JSON.stringify([
   const [transactionsImportDuplicatesModalNewTransactions, setTransactionsImportDuplicatesModalNewTransactions] = useState([]);
   const [transactionsImportDuplicatesModalDuplicates, setTransactionsImportDuplicatesModalDuplicates] = useState([]);
   const [isTransactionsImportDuplicatesModalOpen, setIsTransactionsImportDuplicatesModalOpen] = useState(false);
+  const [signedInUser, setSignedInUser] = useState(undefined);
 
   //Whenever the transactions are updated, save them off as well
   useEffect(()=>{
@@ -205,6 +43,15 @@ localStorage.setItem("budgets-data", JSON.stringify([
   useEffect(()=>{
     console.log("Transactions: ", transactions)
   }, [transactions]);
+
+  //When the app starts, load the Google API
+  useEffect(()=>{
+    initAuthorization(onSignInChange, onSignInChange);
+  }, []);
+
+  useEffect(()=>{
+    console.log("signedInUser: ", signedInUser)
+  }, [signedInUser]);
 
   //Create state handlers
   const checkTransactionsForDuplicates = (previousTransactions, newTransactions)=>{
@@ -319,12 +166,32 @@ localStorage.setItem("budgets-data", JSON.stringify([
     //setTransactionsImportDuplicatesModalDuplicates([]);
   };
 
+  const onSignInChange = signInInfo=>{
+    setSignedInUser(signInInfo);
+  };
+
+  //Create a "loading page" while determining if the user is signed in
+  if (signedInUser === undefined) return (
+    <div className="App">
+      <div className="container-fluid d-flex justify-content-center align-items-center min-vh-100">
+        <i className="spinner fas fa-spinner fa-lg"></i>
+      </div>
+    </div>
+  );
+
+  //If the user has not signed in, send them to the login page
+  if (!signedInUser) return (
+    <div className="App">
+      <SignInView />
+    </div>
+  );
+
   return (
     <div className="App">
       <Router>
         <Switch>
           <Route path={["/dashboard", "/"]} exact>
-            <DashboardView transactions={transactions} accountsData={accountsData} accountData={accountData} budgetsData={budgetsData} budgetCycle={budgetCycle} setFooterNavbar={setFooterNavbar} />
+            <DashboardView signedInUser={signedInUser} transactions={transactions} accountsData={accountsData} accountData={accountData} budgetsData={budgetsData} budgetCycle={budgetCycle} setFooterNavbar={setFooterNavbar} />
           </Route>
           <Route path="/budgets" exact>
             <BudgetsView transactions={transactions} budgetsData={budgetsData} setFooterNavbar={setFooterNavbar} />

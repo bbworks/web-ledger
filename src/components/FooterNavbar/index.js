@@ -8,15 +8,16 @@ const FooterNavbar = ({ active })=>{
 
   const setActiveItem = (active, footerNavbar)=>{
     if (!active) return;
+    const activePath = (active === "/" ? "/dashboard" : active);
     const navItems = [...footerNavbar.current.querySelectorAll(".footer-nav-item")];
-    const activeItem = navItems.find(navItem=>navItem.getAttribute("href") === active);
+    const activeItem = navItems.find(navItem=>navItem.getAttribute("href") === activePath);
     navItems.forEach(navItem=>navItem.classList.remove("active"));
     activeItem.classList.add("active");
   };
 
   useEffect(()=>{
     setActiveItem(active, footerNavbar)
-  });
+  }, [active]);
 
   return (
     <footer className="footer fixed-bottom" ref={footerNavbar}>
