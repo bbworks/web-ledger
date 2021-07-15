@@ -1,30 +1,4 @@
-const convertSheetsArraysToJSON = (data, delimiter=",")=>{
-  //Get the object keys
-  const keys = data.splice(0,1)[0];
-
-  //Return the data
-  return data.map(line=>
-    line.reduce((obj, value, i)=>
-      ({
-        ...obj,
-        [keys[i]]: value,
-      })
-  , {})
-  );
-};
-
-const getDynamicPropertyByArray = (startingObject, dotSeparatedProperties)=>{
-  if (!(typeof dotSeparatedProperties === "string")) return null;
-  if(!dotSeparatedProperties) return startingObject;
-  if (!dotSeparatedProperties.includes(".")) return startingObject[dotSeparatedProperties];
-
-  let object = startingObject;
-  for(let property of dotSeparatedProperties.split(".")) {
-    if (!property) continue;
-    object = object[property];
-  }
-  return object;
-};
+import {convertSheetsArraysToJSON, getDynamicPropertyByArray, convertColumnNumberToColumnLetter, convertColumnLetterToColumnNumber, convertArrayToA1Notation} from './../utilities'
 
 const callGoogleApiFunction = (googleApi, resourceType, method, optionsParam, pageToken)=>{
   //Declare variables
@@ -92,7 +66,7 @@ const callGoogleApiFunction = (googleApi, resourceType, method, optionsParam, pa
         return resolve([...response.result.items]);
       }
 
-      if (method === "get") {
+      if (resourceType === "spreadsheets.values" && method === "get") {
         //Return the values
         return resolve(convertSheetsArraysToJSON(response.result.values));
       }
@@ -111,10 +85,13 @@ const callGoogleApiFunction = (googleApi, resourceType, method, optionsParam, pa
 };
 
 //Declare our specific functions
-const getSheetsSpreadsheet = spreadsheetId=>{
+export const getSheetsSpreadsheet = spreadsheetId=>{
   return callGoogleApiFunction("sheets", "spreadsheets", "get", {spreadsheetId});
 };
 
-const getSheetsSpreadsheetValues = (spreadsheetId, sheetName, range)=>{
-  return callGoogleApiFunction("sheets", "spreadsheets.values", "get", {spreadsheetId, range: (!range ? null : (typeof range === "string" ? [range] : range).map(r=>`'${sheetName}'!${range}`))});
+export const getSheetsSpreadsheetValues = (spreadsheetId, sheetName, range)=>{
+  if (!range) range = convertArrayToA1Notation([1000,26]); //A1:AA1000
+  if (typeof range === "string") range = [range]; //convert to an array of ranges if only one specified
+  range = range.map(r=>`'${sheetName}'!${range}`); //Add the sheet name to the range
+  return callGoogleApiFunction("sheets", "spreadsheets.values", "get", {spreadsheetId, range});
 };

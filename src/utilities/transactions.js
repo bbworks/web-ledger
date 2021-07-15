@@ -20,7 +20,13 @@ export const typeCheckTransactions = function (transactions) {
       ...transaction,
       PostedDate: transaction.PostedDate && new Date(transaction.PostedDate),
       TransactionDate: transaction.TransactionDate && new Date(transaction.TransactionDate),
+      Type: (transaction.Type ? transaction.Type : null),
+      Category: (transaction.Category ? transaction.Category : null),
+      Description: (transaction.Description ? transaction.Description : null),
+      Category: (transaction.Category ? transaction.Category : null),
       Amount: (isNaN(transaction.Amount) ? Number(transaction.Amount.replace(/(\$|,)/g, "")) : transaction.Amount),
+      Tags: (!isFalsy(transaction.Tags) ? transaction.Tags : []),
+
     }
   ));
 };

@@ -15,8 +15,8 @@ const DashboardInsights = ({ transactions, budgetsData })=>{
     setInsights([]);
 
     /* Check if there is money left in the "Personal Spending" budget */
-    const personalSpendingBudgetData = budgetsData.find(budgetData=>budgetData.name==="Personal Spending");
-    const personalSpendingBudgetLeft = getBudgetAmountSpentFromTransactions("Personal Spending", transactions) - personalSpendingBudgetData.amount;
+    const personalSpendingBudgetData = budgetsData.find(budgetData=>budgetData.Name==="Personal Spending");
+    const personalSpendingBudgetLeft = getBudgetAmountSpentFromTransactions("Personal Spending", transactions) - personalSpendingBudgetData.Amount;
     if (personalSpendingBudgetLeft > 0) {
       const insight = {
         type: "primary",

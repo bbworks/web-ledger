@@ -10,7 +10,10 @@ const TransactionsTableBody = ({ transactions, onTransactionEditButtonClick })=>
 
   const [totalAmount, setTotalAmount] = useState(0);
 
-  useEffect(()=>setTotalAmount(calculateTotalAmount()), [transactions]);
+  useEffect(()=>{
+    if (!transactions) return;
+    setTotalAmount(calculateTotalAmount());
+  }, [transactions]);
 
   return (
     <tbody>

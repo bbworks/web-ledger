@@ -17,11 +17,11 @@ const DashboardTop = ({ accountsData, accountData, budgetCycle })=>{
         <div className="row">
           <div className="dashboard-accounts-total-container col text-center fw-bold h4 d-flex flex-column border-end border-2">
             Total in Accounts:
-            <span className="dashboard-accounts-total">{convertNumberToCurrency(accountsData && accountsData[0].balance ? accountsData.reduce((total,accountData)=>total+=Number(accountData.balance), 0) : 0)}</span>
+            <span className="dashboard-accounts-total">{convertNumberToCurrency(accountsData && accountsData[0].Balance ? accountsData.reduce((total,accountData)=>total+=Number(accountData.Balance), 0) : 0)}</span>
           </div>
           <div className="dashboard-credit-score-container col text-center fw-bold h4 d-flex flex-column">
             Credit Score:
-            <span className="dashboard-credit-score">{(accountData && accountData.creditScore ? accountData.creditScore : "--")}</span>
+            <span className="dashboard-credit-score">{(accountData ? accountData.sort((a,b)=>a.LastUpdated+b.LastUpdated)/*sort descending*/.filter(record=>record.CreditScore)[0].CreditScore /*most recent LastUpdated*/ : "--")}</span>
           </div>
         </div>
       </div>

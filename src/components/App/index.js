@@ -2,7 +2,7 @@ import {useState, useEffect} from 'react';
 import {BrowserRouter as Router, Switch, Route, Link} from 'react-router-dom';
 
 import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON, getMonthFromNumber, getCurrentYear, getBillingCycleFromDate, areObjectsEqual, typeCheckTransactions, categorizeTransactionByDescription, saveTransactions, importTransactions, fetchTransactions} from './../../utilities';
-import {initAuthorization} from './../../googleApi';
+import {initAuthorization, getSheetsSpreadsheet, getSheetsSpreadsheetValues} from './../../googleApi';
 
 import SignInView from './../SignInView';
 import DashboardView from './../DashboardView';
@@ -16,16 +16,13 @@ import './index.scss';
 
 const App = () => {
   //Set application state
-  const initialTransactionsData = typeCheckTransactions(fetchTransactions());
-  const initialBudgetsData = JSON.parse(localStorage.getItem("budgets-data"));
-  const initialAccountsData = JSON.parse(localStorage.getItem("accounts-data"));
-  const initialAccountData = JSON.parse(localStorage.getItem("account-data"));
   const spreadsheetData = JSON.parse(localStorage.getItem("spreadsheet-data")) || {};
 
-  const [transactions, setTransactions] = useState(initialTransactionsData || []);
-  const [budgetsData, setBudgetsData] = useState(initialBudgetsData || null);
-  const [accountsData, setAccountsData] = useState(initialAccountsData || null);
-  const [accountData, setAccountData] = useState(initialAccountData || null);
+  const [transactions, setTransactions] = useState(null);
+  const [budgetsData, setBudgetsData] = useState(null);
+  const [accountsData, setAccountsData] = useState(null);
+  const [accountData, setAccountData] = useState(null);
+
   const [footerNavbar, setFooterNavbar] = useState(null);
   const [budgetCycle, setBudgetCycle] = useState(getBillingCycleFromDate(new Date()));
   const [transactionsImportDuplicatesModalNewTransactions, setTransactionsImportDuplicatesModalNewTransactions] = useState([]);
@@ -40,21 +37,30 @@ const App = () => {
   }, [transactions]);
 
   //Log transactions
-  useEffect(()=>{
-    console.log("Transactions: ", transactions)
-  }, [transactions]);
+  useEffect(()=>console.log("Transactions Data: ", transactions), [transactions]);
+  useEffect(()=>console.log("Budget Data: ", budgetsData), [budgetsData]);
+  useEffect(()=>console.log("Accounts Data: ", accountsData), [accountsData]);
+  useEffect(()=>console.log("Account Data: ", accountData), [accountData]);
 
   //When the app starts, load the Google API
   useEffect(()=>{
     initAuthorization(onSignInChange, onSignInChange);
   }, []);
 
-  useEffect(()=>{
+  useEffect(async ()=>{
     console.log("signedInUser: ", signedInUser)
+
+    if (!signedInUser) return;
+    setTransactionsWrapper(await getSheetsSpreadsheetValues("1k_qus-eG4bBOnqVZ2oSCuY3988wDJHUth9M6M-6BBeA", "Transactions Data", "A1:G21"));
+    setBudgetsData(await getSheetsSpreadsheetValues("1k_qus-eG4bBOnqVZ2oSCuY3988wDJHUth9M6M-6BBeA", "Budgets Data", "A1:D26"));
+    setAccountsData(await getSheetsSpreadsheetValues("1k_qus-eG4bBOnqVZ2oSCuY3988wDJHUth9M6M-6BBeA", "Accounts Data", "A1:B5"));
+    setAccountData(await getSheetsSpreadsheetValues("1k_qus-eG4bBOnqVZ2oSCuY3988wDJHUth9M6M-6BBeA", "Account Data", "A1:B2"));
   }, [signedInUser]);
 
   //Create state handlers
   const checkTransactionsForDuplicates = (previousTransactions, newTransactions)=>{
+    if(!previousTransactions) return newTransactions;
+
     //Look for possible duplicate transactions,
     // and confirm if they are duplicates (shouldn't be added),
     // or not duplicates (should be added)
@@ -94,7 +100,17 @@ const App = () => {
     const transactions = typeCheckedTransactions.map(transaction=>categorizeTransactionByDescription(transaction));
 
     //Call the data manipulation callback
-    return callback(previousTransactions, transactions, oldTransaction);
+    if (callback) return callback(previousTransactions, transactions, oldTransaction);
+
+    return transactions;
+  };
+
+  const setTransactionsWrapper = newTransactions=>{
+    //Import new transactions
+    setTransactions(previousTransactions=>{
+      //Run through transaction normalization
+      return setTransactionsHandler(previousTransactions, newTransactions);
+    });
   };
 
   const importTransactionsHandler = newTransactions=>{

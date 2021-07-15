@@ -7,7 +7,7 @@ const TransactionsData = ({ transactions, onTransactionEditButtonClick })=>{
       <h2 className="h2">Transactions</h2>
       <TransactionsTable transactions={transactions} onTransactionEditButtonClick={onTransactionEditButtonClick} />
       <div className="transaction-count text-end mb-4 mr-2">
-        <small><em>{transactions.length} transactions</em></small>
+        <small><em>{(transactions && transactions.length ? transactions.length : 0)} transactions</em></small>
       </div>
     </div>
   );

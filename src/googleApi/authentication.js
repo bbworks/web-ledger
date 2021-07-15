@@ -1,7 +1,7 @@
 const scopes = [
-  "https://www.googleapis.com/auth/drive",
-  "https://www.googleapis.com/auth/drive.file",
-  "https://www.googleapis.com/auth/spreadsheets",
+  //"https://www.googleapis.com/auth/drive",  //See, edit, create, and delete all or your drive files
+  //"https://www.googleapis.com/auth/drive.file",  //See, edit, create, and delete only the specific Google Drive files you use with this app
+  "https://www.googleapis.com/auth/spreadsheets",  //See, edit, create, all your Google sheets spreadsheets
 ];
 const discoveryDocs = ["https://sheets.googleapis.com/$discovery/rest?version=v4"];
 
@@ -77,10 +77,15 @@ const initializeGoogleApis = async (creds, loginCallback, logoutCallback)=>{
     updateSigninStatus(window.gapi.auth2.getAuthInstance().isSignedIn.get(), loginCallback, logoutCallback);
   })
   .catch(err=>{
-    const errorMsg = `Failed to initialize Google Client API. The application failed.\r\n${err}`;
-    console.error(errorMsg);
+    //const errorMsg = `Failed to initialize Google Client API. The application failed.\r\n${err}`;
+    const errorMsg = `The application failed.\r\n`+
+    `  + Error: ${err.message}\r\n`+
+    `${(err.filename === 0 || err.filename ? `  + File: ${err.filename}\r\n` : "")}`+
+    `${(err.lineno === 0 || err.lineno ? `  + Line: ${err.lineno}\r\n` : "")}`+
+    `${(err.colno === 0 || err.colno ? `  + Column: ${err.colno}` : "")}`;
+
+    console.error(err);
     window.alert(errorMsg);
-    console.log(err)
     throw new Error(errorMsg);
   });
 };

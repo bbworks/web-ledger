@@ -24,8 +24,8 @@ const BudgetsView = ({ transactions, budgetsData, setFooterNavbar })=>{
             !budgetsData ?
             '' :
             budgetsData.map(budgetData=>{
-              const {name, amount, type} = budgetData;
-              return <BudgetGraph key={name} budget={{title: name, type: type, color: "#2196f3", budgetedAmount: amount, amountSpent: getBudgetAmountSpentFromTransactions(name, transactions)}}/>
+              const {Name, Amount, Type} = budgetData;
+              return <BudgetGraph key={Name} budget={{...budgetData, color: "#2196f3", amountSpent: getBudgetAmountSpentFromTransactions(Name, transactions)}}/>
             })
           )
         }
