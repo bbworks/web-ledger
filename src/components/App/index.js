@@ -1,8 +1,10 @@
 import {useState, useEffect} from 'react';
 import {BrowserRouter as Router, Switch, Route, Link} from 'react-router-dom';
 
-import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON, getMonthFromNumber, getCurrentYear, getBillingCycleFromDate, areObjectsEqual, typeCheckTransactions, categorizeTransactionByDescription, saveTransactions, importTransactions, fetchTransactions} from './../../utilities';
-import {initAuthorization, getSheetsSpreadsheet, getSheetsSpreadsheetValues} from './../../googleApi';
+import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON, getMonthFromNumber, getCurrentYear, getBillingCycleFromDate, areObjectsEqual, typeCheckTransactions, categorizeTransactionByDescription, importTransactions} from './../../utilities';
+import {initAuthorization} from './../../googleApi';
+import {getTransactions, updateTransactions, getBudgetsData, getAccountsData, getAccountData} from './../../api';
+import {useScript, useConsoleLog} from './../../hooks';
 
 import SignInView from './../SignInView';
 import DashboardView from './../DashboardView';
@@ -18,10 +20,10 @@ const App = () => {
   //Set application state
   const spreadsheetData = JSON.parse(localStorage.getItem("spreadsheet-data")) || {};
 
-  const [transactions, setTransactions] = useState(null);
-  const [budgetsData, setBudgetsData] = useState(null);
-  const [accountsData, setAccountsData] = useState(null);
-  const [accountData, setAccountData] = useState(null);
+  const [transactions, setTransactions] = useState([]);
+  const [budgetsData, setBudgetsData] = useState([]);
+  const [accountsData, setAccountsData] = useState([]);
+  const [accountData, setAccountData] = useState({});
 
   const [footerNavbar, setFooterNavbar] = useState(null);
   const [budgetCycle, setBudgetCycle] = useState(getBillingCycleFromDate(new Date()));
@@ -30,31 +32,34 @@ const App = () => {
   const [isTransactionsImportDuplicatesModalOpen, setIsTransactionsImportDuplicatesModalOpen] = useState(false);
   const [signedInUser, setSignedInUser] = useState(undefined);
 
-  //Whenever the transactions are updated, save them off as well
-  useEffect(()=>{
-    //Save transactions to localStorage
-    saveTransactions(transactions);
-  }, [transactions]);
+  //Log data
+  useConsoleLog(transactions, "Transactions Data:");
+  useConsoleLog(budgetsData, "Budget Data:");
+  useConsoleLog(accountsData, "Accounts Data:");
+  useConsoleLog(accountData, "Account Data:");
+  useConsoleLog(signedInUser, "signedInUser:");
 
-  //Log transactions
-  useEffect(()=>console.log("Transactions Data: ", transactions), [transactions]);
-  useEffect(()=>console.log("Budget Data: ", budgetsData), [budgetsData]);
-  useEffect(()=>console.log("Accounts Data: ", accountsData), [accountsData]);
-  useEffect(()=>console.log("Account Data: ", accountData), [accountData]);
+  //Load the Google API
+  const gapiLoaded = useScript("https://apis.google.com/js/api.js");
 
   //When the app starts, load the Google API
-  useEffect(()=>{
+  useEffect(async()=>{
+    if(!gapiLoaded) return;
     initAuthorization(onSignInChange, onSignInChange);
-  }, []);
+  }, [gapiLoaded]);
+
+  //Whenever the transactions are updated, save them off as well
+  useEffect(()=>{
+    if (!transactions.length) return;
+    updateTransactions(transactions);
+  }, [transactions]);
 
   useEffect(async ()=>{
-    console.log("signedInUser: ", signedInUser)
-
     if (!signedInUser) return;
-    setTransactionsWrapper(await getSheetsSpreadsheetValues("1k_qus-eG4bBOnqVZ2oSCuY3988wDJHUth9M6M-6BBeA", "Transactions Data", "A1:G21"));
-    setBudgetsData(await getSheetsSpreadsheetValues("1k_qus-eG4bBOnqVZ2oSCuY3988wDJHUth9M6M-6BBeA", "Budgets Data", "A1:D26"));
-    setAccountsData(await getSheetsSpreadsheetValues("1k_qus-eG4bBOnqVZ2oSCuY3988wDJHUth9M6M-6BBeA", "Accounts Data", "A1:B5"));
-    setAccountData(await getSheetsSpreadsheetValues("1k_qus-eG4bBOnqVZ2oSCuY3988wDJHUth9M6M-6BBeA", "Account Data", "A1:B2"));
+    setTransactionsWrapper(await getTransactions());
+    setBudgetsData(await getBudgetsData());
+    setAccountsData(await getAccountsData());
+    setAccountData(await getAccountData());
   }, [signedInUser]);
 
   //Create state handlers

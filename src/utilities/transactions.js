@@ -1,9 +1,15 @@
 import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON, getBudgetAmountSpentFromTransactions, getMonthFromNumber, getCurrentYear, getBillingCycleFromDate} from './utilities.js';
 
-//Initialize variables
-const transactionLocalStorageItemKey = "transaction-data";
-
 //Declare private functions
+const getTransactionDefaultDescriptionDisplay = function(description) {
+  if (!description) return null;
+
+  return `*${
+    description
+      //.replace(/([\w\'&]+)/g, p1=>p1[0].toUpperCase() + p1.substring(1).toLowerCase()) /* set Pascal casing between words */
+  }`;
+};
+
 // const filterTransactions = function (transactions) {
 //   return transactions.map(transaction=>(
 //     {
@@ -12,6 +18,7 @@ const transactionLocalStorageItemKey = "transaction-data";
 //     }
 //   ));
 // };
+
 
 //Declare public functions
 export const typeCheckTransactions = function (transactions) {
@@ -24,7 +31,7 @@ export const typeCheckTransactions = function (transactions) {
       Category: (transaction.Category ? transaction.Category : null),
       Description: (transaction.Description ? transaction.Description : null),
       Category: (transaction.Category ? transaction.Category : null),
-      Amount: (isNaN(transaction.Amount) ? Number(transaction.Amount.replace(/(\$|,)/g, "")) : transaction.Amount),
+      Amount: (isNaN(transaction.Amount) ? Number(transaction.Amount.replace(/(\$|,)/g, "")) : Number(transaction.Amount)),
       Tags: (!isFalsy(transaction.Tags) ? transaction.Tags : []),
 
     }
@@ -35,17 +42,13 @@ export const categorizeTransactionByDescription = function(transaction) {
   const {DescriptionDisplay, Description, Tags, Category, Notes} = transaction;
 
   //Skip the transaction if there is no Description
-  if (isFalsy(Description)) return transaction;
+  if (!Description) return transaction;
 
   //Define a base for categorized transaction data
-  let categorizedTransactionData = {
-    Category,
-    DescriptionDisplay: nullCoalesce(DescriptionDisplay, `*${Description}`),
-    Notes,
-  };
+  let categorizedTransactionData = {};
 
   //Bills
-      if (Description.match(/Spectrum 855-707-7328 SC/i))  categorizedTransactionData = {Category: "Spectrum Internet", DescriptionDisplay: "Charge to CCD *3991", Notes: null};
+       if (Description.match(/Spectrum 855-707-7328 SC/i))  categorizedTransactionData = {Category: "Spectrum Internet", DescriptionDisplay: "Charge to CCD *3991", Notes: null};
   else if (Description.match(/Simplisafe 888-957-4675 Ma/i))  categorizedTransactionData = {Category: "SimpliSafe (for mom)", DescriptionDisplay: "Charge to CCD *3991", Notes: null};
   else if (Description.match(/SDC\*Laurens Electric C Laurens SC/i))  categorizedTransactionData = {Category: "Laurens Electric ProTec Security", DescriptionDisplay: "Charge to CCD *3991", Notes: null};
   else if (Description.match(/SJWD Water District 8649492805 SC/i))  categorizedTransactionData = {Category: "SJWD Water District", DescriptionDisplay: "Charge to CCD *3991", Notes: null};
@@ -69,7 +72,7 @@ export const categorizeTransactionByDescription = function(transaction) {
   //Groceies & Necessities
   else if (Description.match(/Walmart Grocery [\d-]+ Ar/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Walmart Supercenter", Notes: "grocery pickup"};
   else if (Description.match(/(?:Wal-Mart|WM Supercenter) #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Walmart Supercenter", Notes: "grocery pickup"};
-  else if (Description.match(/Target #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Target", Notes: null};
+  else if (Description.match(/Target #?\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Target", Notes: null};
   else if (Description.match(/Ingles Markets #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Ingles", Notes: null};
   else if (Description.match(/Publix #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Publix", Notes: "grocery pickup"};
   else if (Description.match(/(?:Sams ?Club #8142 Spartanburg SC|Sams Club #8142 864-574-3480 SC)/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Sam's Club", Notes: null};
@@ -79,20 +82,24 @@ export const categorizeTransactionByDescription = function(transaction) {
   //Family Outings
   else if (Description.match(/McDonald's \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "McDonald's", Notes: null};
   else if (Description.match(/Burger King #\d+(?: \w+ \w+ \w{2})?/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Burger King", Notes: null};
-  else if (Description.match(/PDQ \d+ OLO \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "PDQ", Notes: null};
+  else if (Description.match(/PDQ \d+ (OLO )?Greenville SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "PDQ", Notes: null};
   else if (Description.match(/Chick-Fil-A #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Chick-fil-A", Notes: null};
   else if (Description.match(/Sonic Drive In #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Sonic Drive-In", Notes: null};
   else if (Description.match(/Bojangles \d+ \w+/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Bojangles", Notes: null};
   else if (Description.match(/Cook Out [\w ]+(?: \w+ \w{2})?/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Cook Out", Notes: null};
   else if (Description.match(/Wendys #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Wendy's", Notes: null};
+  else if (Description.match(/KFC [\w\d]+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "KFC", Notes: null};
+  else if (Description.match(/CKE*TACO DOG SPARTANBU SPARTANBURG SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Taco Dog", Notes: null};
   else if (Description.match(/WAFFLE HOUSE \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Waffle House", Notes: null};
+  else if (Description.match(/Chili's (?:\w+ ?)?\d+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Chili's", Notes: null};
   else if (Description.match(/Sweet Basil Thai Cusin Greenville SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Sweet Basil Thai Cusine", Notes: null};
   else if (Description.match(/Paisanos Italian Resta/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Paisanos Italian Restaurant", Notes: null};
   else if (Description.match(/Panda Hibachi Duncan SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Panda Hibachi", Notes: null};
-  else if (Description.match(/El Molcajete Duncan Sc/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "El Molcajete", Notes: null};
-  else if (Description.match(/(?:Chipotle \d+ \w \w{2}|Chipotle Online 1800\d{6} CA)/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Chipotle", Notes: null};
+  else if (Description.match(/(?:Chipotle \d+ \w+ \w{2}|Chipotle Online 1800\d{6} CA)/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Chipotle", Notes: null};
+  else if (Description.match(/TST* WILLY TACO - HUB SPARTANBURG SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Willy Taco", Notes: null};
   else if (Description.match(/El Tejano Mexican Rest/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "El Tejano", Notes: null};
   else if (Description.match(/La Fogata Mexican Rest Simpsonville Sc/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "La Fogata", Notes: null};
+  else if (Description.match(/El Molcajete Duncan Sc/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "El Molcajete", Notes: null};
   else if (Description.match(/Pizza Hut \d+ \d+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Pizza Hut", Notes: null};
   else if (Description.match(/Tutti Frutti Spartanburg SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Tutti Frutti", Notes: null};
   else if (Description.match(/KRISPY KREME \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Krispy Kreme", Notes: null};
@@ -111,6 +118,7 @@ export const categorizeTransactionByDescription = function(transaction) {
   //Other
   else if (Description.match(/Dollartree \w+ \w{2}/i))  categorizedTransactionData = {Category: null, DescriptionDisplay: "Dollar Tree", Notes: null};
   else if (Description.match(/[\w\* ]+ amzn.com\/billwa/i))  categorizedTransactionData = {Category: null, DescriptionDisplay: "Amazon", Notes: null};
+  else if (Description.match(/SPARTANBURGCO TREAS 8645962603 SC/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Spartanburg County Treasury", Notes: null};
 
   //Final categorizedTransactionData
   categorizedTransactionData = {
@@ -188,10 +196,12 @@ export const importTransactions = function(transactionsData, dataType) {
           PostedDate: (matches[1] === "PENDING" ? null : convertMonthDayStringToDate(`${matches[2]} ${matches[3]}`)),
           TransactionDate: convertMonthDayStringToDate(`${matches[4]} ${matches[5]}`),
           Card: matches[6],
+          Type: matches[8],
           Description: matches[7],
           DescriptionDisplay: null,
-          Type: matches[8],
           Amount: Number(`${matches[9]}${matches[10]}`.replace(",","")) * -1,
+          Category: nullCoalesce(transaction.Category),
+          Notes: nullCoalesce(transaction.Notes),
           Tags: transaction.Tags || [],
         };
 
@@ -215,9 +225,9 @@ export const importTransactions = function(transactionsData, dataType) {
           PostedDate: (!isFalsy(transaction.PostedDate) ? convertDateStringToDate(transaction.PostedDate) : null),
           TransactionDate: transactionDate,
           Card: nullCoalesce(transaction.Card, `*${transaction["Card No."]}`),
+          Type: type,
           Description: transaction.Description,
           DescriptionDisplay: null,
-          Type: type,
           Amount: Number(nullCoalesce(!isFalsy(transaction.Amount) && transaction.Amount.replace("$",''), `${(type === "Charges" ? "-" : "")}${transaction[type]}`)),
           Category: nullCoalesce(transaction.Category),
           Notes: nullCoalesce(transaction.Notes),
@@ -236,29 +246,16 @@ export const importTransactions = function(transactionsData, dataType) {
   }
 };
 
-export const saveTransactions = function(transactions) {
-  localStorage.setItem(transactionLocalStorageItemKey, JSON.stringify(transactions));
-};
-
-export const fetchTransactions = function() {
-  //Attempt to fetch the transactions data from localStorage
-  const transactions = JSON.parse(localStorage.getItem(transactionLocalStorageItemKey));
-  if (isFalsy(transactions)) return [];
-
-  //Return the transactions
-  return transactions;
-};
-
 export const formatTransactionDisplay = function(transaction) {
   return {
     ...transaction,
     PostedDate: (transaction.PostedDate ? new Date(transaction.PostedDate).toLocaleDateString().toString() : ""),
     TransactionDate: (transaction.TransactionDate ? new Date(transaction.TransactionDate).toLocaleDateString().toString() : ""),
+    Card: transaction.Card || "",
     Type: transaction.Type || "",
+    Description: nullCoalesce(transaction.DescriptionDisplay, getTransactionDefaultDescriptionDisplay(transaction.Description)) || "",
+    Amount: convertNumberToCurrency(transaction.Amount) || "",
     Category: transaction.Category || "",
     Notes: transaction.Notes || "",
-    Amount: transaction.Amount || "",
-    DescriptionDisplay: nullCoalesce(transaction.DescriptionDisplay, transaction.Description && `*${transaction.Description.replace(/([\w\'&]+)/g, p1=>p1[0].toUpperCase() + p1.substring(1).toLowerCase())}`),
-    Amount: convertNumberToCurrency(transaction.Amount),
   };
 };

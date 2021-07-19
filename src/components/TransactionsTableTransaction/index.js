@@ -10,12 +10,12 @@ const TransactionsTableTransaction = ({ transaction, onTransactionEditButtonClic
   const [transactionDisplay, setTransactionDisplay] = useState({
     PostedDate: "",
     TransactionDate: "",
+    Card: "",
     Type: "",
-    Category: "",
     Description: "",
-    DescriptionDisplay: "",
-    Notes: "",
     Amount: "",
+    Category: "",
+    Notes: "",
     Tags: [],
   });
 
@@ -23,11 +23,10 @@ const TransactionsTableTransaction = ({ transaction, onTransactionEditButtonClic
 
   return (
     <tr className="transaction">
-      <td>{transactionDisplay.PostedDate}</td>
       <td>{transactionDisplay.TransactionDate}</td>
-      <td>{transactionDisplay.Type}</td>
+      <td>{transactionDisplay.Card}</td>
       <td>{transactionDisplay.Category}</td>
-      <td>{nullCoalesce(transactionDisplay.DescriptionDisplay, transactionDisplay.Description) ? nullCoalesce(transactionDisplay.DescriptionDisplay, transactionDisplay.Description) : ""}</td>
+      <td>{transactionDisplay.Description}</td>
       <td>{transactionDisplay.Notes}</td>
       <td>{transactionDisplay.Amount}</td>
       <td>{transactionDisplay.Tags.map(tag=><TagBadge key={tag} tag={tag} />)}</td>

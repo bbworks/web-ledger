@@ -2,9 +2,8 @@ import './index.scss';
 
 const TransactionsTableHeaders = ()=>{
   const headers = [
-    "Posted Date",
     "Transaction Date",
-    "Type",
+    "Card",
     "Category",
     "Description",
     "Notes",

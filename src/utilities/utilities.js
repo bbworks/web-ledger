@@ -34,59 +34,25 @@ export const convertCSVToJSON = function(csv, delimiter = ",") {
   return obj;
 };
 
-export const getBudgetAmountSpentFromTransactions = (budgetName, transactions)=>{
-  if (!(budgetName || transactions)) return null;
-  return transactions.reduce((amountSpent,transaction)=>amountSpent+=(transaction.Category === budgetName ? transaction.Amount : 0), 0);
-};
+export const getSumByProp = (array, prop)=>{
+  //Make sure the provided object is an array
+  if (!Array.isArray(array)) {
+    //If its not even a single object, return null
+    if(!typeof array === "object") return null;
 
-export const getMonthFromNumber = number=>{
-  switch (number) {
-    case 0:
-      return "January";
-      break;
-    case 1:
-      return "February";
-      break;
-    case 2:
-      return "March";
-      break;
-    case 3:
-      return "April";
-      break;
-    case 4:
-      return "May";
-      break;
-    case 5:
-      return "June";
-      break;
-    case 6:
-      return "July";
-      break;
-    case 7:
-      return "August";
-      break;
-    case 8:
-      return "September";
-      break;
-    case 9:
-      return "October";
-      break;
-    case 10:
-      return "November";
-      break;
-    case 11:
-      return "December";
-      break;
+    //Otherwise, wrap the object in an array for processing
+    array = [array]
   }
-  return null;
-};
 
-export const getCurrentYear = (date)=>{
-  return date.getFullYear();
-};
+  return Number(array.reduce((sum, item)=>{
+    //If this an object, use the property
+    if (typeof item === "object") {
+      if (!Number.isNaN(item[prop])) return sum+=item[prop];
+    }
 
-export const getBillingCycleFromDate = date=>{
-  return `${getMonthFromNumber(date.getMonth())} ${getCurrentYear(date)}`;
+    //Otherwise, if a number, use the item directly
+    if (!Number.isNaN(item)) return sum+=item;
+  }, 0)) || null;
 };
 
 export const areObjectsEqual = (a,b)=>{

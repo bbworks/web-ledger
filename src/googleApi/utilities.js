@@ -1,3 +1,15 @@
+//Private Functions
+const getHeadersFromJSON = JSON=>{
+  if (!JSON instanceof Array) JSON = [JSON];
+  return JSON.reduce((headers, transaction)=>
+    [
+      ...headers,
+      ...Object.keys(transaction).filter(key=>!headers.includes(key))
+    ]
+  , []);
+};
+
+//Public functions
 export const convertSheetsArraysToJSON = (data, delimiter=",")=>{
   if (!data) return null;
 
@@ -13,6 +25,19 @@ export const convertSheetsArraysToJSON = (data, delimiter=",")=>{
       })
   , {})
   );
+};
+
+export const convertJSONToSheetsArray = (JSON, delimiter=",")=>{
+  if (!JSON) return null;
+
+  const headers = getHeadersFromJSON(JSON);
+
+  return [
+    headers,
+    ...JSON.map(object=>
+      headers.map(header=>(Array.isArray(object[header]) ? object[header].join(",") : object[header]))
+    )
+  ];
 };
 
 export const getDynamicPropertyByArray = (startingObject, dotSeparatedProperties)=>{

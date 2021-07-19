@@ -1,18 +1,23 @@
 import {useState, useEffect} from 'react';
 import TransactionsTableTransactions from './../TransactionsTableTransactions';
-import {convertNumberToCurrency} from './../../utilities';
+import {convertNumberToCurrency, getSumByProp} from './../../utilities';
 import './index.scss';
 
 const TransactionsTableBody = ({ transactions, onTransactionEditButtonClick })=>{
-  const calculateTotalAmount = ()=>{
-    return Number(transactions.reduce((accumulator, transaction)=>accumulator += (transaction.Type == "Charges" ? transaction.Amount : 0), 0).toFixed(2));
+  const calculatePaymentAmountTotal = ()=>{
+    return convertNumberToCurrency(
+      getSumByProp(
+        transactions.filter(transaction=>transaction.Type === "Charges")
+        , "Amount"
+      )
+    )
   };
 
   const [totalAmount, setTotalAmount] = useState(0);
 
   useEffect(()=>{
-    if (!transactions) return;
-    setTotalAmount(calculateTotalAmount());
+    if (!transactions.length) return;
+    setTotalAmount(calculatePaymentAmountTotal());
   }, [transactions]);
 
   return (
@@ -24,8 +29,7 @@ const TransactionsTableBody = ({ transactions, onTransactionEditButtonClick })=>
         <td></td>
         <td></td>
         <td></td>
-        <td></td>
-        <td>{convertNumberToCurrency(totalAmount)}</td>
+        <td>{totalAmount}</td>
         <td></td>
         <td></td>
       </tr>

@@ -1,21 +1,25 @@
-import {convertSheetsArraysToJSON, getDynamicPropertyByArray, convertColumnNumberToColumnLetter, convertColumnLetterToColumnNumber, convertArrayToA1Notation} from './../utilities'
+import {convertSheetsArraysToJSON, convertJSONToSheetsArray, getDynamicPropertyByArray, convertColumnNumberToColumnLetter, convertColumnLetterToColumnNumber, convertArrayToA1Notation} from './utilities.js'
 
-const callGoogleApiFunction = (googleApi, resourceType, method, optionsParam, pageToken)=>{
+const SPREADSHEET_ID = "1k_qus-eG4bBOnqVZ2oSCuY3988wDJHUth9M6M-6BBeA";
+
+export const callGoogleApiFunction = (googleApi, resourceType, method, optionsParam, pageToken)=>{
   //Declare variables
   let leftoverIds = null;
   const listIdChunkLength = 50;
+  let params = [];
+  let options = optionsParam;
 
   //Build the request options
-  const options = {
-    ...{
-      "part": [
+  if (googleApi === "youtube") {
+    options = {
+      ...optionsParam,
+      part: [
         "snippet",
         "contentDetails",
         "status",
       ],
-    },
-    ...optionsParam
-  };
+    };
+  }
 
   //Check that, if provided SOMETHING as an id,
   // it wasn't falsy
@@ -42,10 +46,20 @@ const callGoogleApiFunction = (googleApi, resourceType, method, optionsParam, pa
     }
   }
 
+  //If more parameters were found in options, move them over
+  if (options.params) {
+    params = (options.params instanceof Array ? options.params : [options.params]);
+    delete options.params;
+  }
+
   //Return a Promise to the Google API
   return new Promise(async (resolve,reject)=>{
     try {
-      const response = await getDynamicPropertyByArray(window.gapi.client[googleApi], resourceType)[method](options);
+      //Get the resource object
+      const resource = getDynamicPropertyByArray(window.gapi.client[googleApi], resourceType);
+
+      //Make the resource method call
+      const response = await resource[method](options, ...params);
       console.log(response);
 
       //If a "list" query was performed
@@ -85,13 +99,31 @@ const callGoogleApiFunction = (googleApi, resourceType, method, optionsParam, pa
 };
 
 //Declare our specific functions
-export const getSheetsSpreadsheet = spreadsheetId=>{
-  return callGoogleApiFunction("sheets", "spreadsheets", "get", {spreadsheetId});
+export const getSheetsSpreadsheet = ()=>{
+  return callGoogleApiFunction("sheets", "spreadsheets", "get", {spreadsheetId: SPREADSHEET_ID});
 };
 
-export const getSheetsSpreadsheetValues = (spreadsheetId, sheetName, range)=>{
+export const getSheetsSpreadsheetValues = (sheetName, range)=>{
   if (!range) range = convertArrayToA1Notation([1000,26]); //A1:AA1000
   if (typeof range === "string") range = [range]; //convert to an array of ranges if only one specified
   range = range.map(r=>`'${sheetName}'!${range}`); //Add the sheet name to the range
-  return callGoogleApiFunction("sheets", "spreadsheets.values", "get", {spreadsheetId, range});
+
+  return callGoogleApiFunction("sheets", "spreadsheets.values", "get", {spreadsheetId: SPREADSHEET_ID, range});
+};
+
+export const updateSheetsSpreadsheetValues = (sheetName, valuesJSON, range)=>{
+  if (!range) range = convertArrayToA1Notation([1000,26]); //A1:Z1000
+  if (typeof range === "string") range = [range]; //convert to an array of ranges if only one specified
+  range = range.map(r=>`'${sheetName}'!${range}`); //Add the sheet name to the range
+
+  return callGoogleApiFunction("sheets", "spreadsheets.values", "update", {
+      spreadsheetId: SPREADSHEET_ID,
+      range,
+      valueInputOption: "USER_ENTERED",
+      includeValuesInResponse: true,
+      responseValueRenderOption: "FORMATTED_VALUE",
+      resource: {
+        values: convertJSONToSheetsArray(valuesJSON),
+      }
+    });
 };
