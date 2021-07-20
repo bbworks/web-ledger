@@ -91,19 +91,18 @@ export const callGoogleApiFunction = (googleApi, resourceType, method, optionsPa
       //If a "delete" or some other query was performed
       return resolve(response);
     }
-    catch (err) {
-      console.error(err);
-      return reject(err);
+    catch (errResponse) {
+      return reject(errResponse.result.error);
     }
   });
 };
 
 //Declare our specific functions
-export const getSheetsSpreadsheet = ()=>{
+export const getSheetsSpreadsheet = async ()=>{
   return callGoogleApiFunction("sheets", "spreadsheets", "get", {spreadsheetId: SPREADSHEET_ID});
 };
 
-export const getSheetsSpreadsheetValues = (sheetName, range)=>{
+export const getSheetsSpreadsheetValues = async (sheetName, range)=>{
   if (!range) range = convertArrayToA1Notation([1000,26]); //A1:AA1000
   if (typeof range === "string") range = [range]; //convert to an array of ranges if only one specified
   range = range.map(r=>`'${sheetName}'!${range}`); //Add the sheet name to the range
@@ -111,7 +110,7 @@ export const getSheetsSpreadsheetValues = (sheetName, range)=>{
   return callGoogleApiFunction("sheets", "spreadsheets.values", "get", {spreadsheetId: SPREADSHEET_ID, range});
 };
 
-export const updateSheetsSpreadsheetValues = (sheetName, valuesJSON, range)=>{
+export const updateSheetsSpreadsheetValues = async (sheetName, valuesJSON, range)=>{
   if (!range) range = convertArrayToA1Notation([1000,26]); //A1:Z1000
   if (typeof range === "string") range = [range]; //convert to an array of ranges if only one specified
   range = range.map(r=>`'${sheetName}'!${range}`); //Add the sheet name to the range

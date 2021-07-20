@@ -1,3 +1,5 @@
+import {throwException} from './../utilities';
+
 const scopes = [
   //"https://www.googleapis.com/auth/drive",  //See, edit, create, and delete all or your drive files
   //"https://www.googleapis.com/auth/drive.file",  //See, edit, create, and delete only the specific Google Drive files you use with this app
@@ -27,10 +29,7 @@ const fetchAuthCredentials = ()=>{
     throw new Error("Failed to get authorization credentials.");
   }
   catch (err) {
-    const errorMsg = `${err}\r\nThe application failed.`;
-    console.error(errorMsg);
-    window.alert(errorMsg);
-    throw new Error(errorMsg);
+    throw err;
   }
 };
 
@@ -44,10 +43,7 @@ export const initAuthorization = (loginCallback, logoutCallback)=>{
     loadGoogleApis(creds, loginCallback, logoutCallback)
   }
   catch (err) {
-    const errorMsg = `The application failed.\r\n${err}`;
-    console.error(errorMsg);
-    window.alert(errorMsg);
-    throw new Error(errorMsg);
+    throwException(err);
   }
 };
 
