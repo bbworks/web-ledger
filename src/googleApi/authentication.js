@@ -18,6 +18,10 @@ const fetchAuthCredentials = ()=>{
     const promptedCreds = window.prompt("Failed to get authorization credentials.\r\nPlease enter the api key, followed by the client ID, separated by a comma.", "api_key,client_id");
     if (promptedCreds && promptedCreds.indexOf(",") !== -1) {
       const [apiKey, clientId] = promptedCreds.split(",");
+      localStorage.setItem("creds", JSON.stringify({
+        apiKey,
+        clientId,
+      }));
       return {apiKey, clientId};
     }
     throw new Error("Failed to get authorization credentials.");

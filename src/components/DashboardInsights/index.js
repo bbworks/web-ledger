@@ -9,7 +9,7 @@ const DashboardInsights = ({ transactions, budgetsData })=>{
   const [insights, setInsights] = useState([]);
 
   const runInsights = ()=>{
-    if (!transactions || !budgetsData) return;
+    if (!transactions.length || !budgetsData.length) return;
 
     //First, remove all insights
     setInsights([]);
