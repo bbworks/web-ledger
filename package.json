@@ -2,6 +2,7 @@
   "name": "web-ledger",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://bbworks.github.io/web-ledger",
   "dependencies": {
     "@testing-library/jest-dom": "^5.12.0",
     "@testing-library/react": "^11.2.7",
