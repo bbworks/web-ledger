@@ -33,7 +33,7 @@ export const throwException = err =>{
   console.error(err);
 
   //Send a prettified version of the error to the screen
-  const exceptionMsg = `${errorMsg}\r\n${Object.entries(exception).length ? Object.entries(exception).map(([key, value])=>`  + ${key}: ${value}\r\n`).join("") : ''}\r\nThe application failed.\r\n`;
+  const exceptionMsg = `${errorMsg}\r\n${Object.entries(exception).length ? Object.entries(exception).map(([key, value])=>`  + ${key}: ${value}\r\n`).join("") : ''}\r\nThe application failed.`;
   window.alert(exceptionMsg);
 
   //Throw the original error
