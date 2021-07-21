@@ -77,16 +77,7 @@ const initializeGoogleApis = async (creds, loginCallback, logoutCallback)=>{
     updateSigninStatus(window.gapi.auth2.getAuthInstance().isSignedIn.get(), loginCallback, logoutCallback);
   })
   .catch(err=>{
-    //const errorMsg = `Failed to initialize Google Client API. The application failed.\r\n${err}`;
-    const errorMsg = `The application failed.\r\n`+
-    `  + Error: ${err.message}\r\n`+
-    `${(err.filename === 0 || err.filename ? `  + File: ${err.filename}\r\n` : "")}`+
-    `${(err.lineno === 0 || err.lineno ? `  + Line: ${err.lineno}\r\n` : "")}`+
-    `${(err.colno === 0 || err.colno ? `  + Column: ${err.colno}` : "")}`;
-
-    console.error(err);
-    window.alert(errorMsg);
-    throw new Error(errorMsg);
+    throwException(err);
   });
 };
 
@@ -134,21 +125,4 @@ const getProfileInformation = ()=>{
     imageUrl: profile.getImageUrl(),
     emailAddress: profile.getEmail(),
   };
-};
-
-//Get channel from API
-const getChannel = channel=>{
-  window.gapi.client.youtube.channels.list({
-    part: "snippet,contentDetails,statistics",
-    id: [channel.id],
-  })
-    .then(response => {if(response.result.pageInfo.totalResults === 0) {throw new Error();} console.log(response.result.items[0]);})
-    .catch(err => {
-    try {
-      const error = JSON.parse(err.body).error;
-      console.error(err);
-      alert(`${error.code}: ${error.message}\r\n\r\nException: Error getting user ${channel.id}. The application failed.`);
-    }
-    catch {console.error(err); alert("The application failed.");}
-  });
 };
