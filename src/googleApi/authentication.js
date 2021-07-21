@@ -17,14 +17,14 @@ const fetchAuthCredentials = ()=>{
     if (creds && creds.clientId) return creds;
 
     //If credentials weren't found, prompt the user for the credentials
-    const promptedCreds = window.prompt("Failed to get authorization credentials.\r\nPlease enter the api key, followed by the client ID, separated by a comma.", "api_key,client_id");
-    if (promptedCreds && promptedCreds.indexOf(",") !== -1) {
-      const [apiKey, clientId] = promptedCreds.split(",");
+    const clientId = window.prompt("Failed to get authorization credentials.\r\nPlease enter the client ID", "client_id");
+    if (clientId) {
+      const creds = JSON.parse(localStorage.getItem("creds"));
       localStorage.setItem("creds", JSON.stringify({
-        apiKey,
+        ...creds,
         clientId,
       }));
-      return {apiKey, clientId};
+      return {clientId};
     }
     throw new Error("Failed to get authorization credentials.");
   }
@@ -56,11 +56,10 @@ const loadGoogleApis = (creds, loginCallback, logoutCallback)=>{
 const initializeGoogleApis = async (creds, loginCallback, logoutCallback)=>{
   console.info("Loaded Google Client, OAuth2.0 APIs.");
   console.info("Initializing Google Client API...");
-  const {apiKey, clientId} = creds;
+  const {clientId} = creds;
 
   //Attempt to initialize the Google API
   window.gapi.client.init({
-    apiKey: apiKey,
     clientId: clientId,
     scope: scopes.join(" "), //space delimited
     discoveryDocs: discoveryDocs,
