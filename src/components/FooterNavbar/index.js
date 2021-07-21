@@ -8,11 +8,11 @@ const FooterNavbar = ({ active })=>{
 
   const setActiveItem = (active, footerNavbar)=>{
     if (!active) return;
-    const activePath = (active === "/" ? "/dashboard" : active);
+    const activePath = (process.env.NODE_ENV === "production" ? process.env.PUBLIC_URL : '')+(active === "/" ? "/dashboard" : active);
     const navItems = [...footerNavbar.current.querySelectorAll(".footer-nav-item")];
     const activeItem = navItems.find(navItem=>navItem.getAttribute("href") === activePath);
     navItems.forEach(navItem=>navItem.classList.remove("active"));
-    activeItem.classList.add("active");
+    if (activeItem) activeItem.classList.add("active");
   };
 
   useEffect(()=>{
