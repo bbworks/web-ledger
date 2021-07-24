@@ -44,6 +44,10 @@ export const getCurrentYear = (date)=>{
   return date.getFullYear();
 };
 
-export const getBillingCycleFromDate = date=>{
+export const getBudgetCycleFromDate = date=>{
+  return new Date(date.getFullYear(), date.getMonth());
+};
+
+export const getBudgetCycleString = date=>{
   return `${getMonthFromNumber(date.getMonth())} ${getCurrentYear(date)}`;
 };

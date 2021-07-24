@@ -7,13 +7,13 @@ const TransactionsTableBody = ({ transactions, onTransactionEditButtonClick })=>
   const calculatePaymentAmountTotal = ()=>{
     return convertNumberToCurrency(
       getSumByProp(
-        transactions.filter(transaction=>transaction.Type === "Charges")
+        transactions.filter(transaction=>transaction.Type !== "Payments")
         , "Amount"
       )
     )
   };
 
-  const [totalAmount, setTotalAmount] = useState(0);
+  const [totalAmount, setTotalAmount] = useState("");
 
   useEffect(()=>{
     if (!transactions.length) return;
@@ -29,7 +29,7 @@ const TransactionsTableBody = ({ transactions, onTransactionEditButtonClick })=>
         <td></td>
         <td></td>
         <td></td>
-        <td>{totalAmount}</td>
+        <td>{(totalAmount ? totalAmount : "")}</td>
         <td></td>
         <td></td>
       </tr>

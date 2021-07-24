@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react';
 
-import {convertNumberToCurrency} from './../../utilities';
+import {convertNumberToCurrency, getBudgetCycleString} from './../../utilities';
 
 import './index.scss';
 
@@ -28,7 +28,7 @@ const DashboardTop = ({ accountsData, accountData, budgetCycle })=>{
       <div className="dashboard-month-dropdown dropdown">
         <button id="dashboardMonthDropdown" className="btn dropdown-toggle container-fluid" type="button" data-bs-toggle="dropdown" aria-expanded="false">
           <strong className="dashboard-month-dropdown-month h2 d-block mb-0">
-            {budgetCycle}
+            {getBudgetCycleString(budgetCycle)}
           </strong>
           <em className="dashboard-month-dropdown-month-description d-block text-muted h6">(current)</em>
         </button>

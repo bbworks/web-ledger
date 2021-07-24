@@ -3,7 +3,7 @@ import {useState, useEffect} from 'react';
 import Modal from 'react-bootstrap/Modal';
 
 import TransactionsImportDuplicatesModalDuplicateCheckbox from './../TransactionsImportDuplicatesModalDuplicateCheckbox';
-import {areObjectsEqual} from './../../utilities';
+import {areObjectsEqual, isTransactionDuplicate} from './../../utilities';
 
 import './index.scss';
 
@@ -27,7 +27,7 @@ const TransactionsImportDuplicatesModal = ({ newTransactions, duplicates, isOpen
     console.log("Duplicates confirmed from TransactionsImportDuplicatesModal", confirmedDuplicates);
 
     //Remove the true duplicates
-    const filteredNewTransactions = newTransactions.filter(newTransaction=>!confirmedDuplicates.find(confirmedDuplicate=>areObjectsEqual(confirmedDuplicate, newTransaction)));
+    const filteredNewTransactions = newTransactions.filter(newTransaction=>!isTransactionDuplicate(newTransaction, confirmedDuplicates));
 
     onSubmitProp(filteredNewTransactions);
   };
@@ -49,7 +49,7 @@ const TransactionsImportDuplicatesModal = ({ newTransactions, duplicates, isOpen
       </Modal.Header>
       <form className="transaction-import-duplicate-form" onSubmit={onSubmit}>
         <Modal.Body>
-          <p>Possible duplicate transactions were found. Please confirm which are duplicates.</p>
+          <p>{duplicates.length} possible duplicate transactions were found. Please confirm which are duplicates.</p>
           <div className="overflow-auto">
             {
               duplicatesData.map((duplicateData, i)=>(
@@ -59,8 +59,8 @@ const TransactionsImportDuplicatesModal = ({ newTransactions, duplicates, isOpen
           </div>
         </Modal.Body>
         <Modal.Footer>
-        <button className="btn btn-secondary" type="button" data-bs-dismiss="modal" tabIndex="2" onClick={onClose}>Cancel import</button>
-          <button className="btn btn-primary" type="submit" tabIndex="1">Confirm</button>
+          <button className="btn btn-secondary" type="button" tabIndex="1" onClick={onClose}>Cancel import</button>
+          <button className="btn btn-primary" type="submit" tabIndex="2">Confirm</button>
         </Modal.Footer>
       </form>
     </Modal>

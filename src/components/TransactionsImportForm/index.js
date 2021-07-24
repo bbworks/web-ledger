@@ -1,4 +1,14 @@
+import {useState} from 'react';
+
+import './index.scss';
+
 const TransactionsImportForm = ({ onSubmit:onSubmitProp, onFileInputChange:onFileInputChangeProp })=>{
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleOnClick = event=>{
+    setIsOpen(wasOpen=>!wasOpen);
+  };
+
   const onSubmit = event=>{
     //Prevent form submission
     event.preventDefault();
@@ -11,6 +21,10 @@ const TransactionsImportForm = ({ onSubmit:onSubmitProp, onFileInputChange:onFil
     //Reset the input
     transactionImportInput.value = '';
 
+    //Re-close the form
+    setIsOpen(false);
+
+    //Send it to the parent
     onSubmitProp(scrapedTransactionsData);
   };
 
@@ -30,26 +44,37 @@ const TransactionsImportForm = ({ onSubmit:onSubmitProp, onFileInputChange:onFil
     //Reset the file input
     event.target.value = "";
 
+    //Re-close the form
+    setIsOpen(false);
+
     //Call the parent handler
     onFileInputChangeProp(transactionsDataArray);
   };
 
   return (
-    <form id="transaction-import-form" className="transaction-import-form mb-4" onSubmit={onSubmit}>
-      <div>
-        <label className="form-label">Transactions</label>
-        <div className="input-group mb-2">
-          <input id="transaction-import-input" className="form-control" type="text" />
-          <button className="btn btn-primary input-group-text" type="submit">Import</button>
-        </div>
-        <p className="form-text">Paste transactions data for parsing.</p>
-        <div>
-          <label className="form-label">Or, import a comma-separated values (*.csv) file.</label>
-          <input id="transaction-import-form-input-file" className="form-control" type="file" accept=".csv" multiple onChange={onFileInputChange} />
-        </div>
-        <div id="transaction-import-form-status"></div>
+    <div>
+      <div className="d-flex justify-content-end">
+        <button className="transaction-import-form-toggle btn btn-dark" type="button" onClick={toggleOnClick}>Import Transactions</button>
       </div>
-    </form>
+      {(
+        !isOpen ? null :
+        <form id="transaction-import-form" className="transaction-import-form mb-4" onSubmit={onSubmit}>
+          <div>
+            <label className="form-label">Transactions</label>
+            <div className="input-group mb-2">
+              <textarea id="transaction-import-input" className="transaction-import-input form-control" rows="1"></textarea>
+              <button className="btn btn-primary input-group-text" type="submit">Import</button>
+            </div>
+            <p className="form-text">Paste transactions data for parsing.</p>
+            <div>
+              <label className="form-label">Or, import a comma-separated values (*.csv) file.</label>
+              <input id="transaction-import-form-input-file" className="form-control" type="file" accept=".csv" multiple onChange={onFileInputChange} />
+            </div>
+            <div id="transaction-import-form-status"></div>
+          </div>
+        </form>
+      )}
+    </div>
   );
 };
 

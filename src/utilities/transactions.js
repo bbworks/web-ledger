@@ -1,4 +1,4 @@
-import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON, getBudgetAmountSpentFromTransactions, getMonthFromNumber, getCurrentYear, getBillingCycleFromDate} from './utilities.js';
+import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON, convertDateStringToDate, areObjectsEqual, getBudgetAmountSpentFromTransactions, getMonthFromNumber, getCurrentYear, getBillingCycleFromDate} from './utilities.js';
 
 //Declare private functions
 const getTransactionDefaultDescriptionDisplay = function(description) {
@@ -136,110 +136,90 @@ export const categorizeTransactionByDescription = function(transaction) {
 };
 
 export const importTransactions = function(transactionsData, dataType) {
-  const convertMonthDayStringToDate = function(dateString) {
-    //Initialize functions
-    const returnMonthIndex = function(month) {
-      if (month.match(/^Jan$/i)) return 0;
-      if (month.match(/^Feb$/i)) return 1;
-      if (month.match(/^Mar$/i)) return 2;
-      if (month.match(/^Apr$/i)) return 3;
-      if (month.match(/^May$/i)) return 4;
-      if (month.match(/^Jun$/i)) return 5;
-      if (month.match(/^Jul$/i)) return 6;
-      if (month.match(/^Aug$/i)) return 7;
-      if (month.match(/^Sep$/i)) return 8;
-      if (month.match(/^Oct$/i)) return 9;
-      if (month.match(/^Nov$/i)) return 10;
-      if (month.match(/^Dec$/i)) return 11;
-      return false;
-    };
-
-    //Declare variables
-    const now = new Date();
-    const [month, day] = dateString.split(" ");
-    const monthIndex = returnMonthIndex(month);
-
-    //Convert to actual date
-    const date = new Date(now.getFullYear(), monthIndex, day)
-
-    //Adjust date backwards one year if this ends up being a future date
-    if (date > now) date.setFullYear(date.getFullYear()-1);
-
-    return date
-  };
-
-  const convertDateStringToDate = function(dateString) {
-    //Initialize functions
-    return new Date(...dateString.replace(/(\d{1,2})\/(\d{1,2})\/(\d{4})/, (p0,p1,p2,p3)=>[p3, Number(p1)-1, p2]).split(/\s*,\s*/));
-  };
-
   try {
-    let transactions = {};
-
     //if this is scraped from online app
     if (dataType === "scraped") {
       //Spilt the string of transactions into an array
-      const transactionsArray = transactionsData.split("POSTED:")
-        //Filter out empty data
-        .filter(transaction=>!isFalsy(transaction))
-        //Remove unwanted data from the transactions
-        .map(transaction=>transaction.replace("\tPending Transactions Ends", ""));
+      return transactionsData
+        .split(/(?:\r\n|\r|\n)/)
+        .map(transactionLine=>{
+          if (!transactionLine) return null;
 
-      //Massage the data into intelligible objects
-      transactions = transactionsArray.map(transaction=>{
-        //Parse the transaction string into an object
-        const isMatch = transaction.match(/(PENDING|(\w+)\s*(\d+))\s*TRANSACTION:(\w+)\s*(\d+)\s+(?:Card No:([\*\d]+)\s*)?Description:(.+)\s*(Charges|Payments):(-?)\$([\d,]+\.\d{2})\s*/);
-        if (isFalsy(isMatch)) throw new Error(`Unable to read transaction.\r\n${transaction}`);
-        const matches = isMatch.map(match=>(match ? match.trim() : match))
+          //Determine if this matches a transaction line
+          const isMatch = transactionLine.match(/(\d{2}\/\d{2}\/\d{2})\t\t([^\t]+)\t(-?)\$([\d,]+\.\d{2})/);
+          if (!isMatch) {
+            console.warn(`Unable to read transaction.\r\n${transactionLine}`);
+            return null;
+          }
 
-        const transactionObj = {
-          PostedDate: (matches[1] === "PENDING" ? null : convertMonthDayStringToDate(`${matches[2]} ${matches[3]}`)),
-          TransactionDate: convertMonthDayStringToDate(`${matches[4]} ${matches[5]}`),
-          Card: matches[6],
-          Type: matches[8],
-          Description: matches[7],
-          DescriptionDisplay: null,
-          Amount: Number(`${matches[9]}${matches[10]}`.replace(",","")) * -1,
-          Category: nullCoalesce(transaction.Category),
-          Notes: nullCoalesce(transaction.Notes),
-          Tags: transaction.Tags || [],
-        };
+          //Save and trim the matched data
+          const [fullMatch, TransactionDate, Description, IsNegativeAmount, Amount] = [...isMatch].map(match=>(match ? match.trim() : match));
 
-        return transactionObj;
-      })
-      .reverse();
+          //Return the new transaction object
+          return {
+            PostedDate: null,
+            TransactionDate: convertDateStringToDate(TransactionDate, "MM/dd/yy"),
+            Card: null,
+            Type: null,
+            Description,
+            DescriptionDisplay: null,
+            Amount: Number(`${IsNegativeAmount}${Amount}`.replace(",","")),
+            Category: null,
+            Notes: null,
+            Tags: [],
+          };
+        })
+        //Filter out anything that didn't become a transaction
+        .filter(transaction=>transaction !== null)
+        //Bring in transactions in ascending TransactionDate
+        .reverse();
     }
+
     //Otherwise, this is CSV or JSON data
-    else {
-      //If CSV data, convert it to JSON
-      if (dataType === "csv") transactionsData = transactionsData.map(csvData=>convertCSVToJSON(csvData)).flat();
 
-      //For each CSV file, convert the contents to JSON
-      transactions = transactionsData.map(transaction=>{
-        //Validate calculated values
-        const type = nullCoalesce(transaction.Type, (transaction.Charges ? "Charges" : (transaction.Payments ? "Payments" : null)));
-        const transactionDate = convertDateStringToDate(nullCoalesce(transaction.TransactionDate, transaction.Date));
-        if (isFalsy(type) || isFalsy(transactionDate)) throw new Error(`Unable to read transaction.\r\n${transaction}`);
+    //If CSV data, convert it to JSON first
+    if (dataType === "csv") transactionsData = transactionsData.map(csvData=>convertCSVToJSON(csvData)).flat();
 
-        const transactionObj = {
-          PostedDate: (!isFalsy(transaction.PostedDate) ? convertDateStringToDate(transaction.PostedDate) : null),
-          TransactionDate: transactionDate,
-          Card: nullCoalesce(transaction.Card, `*${transaction["Card No."]}`),
-          Type: type,
-          Description: transaction.Description,
-          DescriptionDisplay: null,
-          Amount: Number(nullCoalesce(!isFalsy(transaction.Amount) && transaction.Amount.replace("$",''), `${(type === "Charges" ? "-" : "")}${transaction[type]}`)),
-          Category: nullCoalesce(transaction.Category),
-          Notes: nullCoalesce(transaction.Notes),
-          Tags: transaction.Tags || [],
-        };
+    //For each CSV file, convert the contents to JSON
+    return transactionsData.map(transaction=>{
+      const Date = (transaction.Date ? transaction.Date.trim() : null);
+      const TransactionDate = (transaction.TransactionDate ? transaction.TransactionDate.trim() : null);
+      const PostedDate = (transaction.PostedDate ? transaction.PostedDate.trim() : null);
+      const Description = (transaction.Description ? transaction.Description.trim() : null);
+      const Card = (transaction["Card No."] ? transaction["Card No."].trim() : null);
+      const Type = (transaction.Type ? transaction.Type.trim() : null);
+      const Charges = (transaction.Charges ? transaction.Charges.trim() : null);
+      const Payments = (transaction.Payments ? transaction.Payments.trim() : null);
+      const Debit = (transaction.Debit ? transaction.Debit.trim() : null);
+      const Credit = (transaction.Credit ? transaction.Credit.trim() : null);
 
-        return transactionObj;
-      });
-    }
+      //Validate calculated values
+      const type = (
+        Object.keys(transaction).includes("Credit") && Object.keys(transaction).includes("Debit") ?
+        //Checking/Savings account
+        nullCoalesce(Type, (Credit && (Number(Credit) || Credit !== "0") ? "Credit" : (Debit && (Number(Debit) || Debit !== "0") ? "Debit" : null))) : (
+          Object.keys(transaction).includes("Charges") && Object.keys(transaction).includes("Payments") ?
+          //Credit Card account
+          nullCoalesce(Type, (Charges && (Number(Charges) || Charges !== "0") ? "Charges" : (Payments && (Number(Payments) || Payments !== "0") ? "Payments" : null))) :
+          null
+        )
+      );
+      const transactionDate = convertDateStringToDate(nullCoalesce(TransactionDate, Date), "MM/dd/yyyy");
+      if (isFalsy(type) || isFalsy(transactionDate)) throw new Error(`Unable to read transaction.\r\n${transaction}`);
 
-    //Return the transaction objects
-    return transactions;
+      return {
+        PostedDate: (!isFalsy(PostedDate) ? convertDateStringToDate(PostedDate, "MM/dd/yyyy") : null),
+        TransactionDate: transactionDate,
+        Card: (Card ? `*${Card}` : null),
+        Type: type,
+        Description,
+        DescriptionDisplay: null,
+        Amount: Number(`${(["Charges","Debit"].includes(type) ? "-" : "")}${transaction[type]}`),
+        Category: null,
+        Notes: null,
+        Tags: [],
+      };
+    });
   }
   catch (err) {
     throw err;
@@ -258,4 +238,18 @@ export const formatTransactionDisplay = function(transaction) {
     Category: transaction.Category || "",
     Notes: transaction.Notes || "",
   };
+};
+
+export const isTransactionDuplicate = (potentialDuplicate, transactions)=>{
+  return transactions.find(transaction=>
+    areObjectsEqual({
+      TransactionDate: transaction.TransactionDate,
+      Description: transaction.Description,
+      Amount: transaction.Amount,
+    }, {
+      TransactionDate: potentialDuplicate.TransactionDate,
+      Description: potentialDuplicate.Description,
+      Amount: potentialDuplicate.Amount,
+    }
+  ));
 };

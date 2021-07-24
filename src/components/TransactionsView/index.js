@@ -6,9 +6,11 @@ import TransactionsData from './../TransactionsData';
 import TransactionDetailModal from './../TransactionDetailModal';
 import TransactionsImportDuplicatesModal from './../TransactionsImportDuplicatesModal';
 
+import {useBudgetCycleTransactions} from './../../hooks';
+
 import './index.scss';
 
-const TransactionsView = ({ transactions, transactionsImportDuplicatesModalNewTransactions, transactionsImportDuplicatesModalDuplicates, isTransactionsImportDuplicatesModalOpen, onTransactionsImportDuplicatesModalClose, onTransactionsImportDuplicatesModalSubmit, onTransactionsImportFormSubmit, onTransactionsImportFormFileInputChange, onTransactionDetailModalSubmit:onTransactionDetailModalSubmitProp, setFooterNavbar })=>{
+const TransactionsView = ({ transactions, budgetCycle, transactionsImportDuplicatesModalNewTransactions, transactionsImportDuplicatesModalDuplicates, isTransactionsImportDuplicatesModalOpen, onTransactionsImportDuplicatesModalClose, onTransactionsImportDuplicatesModalSubmit, onTransactionsImportFormSubmit, onTransactionsImportFormFileInputChange, onTransactionDetailModalSubmit:onTransactionDetailModalSubmitProp, setFooterNavbar })=>{
   //Send the route to the footer navbar
   const route = useLocation().pathname;
   useEffect(()=>{
@@ -17,6 +19,7 @@ const TransactionsView = ({ transactions, transactionsImportDuplicatesModalNewTr
 
   const [transactionDetailModalTransaction, setTransactionDetailModalTransaction] = useState(null);
   const [isTransactionDetailModalOpen, setIsTransactionDetailModalOpen] = useState(false);
+  const currentBudgetCycleTransactions = useBudgetCycleTransactions(transactions, budgetCycle);
 
   const openTransactionDetailModal = ()=>{
     setIsTransactionDetailModalOpen(true);
@@ -38,11 +41,10 @@ const TransactionsView = ({ transactions, transactionsImportDuplicatesModalNewTr
 
   return (
     <div className="view transactions-view">
-      <div className="container">
+      <div className="container-fluid">
         <h1 className="display-1">Ledger</h1>
-        {/* <button className="btn btn-dark" type="button" data-toggle="collapse" data-target="#transaction-import-form">Import Transactions</button> */}
         <TransactionsImportForm onSubmit={onTransactionsImportFormSubmit} onFileInputChange={onTransactionsImportFormFileInputChange} />
-        <TransactionsData transactions={transactions} onTransactionEditButtonClick={onTransactionEditButtonClick} />
+        <TransactionsData transactions={currentBudgetCycleTransactions} onTransactionEditButtonClick={onTransactionEditButtonClick} />
       </div>
       <TransactionDetailModal transaction={transactionDetailModalTransaction} buttonsOptions={{cancelButton: "Cancel", okButton: "Save"}} isOpen={isTransactionDetailModalOpen} onClose={closeTransactionDetailModal} onSubmit={onTransactionDetailModalSubmit} />
       <TransactionsImportDuplicatesModal newTransactions={transactionsImportDuplicatesModalNewTransactions} duplicates={transactionsImportDuplicatesModalDuplicates} isOpen={isTransactionsImportDuplicatesModalOpen} onClose={onTransactionsImportDuplicatesModalClose} onSubmit={onTransactionsImportDuplicatesModalSubmit} />

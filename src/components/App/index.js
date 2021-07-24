@@ -1,7 +1,7 @@
 import {useState, useEffect} from 'react';
 import {BrowserRouter as Router, Switch, Route, Link} from 'react-router-dom';
 
-import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON, getMonthFromNumber, getCurrentYear, getBillingCycleFromDate, areObjectsEqual, typeCheckTransactions, categorizeTransactionByDescription, importTransactions} from './../../utilities';
+import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON, getMonthFromNumber, getCurrentYear, getBudgetCycleFromDate, getBudgetCycleString, areObjectsEqual, typeCheckTransactions, isTransactionDuplicate, categorizeTransactionByDescription, importTransactions} from './../../utilities';
 import {initAuthorization} from './../../googleApi';
 import {getTransactions, updateTransactions, getBudgetsData, getAccountsData, getAccountData} from './../../api';
 import {useScript, useConsoleLog} from './../../hooks';
@@ -26,11 +26,12 @@ const App = () => {
   const [accountData, setAccountData] = useState({});
 
   const [footerNavbar, setFooterNavbar] = useState(null);
-  const [budgetCycle, setBudgetCycle] = useState(getBillingCycleFromDate(new Date()));
+  const [budgetCycle, setBudgetCycle] = useState(getBudgetCycleFromDate(new Date()));
   const [transactionsImportDuplicatesModalNewTransactions, setTransactionsImportDuplicatesModalNewTransactions] = useState([]);
   const [transactionsImportDuplicatesModalDuplicates, setTransactionsImportDuplicatesModalDuplicates] = useState([]);
   const [isTransactionsImportDuplicatesModalOpen, setIsTransactionsImportDuplicatesModalOpen] = useState(false);
   const [signedInUser, setSignedInUser] = useState(undefined);
+  const [currentBudgetCycleTransactions, setCurrentBudgetCycleTransactions] = useState(null);
 
   //Log data
   useConsoleLog(transactions, "Transactions Data:");
@@ -38,6 +39,7 @@ const App = () => {
   useConsoleLog(accountsData, "Accounts Data:");
   useConsoleLog(accountData, "Account Data:");
   useConsoleLog(signedInUser, "signedInUser:");
+  useConsoleLog(currentBudgetCycleTransactions, "currentBudgetCycleTransactions:");
 
   //Load the Google API
   const gapiLoaded = useScript("https://apis.google.com/js/api.js");
@@ -54,6 +56,8 @@ const App = () => {
     updateTransactions(transactions);
   }, [transactions]);
 
+  //Whenever the user gets logged in,
+  // attempt to query for data
   useEffect(async ()=>{
     if (!signedInUser) return;
     setTransactionsWrapper(await getTransactions());
@@ -64,14 +68,14 @@ const App = () => {
 
   //Create state handlers
   const checkTransactionsForDuplicates = (previousTransactions, newTransactions)=>{
-    if(!previousTransactions) return newTransactions;
+    if(!previousTransactions.length) return newTransactions;
 
     //Look for possible duplicate transactions,
     // and confirm if they are duplicates (shouldn't be added),
     // or not duplicates (should be added)
     const duplicates = [];
     newTransactions.forEach(newTransaction=>{
-      const duplicate = previousTransactions.find(previousTransaction=>areObjectsEqual(newTransaction, previousTransaction));
+      const duplicate = isTransactionDuplicate(newTransaction, previousTransactions);
       if (duplicate) {
         duplicates.push(duplicate);
       }
@@ -83,7 +87,7 @@ const App = () => {
     //Otherwise, ask user to confirm true duplicates,
     // and just return the previous data for now
     console.log("Duplicates: ", duplicates);
-    setTransactionsImportDuplicatesModalNewTransactions(transactions);
+    setTransactionsImportDuplicatesModalNewTransactions(newTransactions);
     setTransactionsImportDuplicatesModalDuplicates(duplicates);
     openTransactionsImportDuplicatesModal();
 
@@ -104,10 +108,12 @@ const App = () => {
     //Assign category & notes from description
     const transactions = typeCheckedTransactions.map(transaction=>categorizeTransactionByDescription(transaction));
 
-    //Call the data manipulation callback
-    if (callback) return callback(previousTransactions, transactions, oldTransaction);
+    //Return the data manipulation callback result, sorted
+    if (callback) return callback(previousTransactions, transactions, oldTransaction)
+      .sort((a,b)=>b.TransactionDate-a.TransactionDate);
 
-    return transactions;
+    //Otherwise, just return the transactions, sorted
+    return transactions.sort((a,b)=>b.TransactionDate-a.TransactionDate);
   };
 
   const setTransactionsWrapper = newTransactions=>{
@@ -150,6 +156,19 @@ const App = () => {
     });
   };
 
+  const appendTransactionsHandler = newTransactions=>{
+    //Import new transactions
+    setTransactions(previousTransactions=>{
+      const callback = (previousTransactions, newTransactions)=>{
+        //Append the new transactions
+        return [...previousTransactions, ...newTransactions];
+      };
+
+      //Run through transaction normalization
+      return setTransactionsHandler(previousTransactions, newTransactions, callback);
+    });
+  };
+
   //Create event listeners
   const onTransactionsImportFormSubmit = scrapedTransactionsData=>{
     //Import the scraped transactions data
@@ -181,10 +200,10 @@ const App = () => {
 
   const onTransactionsImportDuplicatesModalSubmit = (filteredNewTransactions)=>{
     //Update transactions with the new transaction
-    setTransactions(previousTransactions=>[...previousTransactions, ...filteredNewTransactions]);
+    appendTransactionsHandler(filteredNewTransactions);
 
-    //Reset the duplicates
-    //setTransactionsImportDuplicatesModalDuplicates([]);
+    //Close the modal
+    closeTransactionsImportDuplicatesModal();
   };
 
   const onSignInChange = signInInfo=>{
@@ -215,10 +234,10 @@ const App = () => {
             <DashboardView signedInUser={signedInUser} transactions={transactions} accountsData={accountsData} accountData={accountData} budgetsData={budgetsData} budgetCycle={budgetCycle} setFooterNavbar={setFooterNavbar} />
           </Route>
           <Route path="/budgets" exact>
-            <BudgetsView transactions={transactions} budgetsData={budgetsData} setFooterNavbar={setFooterNavbar} />
+            <BudgetsView transactions={transactions} budgetsData={budgetsData} budgetCycle={budgetCycle} setFooterNavbar={setFooterNavbar} />
           </Route>
           <Route path="/transactions" exact>
-            <TransactionsView transactions={transactions} transactionsImportDuplicatesModalNewTransactions={transactionsImportDuplicatesModalNewTransactions} transactionsImportDuplicatesModalDuplicates={transactionsImportDuplicatesModalDuplicates} isTransactionsImportDuplicatesModalOpen={isTransactionsImportDuplicatesModalOpen} onTransactionsImportDuplicatesModalClose={closeTransactionsImportDuplicatesModal} onTransactionsImportDuplicatesModalSubmit={onTransactionsImportDuplicatesModalSubmit} onTransactionsImportFormSubmit={onTransactionsImportFormSubmit} onTransactionsImportFormFileInputChange={onTransactionsImportFormFileInputChange} onTransactionDetailModalSubmit={onTransactionDetailModalSubmit} setFooterNavbar={setFooterNavbar} />
+            <TransactionsView transactions={transactions} budgetCycle={budgetCycle} transactionsImportDuplicatesModalNewTransactions={transactionsImportDuplicatesModalNewTransactions} transactionsImportDuplicatesModalDuplicates={transactionsImportDuplicatesModalDuplicates} isTransactionsImportDuplicatesModalOpen={isTransactionsImportDuplicatesModalOpen} onTransactionsImportDuplicatesModalClose={closeTransactionsImportDuplicatesModal} onTransactionsImportDuplicatesModalSubmit={onTransactionsImportDuplicatesModalSubmit} onTransactionsImportFormSubmit={onTransactionsImportFormSubmit} onTransactionsImportFormFileInputChange={onTransactionsImportFormFileInputChange} onTransactionDetailModalSubmit={onTransactionDetailModalSubmit} setFooterNavbar={setFooterNavbar} />
           </Route>
           <Route path="/settings" exact>
             <SettingsView setFooterNavbar={setFooterNavbar} />
