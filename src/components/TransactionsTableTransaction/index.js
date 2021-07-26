@@ -10,7 +10,7 @@ const TransactionsTableTransaction = ({ transaction, onTransactionEditButtonClic
   const [transactionDisplay, setTransactionDisplay] = useState({
     PostedDate: "",
     TransactionDate: "",
-    Card: "",
+    AccountNumber: "",
     Type: "",
     Description: "",
     Amount: "",
@@ -24,7 +24,7 @@ const TransactionsTableTransaction = ({ transaction, onTransactionEditButtonClic
   return (
     <tr className="transaction">
       <td>{transactionDisplay.TransactionDate}</td>
-      <td>{transactionDisplay.Card}</td>
+      <td>{transactionDisplay.AccountNumber}</td>
       <td>{transactionDisplay.Category}</td>
       <td>{transactionDisplay.Description}</td>
       <td>{transactionDisplay.Notes}</td>

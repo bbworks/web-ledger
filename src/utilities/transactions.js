@@ -2,23 +2,13 @@ import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON, conver
 
 //Declare private functions
 const getTransactionDefaultDescriptionDisplay = function(description) {
-  if (!description) return null;
+  if (!description) return "";
 
   return `*${
     description
       //.replace(/([\w\'&]+)/g, p1=>p1[0].toUpperCase() + p1.substring(1).toLowerCase()) /* set Pascal casing between words */
   }`;
 };
-
-// const filterTransactions = function (transactions) {
-//   return transactions.map(transaction=>(
-//     {
-//       ...transaction,
-//       display: (transaction.display.Description && transaction.display.Description.toUpperCase() === "PAYMENT - THANK YOU ATLANTA GA" ? null : transaction.display),
-//     }
-//   ));
-// };
-
 
 //Declare public functions
 export const typeCheckTransactions = function (transactions) {
@@ -47,8 +37,22 @@ export const categorizeTransactionByDescription = function(transaction) {
   //Define a base for categorized transaction data
   let categorizedTransactionData = {};
 
+  //Define matches, if we need matched capture groups
+  let matches;
+
+  //Income
+       if (Description.match(/ELECTRONIC\/ACH CREDIT INFOR US , INC\. PAYROLL 3203469219/i))  categorizedTransactionData = {Category: "Infor payroll", DescriptionDisplay: "Deposit to CHG *7740", Notes: null};
+  else if (Description.match(/INTEREST PAYMENT PAID THIS STATEMENT THRU \d{2}\/\d{2}/i))  categorizedTransactionData = {Category: "Other income", DescriptionDisplay: "Interest paid", Notes: null};
+
+  //Transfers
+  else if (matches = Description.match(/ONLINE BANKING TRANSFER (?:MOBILE APP TRANSFER )?TO (?:\d{4} )?(\d{13})/i))  categorizedTransactionData = {Category: null, DescriptionDisplay: `Transfer to *${matches[1].substring(matches[1].length-4)}`, Notes: null};
+  else if (matches = Description.match(/ONLINE BANKING TRANSFER CREDIT FROM \d{4} (\d{13})/i))  categorizedTransactionData = {Category: null, DescriptionDisplay: `Transfer from *${matches[1].substring(matches[1].length-4)}`, Notes: null};
+
+  //Payments
+  else if (matches = Description.match(/CREDIT CARD PAYMENT ONLINE BANKING TRANSFER TO \d{4} \d{6}\*{6}(\d{4})/i))  categorizedTransactionData = {Category: null, DescriptionDisplay: `Payment for CCD *${matches[1]}`, Notes: null};
+
   //Bills
-       if (Description.match(/Spectrum 855-707-7328 SC/i))  categorizedTransactionData = {Category: "Spectrum Internet", DescriptionDisplay: "Charge to CCD *3991", Notes: null};
+  else if (Description.match(/Spectrum 855-707-7328 SC/i))  categorizedTransactionData = {Category: "Spectrum Internet", DescriptionDisplay: "Charge to CCD *3991", Notes: null};
   else if (Description.match(/Simplisafe 888-957-4675 Ma/i))  categorizedTransactionData = {Category: "SimpliSafe (for mom)", DescriptionDisplay: "Charge to CCD *3991", Notes: null};
   else if (Description.match(/SDC\*Laurens Electric C Laurens SC/i))  categorizedTransactionData = {Category: "Laurens Electric ProTec Security", DescriptionDisplay: "Charge to CCD *3991", Notes: null};
   else if (Description.match(/SJWD Water District 8649492805 SC/i))  categorizedTransactionData = {Category: "SJWD Water District", DescriptionDisplay: "Charge to CCD *3991", Notes: null};
@@ -159,7 +163,7 @@ export const importTransactions = function(transactionsData, dataType) {
           return {
             PostedDate: null,
             TransactionDate: convertDateStringToDate(TransactionDate, "MM/dd/yy"),
-            Card: null,
+            AccountNumber: null,
             Type: null,
             Description,
             DescriptionDisplay: null,
@@ -186,7 +190,7 @@ export const importTransactions = function(transactionsData, dataType) {
       const TransactionDate = (transaction.TransactionDate ? transaction.TransactionDate.trim() : null);
       const PostedDate = (transaction.PostedDate ? transaction.PostedDate.trim() : null);
       const Description = (transaction.Description ? transaction.Description.trim() : null);
-      const Card = (transaction["Card No."] ? transaction["Card No."].trim() : null);
+      const AccountNumber = (transaction["Card No."] ? transaction["Card No."].trim() : null);
       const Type = (transaction.Type ? transaction.Type.trim() : null);
       const Charges = (transaction.Charges ? transaction.Charges.trim() : null);
       const Payments = (transaction.Payments ? transaction.Payments.trim() : null);
@@ -210,7 +214,7 @@ export const importTransactions = function(transactionsData, dataType) {
       return {
         PostedDate: (!isFalsy(PostedDate) ? convertDateStringToDate(PostedDate, "MM/dd/yyyy") : null),
         TransactionDate: transactionDate,
-        Card: (Card ? `*${Card}` : null),
+        AccountNumber: (AccountNumber ? `*${AccountNumber}` : null),
         Type: type,
         Description,
         DescriptionDisplay: null,
@@ -231,7 +235,7 @@ export const formatTransactionDisplay = function(transaction) {
     ...transaction,
     PostedDate: (transaction.PostedDate ? new Date(transaction.PostedDate).toLocaleDateString().toString() : ""),
     TransactionDate: (transaction.TransactionDate ? new Date(transaction.TransactionDate).toLocaleDateString().toString() : ""),
-    Card: transaction.Card || "",
+    AccountNumber: transaction.AccountNumber || "",
     Type: transaction.Type || "",
     Description: nullCoalesce(transaction.DescriptionDisplay, getTransactionDefaultDescriptionDisplay(transaction.Description)) || "",
     Amount: convertNumberToCurrency(transaction.Amount) || "",

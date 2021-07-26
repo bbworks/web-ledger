@@ -10,7 +10,7 @@ import './index.scss';
 const TransactionDetailModal = ({ transaction, buttonsOptions, isOpen, onClose, onSubmit })=>{
   const [PostedDate, setPostedDate] = useState(""); //empty string, as initial value for input[type="text"]
   const [TransactionDate, setTransactionDate] = useState(""); //empty string, as initial value for input[type="text"]
-  const [Card, setCard] = useState(""); //empty string, as initial value for input[type="text"]
+  const [AccountNumber, setAccountNumber] = useState(""); //empty string, as initial value for input[type="text"]
   const [Amount, setAmount] = useState(""); //empty string, as initial value for input[type="text"]
   const [Description, setDescription] = useState(""); //empty string, as initial value for input[type="text"]
   const [Category, setCategory] = useState(""); //empty string, as initial value for input[type="text"]
@@ -21,11 +21,11 @@ const TransactionDetailModal = ({ transaction, buttonsOptions, isOpen, onClose, 
   useEffect(()=>{
     if(!transaction) return;
 
-    console.log("Updating TransactionDetailModal state based on updated prop \"transaction\".", transaction, PostedDate, TransactionDate, Card, Amount, Description, Category, Notes, Type, Tags)
+    console.log("Updating TransactionDetailModal state based on updated prop \"transaction\".", transaction, PostedDate, TransactionDate, AccountNumber, Amount, Description, Category, Notes, Type, Tags)
     const transactionDisplay = formatTransactionDisplay(transaction);
     setPostedDate(transactionDisplay.PostedDate);
     setTransactionDate(transactionDisplay.TransactionDate);
-    setCard(transactionDisplay.Card);
+    setAccountNumber(transactionDisplay.AccountNumber);
     setAmount(transactionDisplay.Amount);
     setDescription(nullCoalesce(transactionDisplay.DescriptionDisplay, transactionDisplay.Description));
     setCategory(transactionDisplay.Category);
@@ -37,7 +37,7 @@ const TransactionDetailModal = ({ transaction, buttonsOptions, isOpen, onClose, 
   const transactionDetails = [
     {name: "PostedDate", placeholder: "PostedDate", value: PostedDate, tag: "input", tagType: "text", setState: setPostedDate},
     {name: "TransactionDate", placeholder: "TransactionDate", value: TransactionDate, tag: "input", tagType: "text", setState: setTransactionDate},
-    {name: "Card", placeholder: "Card", value: Card, tag: "input", tagType: "text", setState: setCard},
+    {name: "Account", placeholder: "Account Number", value: AccountNumber, tag: "input", tagType: "text", setState: setAccountNumber},
     {name: "Amount", placeholder: "Amount", value: Amount, tag: "input", tagType: "text", setState: setAmount},
     {name: "Description", placeholder: "Description", value: Description, tag: "input", tagType: "text", setState: setDescription},
     {name: "Category", placeholder: "Select a category...", value: Category, tag: "input", tagType: "text", setState: setCategory},
