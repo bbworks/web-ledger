@@ -6,7 +6,7 @@ import TransactionsData from './../TransactionsData';
 import TransactionDetailModal from './../TransactionDetailModal';
 import TransactionsImportDuplicatesModal from './../TransactionsImportDuplicatesModal';
 
-import {useBudgetCycleTransactions} from './../../hooks';
+import {useConsoleLog, useBudgetCycleTransactions} from './../../hooks';
 
 import './index.scss';
 
@@ -21,6 +21,8 @@ const TransactionsView = ({ transactions, budgetCycle, transactionsImportDuplica
   const [isTransactionDetailModalOpen, setIsTransactionDetailModalOpen] = useState(false);
   const currentBudgetCycleTransactions = useBudgetCycleTransactions(transactions, budgetCycle);
 
+  useConsoleLog(currentBudgetCycleTransactions, "currentBudgetCycleTransactions:");
+  
   const openTransactionDetailModal = ()=>{
     setIsTransactionDetailModalOpen(true);
   };

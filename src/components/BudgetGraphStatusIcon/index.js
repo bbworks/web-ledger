@@ -4,7 +4,7 @@ import {convertNumberToCurrency} from './../../utilities';
 
 import './index.scss';
 
-const BudgetGraphStatusIcon = ({ budget, overBudget })=> {
+const BudgetGraphStatusIcon = ({ budget, overBudget, overEarned })=> {
   let iconClass;
   let iconText;
   let iconColor;
@@ -28,8 +28,28 @@ const BudgetGraphStatusIcon = ({ budget, overBudget })=> {
       iconColor = "secondary";
     }
   }
+  if (budget.Type === "income") {
+    if (budget.amountSpent) {
+      if (budget.amountSpent === budget.Amount) {
+        iconClass = "fas fa-check-circle";
+        iconText = "Earned";
+        iconColor = "success";
+      }
+      if (overEarned) {
+        iconClass = "fas fa-check-circle";
+        iconText = "Over-earned";
+        iconColor = "success";
+      }
+      if (!overEarned) {
+        iconClass = "fas fa-exclamation-triangle";
+        iconText = "Under-earned";
+        iconColor = "warning";
+      }
+    }
+  }
 
-  if (budget.Type === "bill") {
+  //If there's an icon to render, render
+  if (iconText) {
     return (
       <div className={`budget-graph-status-icon-container d-inline-block badge rounded-pill text-${iconColor} bg-light ms-1 border border-${iconColor}`}>
         <i className={`budget-graph-status-icon fas fa-xs ${iconClass} me-1`}></i>
@@ -38,6 +58,7 @@ const BudgetGraphStatusIcon = ({ budget, overBudget })=> {
     )
   }
 
+  //Otherwise, return null
   return null;
 };
 

@@ -7,7 +7,7 @@ const TransactionsTableBody = ({ transactions, onTransactionEditButtonClick })=>
   const calculatePaymentAmountTotal = ()=>{
     return convertNumberToCurrency(
       getSumByProp(
-        transactions.filter(transaction=>transaction.Type !== "Payments")
+        transactions.filter(transaction=>!["Payments","Credit"].includes(transaction.Type))
         , "Amount"
       )
     )

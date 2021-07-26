@@ -1,7 +1,7 @@
 import {useState, useEffect} from 'react';
 import {BrowserRouter as Router, Switch, Route, Link} from 'react-router-dom';
 
-import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON, getMonthFromNumber, getCurrentYear, getBudgetCycleFromDate, getBudgetCycleString, areObjectsEqual, typeCheckTransactions, isTransactionDuplicate, categorizeTransactionByDescription, importTransactions} from './../../utilities';
+import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON, getMonthFromNumber, getCurrentYear, getBudgetCycleFromDate, getBudgetCycleString, areObjectsEqual, typeCheckTransactions, isTransactionDuplicate, categorizeTransactionByDescription, importTransactions, typeCheckBudgetsData, typeCheckAccountsData, typeCheckAccountData} from './../../utilities';
 import {initAuthorization} from './../../googleApi';
 import {getTransactions, updateTransactions, getBudgetsData, getAccountsData, getAccountData} from './../../api';
 import {useScript, useConsoleLog} from './../../hooks';
@@ -31,7 +31,6 @@ const App = () => {
   const [transactionsImportDuplicatesModalDuplicates, setTransactionsImportDuplicatesModalDuplicates] = useState([]);
   const [isTransactionsImportDuplicatesModalOpen, setIsTransactionsImportDuplicatesModalOpen] = useState(false);
   const [signedInUser, setSignedInUser] = useState(undefined);
-  const [currentBudgetCycleTransactions, setCurrentBudgetCycleTransactions] = useState(null);
 
   //Log data
   useConsoleLog(transactions, "Transactions Data:");
@@ -39,7 +38,6 @@ const App = () => {
   useConsoleLog(accountsData, "Accounts Data:");
   useConsoleLog(accountData, "Account Data:");
   useConsoleLog(signedInUser, "signedInUser:");
-  useConsoleLog(currentBudgetCycleTransactions, "currentBudgetCycleTransactions:");
 
   //Load the Google API
   const gapiLoaded = useScript("https://apis.google.com/js/api.js");
@@ -61,9 +59,9 @@ const App = () => {
   useEffect(async ()=>{
     if (!signedInUser) return;
     setTransactionsWrapper(await getTransactions());
-    setBudgetsData(await getBudgetsData());
-    setAccountsData(await getAccountsData());
-    setAccountData(await getAccountData());
+    setBudgetsDataWrapper(await getBudgetsData());
+    setAccountsDataWrapper(await getAccountsData());
+    setAccountDataWrapper(await getAccountData());
   }, [signedInUser]);
 
   //Create state handlers
@@ -168,6 +166,37 @@ const App = () => {
       return setTransactionsHandler(previousTransactions, newTransactions, callback);
     });
   };
+
+  const setBudgetsDataWrapper = newBudgetsData=>{
+    //Import new data
+    setBudgetsData(previousBudgetsData=>{
+      if (!newBudgetsData) return [];
+
+      const typeCheckedData = typeCheckBudgetsData(newBudgetsData);
+      return typeCheckedData;
+    });
+  };
+
+  const setAccountsDataWrapper = newAccountsData=>{
+    //Import new data
+    setAccountsData(previousAccountsData=>{
+      if (!newAccountsData) return [];
+
+      const typeCheckedData = typeCheckAccountsData(newAccountsData);
+      return typeCheckedData;
+    });
+  };
+
+  const setAccountDataWrapper = newAccountData=>{
+    //Import new data
+    setAccountData(previousAccountData=>{
+      if (!newAccountData) return {};
+
+      const typeCheckedData = typeCheckAccountData(newAccountData);
+      return typeCheckedData;
+    });
+  };
+
 
   //Create event listeners
   const onTransactionsImportFormSubmit = scrapedTransactionsData=>{

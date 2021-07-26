@@ -7,13 +7,14 @@ import BudgetGraphStatusIcon from './../BudgetGraphStatusIcon';
 import './index.scss';
 
 const BudgetGraph = ({ budget })=>{
-  const isExpenseBudget = budget.Amount <= 0
-  const overBudget = (isExpenseBudget ? budget.amountSpent < budget.Amount : budget.amountSpent > budget.Amount);
+  const isExpenseBudget = budget.Type !== "income";
+  const overBudget = (isExpenseBudget ? budget.amountSpent < budget.Amount : false);
+  const overEarned = (!isExpenseBudget ? budget.amountSpent > budget.Amount : false);
 
   return (
     <div className="budget-graph-container my-4">
       <h5 className="budget-graph-title d-inline-block">{budget.Name}</h5>
-      <BudgetGraphStatusIcon budget={budget} overBudget={overBudget} />
+      <BudgetGraphStatusIcon budget={budget} overBudget={overBudget} overEarned={overEarned} />
       <div className="budget-graph-bar-outer">
         <h6 className="budget-graph-bar-stats" style={
           {
@@ -23,7 +24,7 @@ const BudgetGraph = ({ budget })=>{
             ),
           }
         }>
-          {convertNumberToCurrency(Math.abs(budget.amountSpent))} of {convertNumberToCurrency(Math.abs(budget.Amount))} spent
+          {convertNumberToCurrency(Math.abs(budget.amountSpent))} of {convertNumberToCurrency(Math.abs(budget.Amount))} {(isExpenseBudget ? "spent" : "earned")}
         </h6>
         <h6 className="budget-graph-bar-remaining text-muted" >
           {convertNumberToCurrency(budget.Amount - budget.amountSpent)} {(overBudget ? "overspent" : "remaining")}

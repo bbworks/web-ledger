@@ -41,7 +41,7 @@ export const categorizeTransactionByDescription = function(transaction) {
   let matches;
 
   //Income
-       if (Description.match(/ELECTRONIC\/ACH CREDIT \d{5} US , INC\. PAYROLL \d{10}/i))  categorizedTransactionData = {Category: "Infor payroll", DescriptionDisplay: "Deposit to CHG *7740", Notes: null};
+       if (Description.match(/ELECTRONIC\/ACH CREDIT \w{5} US , INC\. PAYROLL \d{10}/i))  categorizedTransactionData = {Category: "Infor payroll", DescriptionDisplay: "Deposit to CHG *7740", Notes: null};
   else if (Description.match(/INTEREST PAYMENT PAID THIS STATEMENT THRU \d{2}\/\d{2}/i))  categorizedTransactionData = {Category: "Other income", DescriptionDisplay: "Interest paid", Notes: null};
 
   //Transfers

@@ -19,3 +19,12 @@ export const getBudgetAmountSpentFromTransactions = (budgetName, transactions)=>
   };
   return getSumByProp(transactions.filter(transaction=>check(transaction)), "Amount");
 };
+
+export const typeCheckBudgetsData = budgetsData=>{
+  return budgetsData.map(budgetData=>({
+      ...budgetData,
+      Amount: (budgetData.Amount ? Number(budgetData.Amount) : null),
+      IsPaidByCreditCardNotAccount: (budgetData.IsPaidByCreditCardNotAccount ? Boolean(budgetData.IsPaidByCreditCardNotAccount) : null),
+    })
+  );
+};
