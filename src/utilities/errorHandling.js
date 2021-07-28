@@ -1,4 +1,4 @@
-export const throwException = err =>{
+export const throwException = (err, throwEx=true)=>{
   //Build an exception to throw
   let exception = {};
   let errorMsg = null;
@@ -37,5 +37,5 @@ export const throwException = err =>{
   window.alert(exceptionMsg);
 
   //Throw the original error
-  throw err;
+  if (throwEx) throw err;
 }

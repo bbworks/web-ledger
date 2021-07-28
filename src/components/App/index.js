@@ -4,7 +4,7 @@ import {BrowserRouter as Router, Switch, Route, Link} from 'react-router-dom';
 
 //Import source code
 import {getBudgetCycleFromDate, typeCheckTransactions, isTransactionDuplicate, categorizeTransactionByDescription, importTransactions, typeCheckBudgetsData, typeCheckAccountsData, typeCheckAccountData} from './../../utilities';
-import {getSpreadsheetData, setSpreadsheetData, getCredentials, setCredentials, initAuthorization} from './../../googleApi';
+import {getSpreadsheetId, setSpreadsheetId, getClientId, setClientId, initAuthorization} from './../../googleApi';
 import {getTransactions, updateTransactions, getBudgetsData, getAccountsData, getAccountData} from './../../api';
 import {useScript, useConsoleLog, useLocalStorage} from './../../hooks';
 
@@ -254,12 +254,12 @@ const App = () => {
   //Declare settings
   const settings = {
     "Client Id": {
-      value: getCredentials().clientId,
-      update: function(newData){setCredentials({...getCredentials(), clientId: newData})},
+      value: getClientId(),
+      update: clientId=>setClientId(clientId),
     },
     "Spreadsheet id": {
-      value: getSpreadsheetData().spreadsheetId,
-      update: function(newData){setSpreadsheetData({...getSpreadsheetData(), spreadsheetId: newData})},
+      value: getSpreadsheetId(),
+      update: spreadsheetId=>setSpreadsheetId(spreadsheetId),
     }
   };
 
@@ -275,7 +275,9 @@ const App = () => {
   //If the user has not signed in, send them to the login page
   if (!signedInUser) return (
     <div className="App">
-      <SignInView />
+      <Router basename={(process.env.NODE_ENV === "production" ? process.env.PUBLIC_URL : null)}>
+        <SignInView />
+      </Router>
     </div>
   );
 

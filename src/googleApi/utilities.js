@@ -12,19 +12,47 @@ const getHeadersFromJSON = JSON=>{
 //Public functions
 export const getSpreadsheetData = ()=>{
   return JSON.parse(localStorage.getItem("spreadsheet-data"));
-}
+};
 
-export const setSpreadsheetData = newData=>{
-  return localStorage.setItem("spreadsheet-data", JSON.stringify(newData));
-}
+export const setSpreadsheetData = spreadsheetData=>{
+  return localStorage.setItem("spreadsheet-data", JSON.stringify(spreadsheetData));
+};
+
+export const getSpreadsheetId = ()=>{
+  const spreadsheetData = getSpreadsheetData();
+  return (spreadsheetData ? spreadsheetData.spreadsheetId : null);
+};
+
+export const setSpreadsheetId = spreadsheetId=>{
+  const spreadsheetData = getSpreadsheetData() || {};
+  const newSpreadsheetData = {
+    ...spreadsheetData,
+    spreadsheetId,
+  };
+  return setSpreadsheetData(newSpreadsheetData);
+};
 
 export const getCredentials = ()=>{
   return JSON.parse(localStorage.getItem("creds"));
-}
+};
 
-export const setCredentials = newData=>{
-  return localStorage.setItem("creds", JSON.stringify(newData));
-}
+export const setCredentials = credentials=>{
+  return localStorage.setItem("creds", JSON.stringify(credentials));
+};
+
+export const getClientId = ()=>{
+  const creds = getCredentials();
+  return (creds ? creds.clientId : null);
+};
+
+export const setClientId = clientId=>{
+  const creds = getCredentials() || {};
+  const newCreds = {
+    ...creds,
+    clientId,
+  };
+  return setCredentials(newCreds);
+};
 
 export const convertSheetsArraysToJSON = (data, delimiter=",")=>{
   if (!data) return null;

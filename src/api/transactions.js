@@ -6,7 +6,7 @@ export const getTransactions = async ()=>{
     return await getSheetsSpreadsheetValues("Transactions Data");
   }
   catch (err) {
-    throwException(err);
+    throwException(err, false);
     return [];
   }
 };
@@ -16,7 +16,7 @@ export const insertTransactions = async ()=>{
     return;
   }
   catch (err) {
-    throwException(err);
+    throwException(err, false);
     return;
   }
 };
@@ -26,7 +26,7 @@ export const updateTransactions = async transactions=>{
     return await updateSheetsSpreadsheetValues("Transactions Data", transactions);
   }
   catch (err) {
-    throwException(err);
+    throwException(err, false);
     return [];
   }
 };
@@ -36,7 +36,7 @@ export const deleteTransactions = async ()=>{
     return;
   }
   catch (err) {
-    throwException(err);
+    throwException(err, false);
     return;
   }
 };

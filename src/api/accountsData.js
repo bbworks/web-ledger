@@ -6,7 +6,7 @@ export const getAccountsData = async ()=>{
     return await getSheetsSpreadsheetValues("Accounts Data");
   }
   catch (err) {
-    throwException(err);
+    throwException(err, false);
     return [];
   }
 };

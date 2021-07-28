@@ -8,6 +8,7 @@ export const nullCoalesce = function(value) {
 };
 
 export const convertNumberToCurrency = function(value) {
+  if (isNaN(value)) return null;
   return Number(value)
     .toFixed(2)
     .toString()
@@ -208,8 +209,6 @@ export const convertDateStringToDate = (dateString, dateStringFormat)=>{
     if (Number.isNaN(monthString) || Number(monthString) < 1 || Number(monthString) > 31) return null;
 
     return Number(monthString);
-
-    return null;
   };
 
   return new Date(
