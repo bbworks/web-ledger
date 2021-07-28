@@ -10,6 +10,22 @@ const getHeadersFromJSON = JSON=>{
 };
 
 //Public functions
+export const getSpreadsheetData = ()=>{
+  return JSON.parse(localStorage.getItem("spreadsheet-data"));
+}
+
+export const setSpreadsheetData = newData=>{
+  return localStorage.setItem("spreadsheet-data", JSON.stringify(newData));
+}
+
+export const getCredentials = ()=>{
+  return JSON.parse(localStorage.getItem("creds"));
+}
+
+export const setCredentials = newData=>{
+  return localStorage.setItem("creds", JSON.stringify(newData));
+}
+
 export const convertSheetsArraysToJSON = (data, delimiter=",")=>{
   if (!data) return null;
 

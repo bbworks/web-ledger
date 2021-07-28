@@ -1,6 +1,8 @@
 import {useEffect} from 'react';
 import {useLocation} from 'react-router-dom';
 
+import {useBudgetCycleTransactions} from './../../hooks';
+
 import './index.scss';
 
 import DashboardHeader from './../DashboardHeader';
@@ -14,12 +16,14 @@ const DashboardView = ({ signedInUser, transactions, accountsData, accountData, 
     setFooterNavbar(route);
   }, []);
 
+  const currentBudgetCycleTransactions = useBudgetCycleTransactions(transactions, budgetCycle);
+
   return (
     <div className="view dashboard-view d-flex flex-column">
       <DashboardHeader signedInUser={signedInUser} />
       <main className="main flex-grow-1">
         <DashboardTop accountsData={accountsData} accountData={accountData} budgetCycle={budgetCycle} />
-        <DashboardContent transactions={transactions} budgetsData={budgetsData} />
+        <DashboardContent transactions={currentBudgetCycleTransactions} budgetsData={budgetsData} />
       </main>
     </div>
   );

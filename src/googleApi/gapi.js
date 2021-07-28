@@ -1,6 +1,4 @@
-import {convertSheetsArraysToJSON, convertJSONToSheetsArray, getDynamicPropertyByArray, convertColumnNumberToColumnLetter, convertColumnLetterToColumnNumber, convertArrayToA1Notation} from './utilities.js'
-
-const SPREADSHEET_ID = "1k_qus-eG4bBOnqVZ2oSCuY3988wDJHUth9M6M-6BBeA";
+import {getSpreadsheetData, setSpreadsheetData, convertSheetsArraysToJSON, convertJSONToSheetsArray, getDynamicPropertyByArray, convertColumnNumberToColumnLetter, convertColumnLetterToColumnNumber, convertArrayToA1Notation} from './utilities.js'
 
 export const callGoogleApiFunction = (googleApi, resourceType, method, optionsParam, pageToken)=>{
   //Declare variables
@@ -99,7 +97,7 @@ export const callGoogleApiFunction = (googleApi, resourceType, method, optionsPa
 
 //Declare our specific functions
 export const getSheetsSpreadsheet = async ()=>{
-  return callGoogleApiFunction("sheets", "spreadsheets", "get", {spreadsheetId: SPREADSHEET_ID});
+  return callGoogleApiFunction("sheets", "spreadsheets", "get", {spreadsheetId: getSpreadsheetData().spreadsheetId});
 };
 
 export const getSheetsSpreadsheetValues = async (sheetName, range)=>{
@@ -107,7 +105,7 @@ export const getSheetsSpreadsheetValues = async (sheetName, range)=>{
   if (typeof range === "string") range = [range]; //convert to an array of ranges if only one specified
   range = range.map(r=>`'${sheetName}'!${range}`); //Add the sheet name to the range
 
-  return callGoogleApiFunction("sheets", "spreadsheets.values", "get", {spreadsheetId: SPREADSHEET_ID, range});
+  return callGoogleApiFunction("sheets", "spreadsheets.values", "get", {spreadsheetId: getSpreadsheetData().spreadsheetId, range});
 };
 
 export const updateSheetsSpreadsheetValues = async (sheetName, valuesJSON, range)=>{
@@ -116,7 +114,7 @@ export const updateSheetsSpreadsheetValues = async (sheetName, valuesJSON, range
   range = range.map(r=>`'${sheetName}'!${range}`); //Add the sheet name to the range
 
   return callGoogleApiFunction("sheets", "spreadsheets.values", "update", {
-      spreadsheetId: SPREADSHEET_ID,
+      spreadsheetId: getSpreadsheetData().spreadsheetId,
       range,
       valueInputOption: "USER_ENTERED",
       includeValuesInResponse: true,

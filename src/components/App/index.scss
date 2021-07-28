@@ -9,6 +9,6 @@
 
 .view {
   background-color: #e3f2fd;
-  min-height: 100vh;
+  min-height: calc(100vh - 4rem);
   margin-bottom: 4rem;
 }

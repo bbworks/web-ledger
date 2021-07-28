@@ -1,11 +1,14 @@
+//Import package dependencies
 import {useState, useEffect} from 'react';
 import {BrowserRouter as Router, Switch, Route, Link} from 'react-router-dom';
 
-import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON, getMonthFromNumber, getCurrentYear, getBudgetCycleFromDate, getBudgetCycleString, areObjectsEqual, typeCheckTransactions, isTransactionDuplicate, categorizeTransactionByDescription, importTransactions, typeCheckBudgetsData, typeCheckAccountsData, typeCheckAccountData} from './../../utilities';
-import {initAuthorization} from './../../googleApi';
+//Import source code
+import {getBudgetCycleFromDate, typeCheckTransactions, isTransactionDuplicate, categorizeTransactionByDescription, importTransactions, typeCheckBudgetsData, typeCheckAccountsData, typeCheckAccountData} from './../../utilities';
+import {getSpreadsheetData, setSpreadsheetData, getCredentials, setCredentials, initAuthorization} from './../../googleApi';
 import {getTransactions, updateTransactions, getBudgetsData, getAccountsData, getAccountData} from './../../api';
-import {useScript, useConsoleLog} from './../../hooks';
+import {useScript, useConsoleLog, useLocalStorage} from './../../hooks';
 
+//Import custom components
 import SignInView from './../SignInView';
 import DashboardView from './../DashboardView';
 import BudgetsView from './../BudgetsView';
@@ -13,13 +16,13 @@ import TransactionsView from './../TransactionsView';
 import SettingsView from './../SettingsView';
 import FooterNavbar from './../FooterNavbar';
 
+//Import styles
 import './main.css';
 import './index.scss';
 
+
 const App = () => {
   //Set application state
-  const spreadsheetData = JSON.parse(localStorage.getItem("spreadsheet-data")) || {};
-
   const [transactions, setTransactions] = useState([]);
   const [budgetsData, setBudgetsData] = useState([]);
   const [accountsData, setAccountsData] = useState([]);
@@ -48,12 +51,6 @@ const App = () => {
     initAuthorization(onSignInChange, onSignInChange);
   }, [gapiLoaded]);
 
-  //Whenever the transactions are updated, save them off as well
-  useEffect(()=>{
-    if (!transactions.length) return;
-    updateTransactions(transactions);
-  }, [transactions]);
-
   //Whenever the user gets logged in,
   // attempt to query for data
   useEffect(async ()=>{
@@ -63,6 +60,12 @@ const App = () => {
     setAccountsDataWrapper(await getAccountsData());
     setAccountDataWrapper(await getAccountData());
   }, [signedInUser]);
+
+  //Whenever the transactions are updated, save them off as well
+  useEffect(()=>{
+    if (!transactions.length) return;
+    updateTransactions(transactions);
+  }, [transactions]);
 
   //Create state handlers
   const checkTransactionsForDuplicates = (previousTransactions, newTransactions)=>{
@@ -94,7 +97,7 @@ const App = () => {
 
   const setTransactionsHandler = (previousTransactions, newTransactions, callback, oldTransaction)=>{
     //If there are no new transactions, short-circuit
-    if (isFalsy(newTransactions)) return previousTransactions;
+    if (!newTransactions || !newTransactions.length) return previousTransactions;
 
     //Check that we have an array of transactions
     let transactionsArray = newTransactions;
@@ -239,6 +242,27 @@ const App = () => {
     setSignedInUser(signInInfo);
   };
 
+  const onSettingsViewSubmit = submittedData=>{
+    console.log(submittedData);
+
+    //Call the update function for each setting
+    Object.entries(submittedData).forEach(([settingName, settingValue])=>
+      settings[settingName].update(settingValue)
+    );
+  };
+
+  //Declare settings
+  const settings = {
+    "Client Id": {
+      value: getCredentials().clientId,
+      update: function(newData){setCredentials({...getCredentials(), clientId: newData})},
+    },
+    "Spreadsheet id": {
+      value: getSpreadsheetData().spreadsheetId,
+      update: function(newData){setSpreadsheetData({...getSpreadsheetData(), spreadsheetId: newData})},
+    }
+  };
+
   //Create a "loading page" while determining if the user is signed in
   if (signedInUser === undefined) return (
     <div className="App">
@@ -269,7 +293,7 @@ const App = () => {
             <TransactionsView transactions={transactions} budgetCycle={budgetCycle} transactionsImportDuplicatesModalNewTransactions={transactionsImportDuplicatesModalNewTransactions} transactionsImportDuplicatesModalDuplicates={transactionsImportDuplicatesModalDuplicates} isTransactionsImportDuplicatesModalOpen={isTransactionsImportDuplicatesModalOpen} onTransactionsImportDuplicatesModalClose={closeTransactionsImportDuplicatesModal} onTransactionsImportDuplicatesModalSubmit={onTransactionsImportDuplicatesModalSubmit} onTransactionsImportFormSubmit={onTransactionsImportFormSubmit} onTransactionsImportFormFileInputChange={onTransactionsImportFormFileInputChange} onTransactionDetailModalSubmit={onTransactionDetailModalSubmit} setFooterNavbar={setFooterNavbar} />
           </Route>
           <Route path="/settings" exact>
-            <SettingsView setFooterNavbar={setFooterNavbar} />
+            <SettingsView setFooterNavbar={setFooterNavbar} settings={settings} onSubmit={onSettingsViewSubmit}/>
           </Route>
         </Switch>
         <FooterNavbar active={footerNavbar} />

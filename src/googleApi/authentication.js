@@ -41,6 +41,8 @@ export const initAuthorization = (loginCallback, logoutCallback)=>{
 
     //Load the Google APIs
     loadGoogleApis(creds, loginCallback, logoutCallback)
+
+    return creds;
   }
   catch (err) {
     throwException(err);
