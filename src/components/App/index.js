@@ -263,20 +263,12 @@ const App = () => {
     }
   };
 
-  //Create a "loading page" while determining if the user is signed in
-  if (signedInUser === undefined) return (
-    <div className="App">
-      <div className="container-fluid d-flex justify-content-center align-items-center min-vh-100">
-        <i className="spinner fas fa-spinner fa-lg"></i>
-      </div>
-    </div>
-  );
-
-  //If the user has not signed in, send them to the login page
+  //If the user has not signed in, send them to the sign in page,
+  // and while the Google API is loading, disable the sign in button
   if (!signedInUser) return (
     <div className="App">
       <Router basename={(process.env.NODE_ENV === "production" ? process.env.PUBLIC_URL : null)}>
-        <SignInView />
+        <SignInView isReadyForSignIn={!(signedInUser===undefined)}/>
       </Router>
     </div>
   );

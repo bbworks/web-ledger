@@ -1,4 +1,4 @@
-export const throwException = (err, throwEx=true)=>{
+export const throwException = (err, throwEx=true, alertWindow=true)=>{
   //Build an exception to throw
   let exception = {};
   let errorMsg = null;
@@ -34,7 +34,8 @@ export const throwException = (err, throwEx=true)=>{
 
   //Send a prettified version of the error to the screen
   const exceptionMsg = `${errorMsg}\r\n${Object.entries(exception).length ? Object.entries(exception).map(([key, value])=>`  + ${key}: ${value}\r\n`).join("") : ''}\r\nThe application failed.`;
-  window.alert(exceptionMsg);
+
+  if (alertWindow) window.alert(exceptionMsg);
 
   //Throw the original error
   if (throwEx) throw err;

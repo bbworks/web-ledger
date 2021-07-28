@@ -106,12 +106,22 @@ const updateSigninStatus = (isSignedIn, loginCallback, logoutCallback)=>{
   console.info("Updated sign in status.");
 };
 
-export const signIn = ()=>{
-  window.gapi.auth2.getAuthInstance().signIn();
+export const signIn = async ()=>{
+  try {
+    await window.gapi.auth2.getAuthInstance().signIn();
+  }
+  catch (err) {
+    throwException(err, false, false);
+  }
 };
 
-export const signOut = ()=>{
-  window.gapi.auth2.getAuthInstance().signOut();
+export const signOut = async ()=>{
+  try {
+    await window.gapi.auth2.getAuthInstance().signOut();
+  }
+  catch (err) {
+    throwException(err, false, false);
+  }
 };
 
 const getProfileInformation = ()=>{
