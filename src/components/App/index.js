@@ -3,7 +3,7 @@ import {useState, useEffect} from 'react';
 import {BrowserRouter as Router, Switch, Route, Link} from 'react-router-dom';
 
 //Import source code
-import {getBudgetCycleFromDate, typeCheckTransactions, isTransactionDuplicate, categorizeTransactionByDescription, importTransactions, typeCheckBudgetsData, typeCheckAccountsData, typeCheckAccountData} from './../../utilities';
+import {getBudgetCycleFromDate, typeCheckTransactions, isTransactionDuplicate, categorizeTransactionByDescription, importTransactions, typeCheckBudgetsData, typeCheckAccountsData, typeCheckAccountData, throwException} from './../../utilities';
 import {getSpreadsheetId, setSpreadsheetId, getClientId, setClientId, initAuthorization} from './../../googleApi';
 import {getTransactions, updateTransactions, getBudgetsData, getAccountsData, getAccountData} from './../../api';
 import {useScript, useConsoleLog, useLocalStorage} from './../../hooks';
@@ -15,6 +15,7 @@ import BudgetsView from './../BudgetsView';
 import TransactionsView from './../TransactionsView';
 import SettingsView from './../SettingsView';
 import FooterNavbar from './../FooterNavbar';
+import SignInSettingsModal from './../SignInSettingsModal';
 
 //Import styles
 import './main.css';
@@ -34,6 +35,19 @@ const App = () => {
   const [transactionsImportDuplicatesModalDuplicates, setTransactionsImportDuplicatesModalDuplicates] = useState([]);
   const [isTransactionsImportDuplicatesModalOpen, setIsTransactionsImportDuplicatesModalOpen] = useState(false);
   const [signedInUser, setSignedInUser] = useState(undefined);
+  const [isSignInSettingsModalOpen, setIsSignInSettingsModalOpen] = useState(false);
+
+  //Declare settings
+  const settings = {
+    "Client Id": {
+      value: getClientId(),
+      update: clientId=>setClientId(clientId),
+    },
+    "Spreadsheet id": {
+      value: getSpreadsheetId(),
+      update: spreadsheetId=>setSpreadsheetId(spreadsheetId),
+    }
+  };
 
   //Log data
   useConsoleLog(transactions, "Transactions Data:");
@@ -45,11 +59,8 @@ const App = () => {
   //Load the Google API
   const gapiLoaded = useScript("https://apis.google.com/js/api.js");
 
-  //When the app starts, load the Google API
-  useEffect(async()=>{
-    if(!gapiLoaded) return;
-    initAuthorization(onSignInChange, onSignInChange);
-  }, [gapiLoaded]);
+  //When the Google API JS library loads, initialize the Google API
+  useEffect(()=>connectToGoogleAPI(), [gapiLoaded]);
 
   //Whenever the user gets logged in,
   // attempt to query for data
@@ -242,26 +253,50 @@ const App = () => {
     setSignedInUser(signInInfo);
   };
 
-  const onSettingsViewSubmit = submittedData=>{
-    console.log(submittedData);
-
+  const saveSettings = savedSettings=>{
     //Call the update function for each setting
-    Object.entries(submittedData).forEach(([settingName, settingValue])=>
+    Object.entries(savedSettings).forEach(([settingName, settingValue])=>
       settings[settingName].update(settingValue)
     );
   };
 
-  //Declare settings
-  const settings = {
-    "Client Id": {
-      value: getClientId(),
-      update: clientId=>setClientId(clientId),
-    },
-    "Spreadsheet id": {
-      value: getSpreadsheetId(),
-      update: spreadsheetId=>setSpreadsheetId(spreadsheetId),
+  const onSettingsViewSubmit = submittedSettings=>{
+    saveSettings(submittedSettings);
+  };
+
+  const openSignInSettingsModal = ()=>{
+    setIsSignInSettingsModalOpen(true);
+  };
+
+  const closeSignInSettingsModal = ()=>{
+    setIsSignInSettingsModalOpen(false);
+
+    //Re-attempt to initialize Google API again
+    connectToGoogleAPI();
+  };
+
+  const onSignInSettingsModalSubmit = submittedSettings=>{
+    saveSettings(submittedSettings);
+  };
+
+  const connectToGoogleAPI = async ()=>{
+    if(!gapiLoaded) return;
+
+    //Try to initialize the Google API
+    try {
+      initAuthorization(onSignInChange, onSignInChange);
+    }
+    catch (err) {
+      //If credentials weren't found, prompt the user for the credentials
+      if (err.name === "CredentialsNotFoundError") {
+        return openSignInSettingsModal();
+        // throw new Error("Failed to get authorization credentials.");
+      }
+      console.log("test")
+      return throwException(err);
     }
   };
+
 
   //If the user has not signed in, send them to the sign in page,
   // and while the Google API is loading, disable the sign in button
@@ -269,6 +304,7 @@ const App = () => {
     <div className="App">
       <Router basename={(process.env.NODE_ENV === "production" ? process.env.PUBLIC_URL : null)}>
         <SignInView isReadyForSignIn={!(signedInUser===undefined)}/>
+        <SignInSettingsModal settings={settings} isOpen={isSignInSettingsModalOpen} onClose={closeSignInSettingsModal} onSubmit={onSignInSettingsModalSubmit} />
       </Router>
     </div>
   );

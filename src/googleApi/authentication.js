@@ -16,17 +16,10 @@ const fetchAuthCredentials = ()=>{
     const creds = JSON.parse(localStorage.getItem("creds"));
     if (creds && creds.clientId) return creds;
 
-    //If credentials weren't found, prompt the user for the credentials
-    const clientId = window.prompt("Failed to get authorization credentials.\r\nPlease enter the client ID", "client_id");
-    if (clientId) {
-      const creds = JSON.parse(localStorage.getItem("creds"));
-      localStorage.setItem("creds", JSON.stringify({
-        ...creds,
-        clientId,
-      }));
-      return {clientId};
-    }
-    throw new Error("Failed to get authorization credentials.");
+    //If proper credentials weren't found, throw
+    const CredentialsNotFoundError = new Error("Failed to get authorization credentials.")
+    CredentialsNotFoundError.name = "CredentialsNotFoundError";
+    throw CredentialsNotFoundError;
   }
   catch (err) {
     throw err;
@@ -45,13 +38,18 @@ export const initAuthorization = (loginCallback, logoutCallback)=>{
     return creds;
   }
   catch (err) {
-    throwException(err);
+    return throwException(err);
   }
 };
 
 const loadGoogleApis = (creds, loginCallback, logoutCallback)=>{
-  console.info("Loading Google Client, OAuth2.0 APIs...");
-  window.gapi.load("client:auth2", ()=>{initializeGoogleApis(creds, loginCallback, logoutCallback)});
+  try {
+    console.info("Loading Google Client, OAuth2.0 APIs...");
+    window.gapi.load("client:auth2", ()=>{initializeGoogleApis(creds, loginCallback, logoutCallback)});
+  }
+  catch (err) {
+    return throwException(err);
+  }
 };
 
 //Initialize Google Client library (which simultaneously initializes Google OAuth2.0 library) and set up sign in listeners
@@ -78,7 +76,7 @@ const initializeGoogleApis = async (creds, loginCallback, logoutCallback)=>{
     updateSigninStatus(window.gapi.auth2.getAuthInstance().isSignedIn.get(), loginCallback, logoutCallback);
   })
   .catch(err=>{
-    throwException(err);
+    return throwException(err);
   });
 };
 
@@ -111,7 +109,7 @@ export const signIn = async ()=>{
     await window.gapi.auth2.getAuthInstance().signIn();
   }
   catch (err) {
-    throwException(err, false, false);
+    return throwException(err, false, false);
   }
 };
 
@@ -120,7 +118,7 @@ export const signOut = async ()=>{
     await window.gapi.auth2.getAuthInstance().signOut();
   }
   catch (err) {
-    throwException(err, false, false);
+    return throwException(err, false, false);
   }
 };
 
