@@ -9,7 +9,7 @@ import DashboardHeader from './../DashboardHeader';
 import DashboardTop from './../DashboardTop';
 import DashboardContent from './../DashboardContent';
 
-const DashboardView = ({ signedInUser, transactions, accountsData, accountData, budgetsData, budgetCycle, setFooterNavbar })=>{
+const DashboardView = ({ signedInUser, transactions, accountsData, accountData, budgetsData, budgetCycle, onBudgetCycleChange, setFooterNavbar })=>{
   //Send the route to the footer navbar
   const route = useLocation().pathname;
   useEffect(()=>{
@@ -22,7 +22,7 @@ const DashboardView = ({ signedInUser, transactions, accountsData, accountData, 
     <div className="view dashboard-view d-flex flex-column">
       <DashboardHeader signedInUser={signedInUser} />
       <main className="main flex-grow-1">
-        <DashboardTop accountsData={accountsData} accountData={accountData} budgetCycle={budgetCycle} />
+        <DashboardTop transactions={transactions} accountsData={accountsData} accountData={accountData} budgetCycle={budgetCycle} onBudgetCycleChange={onBudgetCycleChange} />
         <DashboardContent transactions={currentBudgetCycleTransactions} budgetsData={budgetsData} />
       </main>
     </div>

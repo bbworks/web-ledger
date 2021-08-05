@@ -1,10 +1,12 @@
 import {useState, useEffect} from 'react';
 
-import {convertNumberToCurrency, getBudgetCycleString} from './../../utilities';
+import {convertNumberToCurrency} from './../../utilities';
+
+import DashboardBudgetCycleDropdown from './../DashboardBudgetCycleDropdown';
 
 import './index.scss';
 
-const DashboardTop = ({ accountsData, accountData, budgetCycle })=>{
+const DashboardTop = ({ transactions, accountsData, accountData, budgetCycle, onBudgetCycleChange })=>{
   useEffect(()=>console.log("Accounts data:", accountsData), [accountsData]);
 
   return (
@@ -25,22 +27,7 @@ const DashboardTop = ({ accountsData, accountData, budgetCycle })=>{
           </div>
         </div>
       </div>
-      <div className="dashboard-month-dropdown dropdown">
-        <button id="dashboardMonthDropdown" className="btn dropdown-toggle container-fluid" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-          <strong className="dashboard-month-dropdown-month h2 d-block mb-0">
-            {getBudgetCycleString(budgetCycle)}
-          </strong>
-          <em className="dashboard-month-dropdown-month-description d-block text-muted h6">(current)</em>
-        </button>
-        <ul className="dropdown-menu container-fluid ">
-          <li><a href="#" className="dropdown-item">June 2021</a></li>
-          <li><a href="#" className="dropdown-item">May 2021</a></li>
-          <li><a href="#" className="dropdown-item">April 2021</a></li>
-          <li><a href="#" className="dropdown-item">March 2021</a></li>
-          <li><a href="#" className="dropdown-item">February 2021</a></li>
-          <li><a href="#" className="dropdown-item">January 2021</a></li>
-        </ul>
-      </div>
+      <DashboardBudgetCycleDropdown transactions={transactions} budgetCycle={budgetCycle} onChange={onBudgetCycleChange} />
     </div>
   );
 };

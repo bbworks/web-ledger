@@ -51,3 +51,14 @@ export const getBudgetCycleFromDate = date=>{
 export const getBudgetCycleString = date=>{
   return `${getMonthFromNumber(date.getMonth())} ${getCurrentYear(date)}`;
 };
+
+export const getBudgetCycleDescription = (budgetCycle,todayBudgetCycle=(new Date()))=>{
+  const fullYearDifference = todayBudgetCycle.getFullYear() - budgetCycle.getFullYear();
+  const monthDifference = (fullYearDifference*12) + (todayBudgetCycle.getMonth() - budgetCycle.getMonth());
+  if (monthDifference < 0) return null;
+  if (monthDifference === 0) return "current";
+  if (monthDifference === 1) return "last month";
+  if (monthDifference < 12) return `${monthDifference} month${monthDifference===1?"":"s"} ago`;
+  const yearDifference = Math.floor(monthDifference/12);
+  return `${yearDifference} year${yearDifference===1?"":"s"} ago`;
+}

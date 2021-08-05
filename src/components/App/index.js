@@ -55,6 +55,7 @@ const App = () => {
   useConsoleLog(accountsData, "Accounts Data:");
   useConsoleLog(accountData, "Account Data:");
   useConsoleLog(signedInUser, "signedInUser:");
+  useConsoleLog(budgetCycle, "budgetCycle:");
 
   //Load the Google API
   const gapiLoaded = useScript("https://apis.google.com/js/api.js");
@@ -297,6 +298,10 @@ const App = () => {
     }
   };
 
+  const onBudgetCycleChange = budgetCycle=>{
+    setBudgetCycle(budgetCycle);
+  };
+
 
   //If the user has not signed in, send them to the sign in page,
   // and while the Google API is loading, disable the sign in button
@@ -314,7 +319,7 @@ const App = () => {
       <Router basename={(process.env.NODE_ENV === "production" ? process.env.PUBLIC_URL : null)}>
         <Switch>
           <Route path={["/dashboard", "/"]} exact>
-            <DashboardView signedInUser={signedInUser} transactions={transactions} accountsData={accountsData} accountData={accountData} budgetsData={budgetsData} budgetCycle={budgetCycle} setFooterNavbar={setFooterNavbar} />
+            <DashboardView signedInUser={signedInUser} transactions={transactions} accountsData={accountsData} accountData={accountData} budgetsData={budgetsData} budgetCycle={budgetCycle} onBudgetCycleChange={onBudgetCycleChange} setFooterNavbar={setFooterNavbar} />
           </Route>
           <Route path="/budgets" exact>
             <BudgetsView transactions={transactions} budgetsData={budgetsData} budgetCycle={budgetCycle} setFooterNavbar={setFooterNavbar} />

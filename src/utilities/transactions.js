@@ -52,7 +52,6 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (matches = Description.match(/CREDIT CARD PAYMENT ONLINE BANKING TRANSFER TO \d{4} \d{6}\*{6}(\d{4})/i))  categorizedTransactionData = {Category: null, DescriptionDisplay: `Payment for CCD *${matches[1]}`, Notes: null};
 
   //Bills
-  else if (Description.match(/Spectrum 855-707-7328 SC/i))  categorizedTransactionData = {Category: "Spectrum Internet", DescriptionDisplay: "Charge to CCD *3991", Notes: null};
   else if (Description.match(/Simplisafe 888-957-4675 Ma/i))  categorizedTransactionData = {Category: "SimpliSafe (for mom)", DescriptionDisplay: "Charge to CCD *3991", Notes: null};
   else if (Description.match(/SDC\*Laurens Electric C Laurens SC/i))  categorizedTransactionData = {Category: "Laurens Electric ProTec Security", DescriptionDisplay: "Charge to CCD *3991", Notes: null};
   else if (Description.match(/SJWD Water District 8649492805 SC/i))  categorizedTransactionData = {Category: "SJWD Water District", DescriptionDisplay: "Charge to CCD *3991", Notes: null};
@@ -247,13 +246,21 @@ export const formatTransactionDisplay = function(transaction) {
 export const isTransactionDuplicate = (potentialDuplicate, transactions)=>{
   return transactions.find(transaction=>
     areObjectsEqual({
-      TransactionDate: transaction.TransactionDate,
+      TransactionDate: transaction.TransactionDate.toJSON(),
       Description: transaction.Description,
       Amount: transaction.Amount,
     }, {
-      TransactionDate: potentialDuplicate.TransactionDate,
+      TransactionDate: potentialDuplicate.TransactionDate.toJSON(),
       Description: potentialDuplicate.Description,
       Amount: potentialDuplicate.Amount,
     }
   ));
+};
+
+export const getBudgetCyclesFromTransactions = transactions=>{
+  return [
+    ...new Set(
+      transactions.map(({TransactionDate})=>new Date(TransactionDate.getFullYear(), TransactionDate.getMonth()).toJSON())
+    )
+  ].map(date=>new Date(date));
 };
