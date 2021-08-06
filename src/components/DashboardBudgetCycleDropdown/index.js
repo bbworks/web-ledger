@@ -40,7 +40,7 @@ const DashboardBudgetCycleDropdown = ({ transactions, budgetCycle, onChange:onCh
       </button>
       <ul className="dropdown-menu container-fluid" onClick={onClick}>
         {allBudgetCycles.map(budgetCycle=>(
-          <li>
+          <li key={budgetCycle.toJSON()}>
             <a href="#" className="dropdown-item" data-budget-cycle={budgetCycle.toJSON()}>
               {getBudgetCycleString(budgetCycle)} <em className="text-muted">({getBudgetCycleDescription(budgetCycle)})</em>
             </a>

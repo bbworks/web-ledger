@@ -34,6 +34,8 @@ const App = () => {
   const [transactionsImportDuplicatesModalNewTransactions, setTransactionsImportDuplicatesModalNewTransactions] = useState([]);
   const [transactionsImportDuplicatesModalDuplicates, setTransactionsImportDuplicatesModalDuplicates] = useState([]);
   const [isTransactionsImportDuplicatesModalOpen, setIsTransactionsImportDuplicatesModalOpen] = useState(false);
+  const [transactionsImportConfirmedModalTransactions, setTransactionsImportConfirmedModalTransactions] = useState([]);
+  const [isTransactionsImportConfirmedModalOpen, setIsTransactionsImportConfirmedModalOpen] = useState(false);
   const [signedInUser, setSignedInUser] = useState(undefined);
   const [isSignInSettingsModalOpen, setIsSignInSettingsModalOpen] = useState(false);
 
@@ -243,11 +245,28 @@ const App = () => {
   };
 
   const onTransactionsImportDuplicatesModalSubmit = (filteredNewTransactions)=>{
-    //Update transactions with the new transaction
-    appendTransactionsHandler(filteredNewTransactions);
-
     //Close the modal
     closeTransactionsImportDuplicatesModal();
+
+    //Open the confirmed imported transactions modal
+    setTransactionsImportConfirmedModalTransactions(filteredNewTransactions);
+    openTransactionsImportConfirmedModal();
+  };
+
+  const openTransactionsImportConfirmedModal = ()=>{
+    setIsTransactionsImportConfirmedModalOpen(true);
+  };
+
+  const closeTransactionsImportConfirmedModal = ()=>{
+    setIsTransactionsImportConfirmedModalOpen(false);
+  };
+
+  const onTransactionsImportConfirmedModalSubmit = confirmedTransactions=>{
+    //Update transactions with the new transaction
+    appendTransactionsHandler(confirmedTransactions);
+
+    //Close the modal
+    closeTransactionsImportConfirmedModal();
   };
 
   const onSignInChange = signInInfo=>{
@@ -325,7 +344,7 @@ const App = () => {
             <BudgetsView transactions={transactions} budgetsData={budgetsData} budgetCycle={budgetCycle} setFooterNavbar={setFooterNavbar} />
           </Route>
           <Route path="/transactions" exact>
-            <TransactionsView transactions={transactions} budgetCycle={budgetCycle} transactionsImportDuplicatesModalNewTransactions={transactionsImportDuplicatesModalNewTransactions} transactionsImportDuplicatesModalDuplicates={transactionsImportDuplicatesModalDuplicates} isTransactionsImportDuplicatesModalOpen={isTransactionsImportDuplicatesModalOpen} onTransactionsImportDuplicatesModalClose={closeTransactionsImportDuplicatesModal} onTransactionsImportDuplicatesModalSubmit={onTransactionsImportDuplicatesModalSubmit} onTransactionsImportFormSubmit={onTransactionsImportFormSubmit} onTransactionsImportFormFileInputChange={onTransactionsImportFormFileInputChange} onTransactionDetailModalSubmit={onTransactionDetailModalSubmit} setFooterNavbar={setFooterNavbar} />
+            <TransactionsView transactions={transactions} budgetCycle={budgetCycle} transactionsImportDuplicatesModalNewTransactions={transactionsImportDuplicatesModalNewTransactions} transactionsImportDuplicatesModalDuplicates={transactionsImportDuplicatesModalDuplicates} isTransactionsImportDuplicatesModalOpen={isTransactionsImportDuplicatesModalOpen} onTransactionsImportDuplicatesModalClose={closeTransactionsImportDuplicatesModal} onTransactionsImportDuplicatesModalSubmit={onTransactionsImportDuplicatesModalSubmit} onTransactionsImportFormSubmit={onTransactionsImportFormSubmit} onTransactionsImportFormFileInputChange={onTransactionsImportFormFileInputChange} onTransactionDetailModalSubmit={onTransactionDetailModalSubmit} transactionsImportConfirmedModalTransactions={transactionsImportConfirmedModalTransactions} isTransactionsImportConfirmedModalOpen={isTransactionsImportConfirmedModalOpen} closeTransactionsImportConfirmedModal={closeTransactionsImportConfirmedModal} onTransactionsImportConfirmedModalSubmit={onTransactionsImportConfirmedModalSubmit} setFooterNavbar={setFooterNavbar} />
           </Route>
           <Route path="/settings" exact>
             <SettingsView setFooterNavbar={setFooterNavbar} settings={settings} onSubmit={onSettingsViewSubmit}/>

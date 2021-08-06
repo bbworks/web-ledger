@@ -5,12 +5,13 @@ import TransactionsImportForm from './../TransactionsImportForm';
 import TransactionsData from './../TransactionsData';
 import TransactionDetailModal from './../TransactionDetailModal';
 import TransactionsImportDuplicatesModal from './../TransactionsImportDuplicatesModal';
+import TransactionsImportConfirmedModal from './../TransactionsImportConfirmedModal';
 
 import {useConsoleLog, useBudgetCycleTransactions} from './../../hooks';
 
 import './index.scss';
 
-const TransactionsView = ({ transactions, budgetCycle, transactionsImportDuplicatesModalNewTransactions, transactionsImportDuplicatesModalDuplicates, isTransactionsImportDuplicatesModalOpen, onTransactionsImportDuplicatesModalClose, onTransactionsImportDuplicatesModalSubmit, onTransactionsImportFormSubmit, onTransactionsImportFormFileInputChange, onTransactionDetailModalSubmit:onTransactionDetailModalSubmitProp, setFooterNavbar })=>{
+const TransactionsView = ({ transactions, budgetCycle, transactionsImportDuplicatesModalNewTransactions, transactionsImportDuplicatesModalDuplicates, isTransactionsImportDuplicatesModalOpen, onTransactionsImportDuplicatesModalClose, onTransactionsImportDuplicatesModalSubmit, onTransactionsImportFormSubmit, onTransactionsImportFormFileInputChange, onTransactionDetailModalSubmit:onTransactionDetailModalSubmitProp, transactionsImportConfirmedModalTransactions, isTransactionsImportConfirmedModalOpen, closeTransactionsImportConfirmedModal, onTransactionsImportConfirmedModalSubmit, setFooterNavbar })=>{
   //Send the route to the footer navbar
   const route = useLocation().pathname;
   useEffect(()=>{
@@ -22,7 +23,7 @@ const TransactionsView = ({ transactions, budgetCycle, transactionsImportDuplica
   const currentBudgetCycleTransactions = useBudgetCycleTransactions(transactions, budgetCycle);
 
   useConsoleLog(currentBudgetCycleTransactions, "currentBudgetCycleTransactions:");
-  
+
   const openTransactionDetailModal = ()=>{
     setIsTransactionDetailModalOpen(true);
   };
@@ -50,6 +51,7 @@ const TransactionsView = ({ transactions, budgetCycle, transactionsImportDuplica
       </div>
       <TransactionDetailModal transaction={transactionDetailModalTransaction} buttonsOptions={{cancelButton: "Cancel", okButton: "Save"}} isOpen={isTransactionDetailModalOpen} onClose={closeTransactionDetailModal} onSubmit={onTransactionDetailModalSubmit} />
       <TransactionsImportDuplicatesModal newTransactions={transactionsImportDuplicatesModalNewTransactions} duplicates={transactionsImportDuplicatesModalDuplicates} isOpen={isTransactionsImportDuplicatesModalOpen} onClose={onTransactionsImportDuplicatesModalClose} onSubmit={onTransactionsImportDuplicatesModalSubmit} />
+      <TransactionsImportConfirmedModal transactions={transactionsImportConfirmedModalTransactions} isOpen={isTransactionsImportConfirmedModalOpen} onClose={closeTransactionsImportConfirmedModal} onSubmit={onTransactionsImportConfirmedModalSubmit} />
     </div>
   );
 };
