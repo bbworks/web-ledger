@@ -36,15 +36,50 @@ const TransactionDetailModal = ({ transaction, buttonsOptions, isOpen, onClose, 
     setTags(transactionDisplay.Tags);
   }, [transaction]);
 
+  const categories = [
+    "",
+    "Savings",
+    "Gas",
+    "Church",
+    "Groceries/Necessities",
+    "LoveInAction",
+    "Family Outings",
+    "Personal Spending",
+    "Miscellaneous",
+    "Sharonview mortgage & escrow",
+    "HOA dues",
+    "Duke Energy",
+    "SJWD Water District",
+    "Piedmont Natural Gas",
+    "Kirby Sanitation",
+    "Laurens Electric ProTec Security",
+    "SimpliSafe (for mom)",
+    "AT&T Internet",
+    "State Farm auto insurance",
+    "AT&T phone bill",
+    "Spotify Premium subscription",
+    "Netflix Premium subscription",
+    "Discovery Plus subscription",
+    "YMCA membership",
+  ];
+
+  const types = [
+    "",
+    "Charges",
+    "Payments",
+    "Debit",
+    "Credit",
+  ];
+
   const transactionDetails = [
     {name: "PostedDate", placeholder: "PostedDate", value: PostedDate, tag: "input", tagType: "text", setState: setPostedDate, disabled: false},
     {name: "TransactionDate", placeholder: "TransactionDate", value: TransactionDate, tag: "input", tagType: "text", setState: setTransactionDate, disabled: false},
     {name: "Account", placeholder: "Account Number", value: AccountNumber, tag: "input", tagType: "text", setState: setAccountNumber, disabled: false},
     {name: "Amount", placeholder: "Amount", value: Amount, tag: "input", tagType: "text", setState: setAmount, disabled: false},
     {name: "Description", placeholder: "Description", value: Description, tag: "input", tagType: "text", setState: setDescription, disabled: true},
-    {name: "DescriptionDisplay", placeholder: "Description", value: DescriptionDisplay, tag: "input", tagType: "text", setState: setDescription, disabled: false},
-    {name: "Category", placeholder: "Select a category...", value: Category, tag: "input", tagType: "text", setState: setCategory, disabled: false},
-    {name: "Type", placeholder: "Type", value: Type, tag: "input", tagType: "text", setState: setType, disabled: false},
+    {name: "DescriptionDisplay", placeholder: "Description", value: DescriptionDisplay, tag: "input", tagType: "text", setState: setDescriptionDisplay, disabled: false},
+    {name: "Category", placeholder: "Select a category...", value: Category, items: categories, tag: "input", tagType: "text", setState: setCategory, disabled: false},
+    {name: "Type", placeholder: "Select a type...", value: Type, items: types, tag: "input", tagType: "text", setState: setType, disabled: false},
     {name: "Notes", placeholder: "Notes", value: Notes, tag: "textarea", tagType: null, setState: setNotes, disabled: false},
     {name: "Tags", placeholder: "Tags", value: Tags, tag: "input", tagType: "text", setState: setTags, disabled: false},
   ];
@@ -118,7 +153,6 @@ const TransactionDetailModal = ({ transaction, buttonsOptions, isOpen, onClose, 
       ...transaction, //previous transaction data
       ...data, //new transaction data from the form
       Description: transaction.Description, //make sure to never change the actual Description
-      DescriptionDisplay: (data.Description === formatTransactionDisplay(transaction).DescriptionDisplay ? null : data.Description), //if the description from the form exactly matches the default description format, then there was no description display created; otherwise, the user wants to save that description display
     };
 
     console.log("Updated transaction submitted from TransactionDetailModal", updatedTransaction);

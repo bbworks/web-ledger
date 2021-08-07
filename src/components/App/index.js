@@ -112,7 +112,7 @@ const App = () => {
 
   const setTransactionsHandler = (previousTransactions, newTransactions, callback, oldTransaction)=>{
     //If there are no new transactions, short-circuit
-    if (!newTransactions || !newTransactions.length) return previousTransactions;
+    if ((Array.isArray(newTransactions) ? !newTransactions.length : !newTransactions)) return previousTransactions;
 
     //Check that we have an array of transactions
     let transactionsArray = newTransactions;
