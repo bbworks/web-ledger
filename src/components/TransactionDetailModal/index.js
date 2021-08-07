@@ -13,6 +13,7 @@ const TransactionDetailModal = ({ transaction, buttonsOptions, isOpen, onClose, 
   const [AccountNumber, setAccountNumber] = useState(""); //empty string, as initial value for input[type="text"]
   const [Amount, setAmount] = useState(""); //empty string, as initial value for input[type="text"]
   const [Description, setDescription] = useState(""); //empty string, as initial value for input[type="text"]
+  const [DescriptionDisplay, setDescriptionDisplay] = useState(""); //empty string, as initial value for input[type="text"]
   const [Category, setCategory] = useState(""); //empty string, as initial value for input[type="text"]
   const [Type, setType] = useState(""); //empty string, as initial value for input[type="text"]
   const [Notes, setNotes] = useState(""); //empty string, as initial value for input[type="text"]
@@ -27,7 +28,8 @@ const TransactionDetailModal = ({ transaction, buttonsOptions, isOpen, onClose, 
     setTransactionDate(transactionDisplay.TransactionDate);
     setAccountNumber(transactionDisplay.AccountNumber);
     setAmount(transactionDisplay.Amount);
-    setDescription(nullCoalesce(transactionDisplay.DescriptionDisplay, transactionDisplay.Description));
+    setDescription(transaction.Description);
+    setDescriptionDisplay(transactionDisplay.DescriptionDisplay);
     setCategory(transactionDisplay.Category);
     setNotes(transactionDisplay.Notes);
     setType(transactionDisplay.Type);
@@ -35,25 +37,28 @@ const TransactionDetailModal = ({ transaction, buttonsOptions, isOpen, onClose, 
   }, [transaction]);
 
   const transactionDetails = [
-    {name: "PostedDate", placeholder: "PostedDate", value: PostedDate, tag: "input", tagType: "text", setState: setPostedDate},
-    {name: "TransactionDate", placeholder: "TransactionDate", value: TransactionDate, tag: "input", tagType: "text", setState: setTransactionDate},
-    {name: "Account", placeholder: "Account Number", value: AccountNumber, tag: "input", tagType: "text", setState: setAccountNumber},
-    {name: "Amount", placeholder: "Amount", value: Amount, tag: "input", tagType: "text", setState: setAmount},
-    {name: "Description", placeholder: "Description", value: Description, tag: "input", tagType: "text", setState: setDescription},
-    {name: "Category", placeholder: "Select a category...", value: Category, tag: "input", tagType: "text", setState: setCategory},
-    {name: "Type", placeholder: "Type", value: Type, tag: "input", tagType: "text", setState: setType},
-    {name: "Notes", placeholder: "Notes", value: Notes, tag: "textarea", tagType: null, setState: setNotes},
-    {name: "Tags", placeholder: "Tags", value: Tags, tag: "input", tagType: "text", setState: setTags},
+    {name: "PostedDate", placeholder: "PostedDate", value: PostedDate, tag: "input", tagType: "text", setState: setPostedDate, disabled: false},
+    {name: "TransactionDate", placeholder: "TransactionDate", value: TransactionDate, tag: "input", tagType: "text", setState: setTransactionDate, disabled: false},
+    {name: "Account", placeholder: "Account Number", value: AccountNumber, tag: "input", tagType: "text", setState: setAccountNumber, disabled: false},
+    {name: "Amount", placeholder: "Amount", value: Amount, tag: "input", tagType: "text", setState: setAmount, disabled: false},
+    {name: "Description", placeholder: "Description", value: Description, tag: "input", tagType: "text", setState: setDescription, disabled: true},
+    {name: "DescriptionDisplay", placeholder: "Description", value: DescriptionDisplay, tag: "input", tagType: "text", setState: setDescription, disabled: false},
+    {name: "Category", placeholder: "Select a category...", value: Category, tag: "input", tagType: "text", setState: setCategory, disabled: false},
+    {name: "Type", placeholder: "Type", value: Type, tag: "input", tagType: "text", setState: setType, disabled: false},
+    {name: "Notes", placeholder: "Notes", value: Notes, tag: "textarea", tagType: null, setState: setNotes, disabled: false},
+    {name: "Tags", placeholder: "Tags", value: Tags, tag: "input", tagType: "text", setState: setTags, disabled: false},
   ];
 
   const onTransactionDetailInputContainerClick = event=>{
     const transactionDetailInput = event.target;
+    if (transactionDetailInput.getAttribute("data-stay-disabled")) return;
     transactionDetailInput.disabled = false;
     transactionDetailInput.focus();
   };
 
   const onTransactionDetailInputContainerBlur = event=>{
     const transactionDetailInput = event.target;
+    if (transactionDetailInput.getAttribute("data-stay-disabled")) return;
     transactionDetailInput.disabled = true;
   };
 
