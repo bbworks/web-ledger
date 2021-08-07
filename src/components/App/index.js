@@ -16,6 +16,7 @@ import TransactionsView from './../TransactionsView';
 import SettingsView from './../SettingsView';
 import FooterNavbar from './../FooterNavbar';
 import SignInSettingsModal from './../SignInSettingsModal';
+import Header from './../Header';
 
 //Import styles
 import './main.css';
@@ -336,6 +337,7 @@ const App = () => {
   return (
     <div className="App">
       <Router basename={(process.env.NODE_ENV === "production" ? process.env.PUBLIC_URL : null)}>
+      <Header signedInUser={signedInUser} />
         <Switch>
           <Route path={["/dashboard", "/"]} exact>
             <DashboardView signedInUser={signedInUser} transactions={transactions} accountsData={accountsData} accountData={accountData} budgetsData={budgetsData} budgetCycle={budgetCycle} onBudgetCycleChange={onBudgetCycleChange} setFooterNavbar={setFooterNavbar} />
