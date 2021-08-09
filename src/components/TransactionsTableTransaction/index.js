@@ -6,7 +6,7 @@ import {nullCoalesce, formatTransactionDisplay} from './../../utilities';
 
 import './index.scss';
 
-const TransactionsTableTransaction = ({ transaction, onTransactionEditButtonClick })=>{
+const TransactionsTableTransaction = ({ transaction, onTransactionEditButtonClick:onTransactionEditButtonClickProp, onTransactionDeleteButtonClick:onTransactionDeleteButtonClickProp })=>{
   const [transactionDisplay, setTransactionDisplay] = useState({
     PostedDate: "",
     TransactionDate: "",
@@ -21,6 +21,14 @@ const TransactionsTableTransaction = ({ transaction, onTransactionEditButtonClic
 
   useEffect(()=>setTransactionDisplay(formatTransactionDisplay(transaction)), [transaction]);
 
+  const onTransactionEditButtonClick = event=>{
+    onTransactionEditButtonClickProp(transaction);
+  };
+
+  const onTransactionDeleteButtonClick = event=>{
+    onTransactionDeleteButtonClickProp(transaction);
+  };
+
   return (
     <tr className="transaction">
       <td>{transactionDisplay.TransactionDate}</td>
@@ -30,7 +38,14 @@ const TransactionsTableTransaction = ({ transaction, onTransactionEditButtonClic
       <td>{transactionDisplay.Notes}</td>
       <td>{transactionDisplay.Amount}</td>
       <td>{transactionDisplay.Tags.map(tag=><TagBadge key={tag} tag={tag} />)}</td>
-      <td><button className="transaction-edit-button btn" type="button" onClick={()=>onTransactionEditButtonClick(transaction)}><i className="transaction-edit-button-icon fas fa-edit"></i></button></td>
+      <td style={{whiteSpace: "pre"}}>
+        <button className="transaction-edit-button transaction-button btn" type="button" onClick={onTransactionEditButtonClick}>
+          <i className="transaction-edit-button-icon fas fa-edit"></i>
+        </button>
+        <button className="transaction-delete-button transaction-button btn" type="button" onClick={onTransactionDeleteButtonClick}>
+          <i className="transaction-edit-button-icon fas fa-trash"></i>
+        </button>
+      </td>
     </tr>
   );
 };

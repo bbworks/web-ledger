@@ -4,6 +4,7 @@ import {useLocation} from 'react-router-dom';
 import TransactionsImportForm from './../TransactionsImportForm';
 import TransactionsData from './../TransactionsData';
 import TransactionDetailModal from './../TransactionDetailModal';
+import TransactionDeleteModal from './../TransactionDeleteModal';
 import TransactionsImportDuplicatesModal from './../TransactionsImportDuplicatesModal';
 import TransactionsImportConfirmedModal from './../TransactionsImportConfirmedModal';
 
@@ -11,7 +12,7 @@ import {useConsoleLog, useBudgetCycleTransactions} from './../../hooks';
 
 import './index.scss';
 
-const TransactionsView = ({ transactions, budgetCycle, transactionsImportDuplicatesModalNewTransactions, transactionsImportDuplicatesModalDuplicates, isTransactionsImportDuplicatesModalOpen, onTransactionsImportDuplicatesModalClose, onTransactionsImportDuplicatesModalSubmit, onTransactionsImportFormSubmit, onTransactionsImportFormFileInputChange, onTransactionDetailModalSubmit:onTransactionDetailModalSubmitProp, transactionsImportConfirmedModalTransactions, isTransactionsImportConfirmedModalOpen, closeTransactionsImportConfirmedModal, onTransactionsImportConfirmedModalSubmit, setFooterNavbar })=>{
+const TransactionsView = ({ transactions, budgetCycle, transactionsImportDuplicatesModalNewTransactions, transactionsImportDuplicatesModalDuplicates, isTransactionsImportDuplicatesModalOpen, onTransactionsImportDuplicatesModalClose, onTransactionsImportDuplicatesModalSubmit, onTransactionsImportFormSubmit, onTransactionsImportFormFileInputChange, onTransactionDetailModalSubmit:onTransactionDetailModalSubmitProp, onTransactionDeleteModalSubmit:onTransactionDeleteModalSubmitProp, transactionsImportConfirmedModalTransactions, isTransactionsImportConfirmedModalOpen, closeTransactionsImportConfirmedModal, onTransactionsImportConfirmedModalSubmit, setFooterNavbar })=>{
   //Send the route to the footer navbar
   const route = useLocation().pathname;
   useEffect(()=>{
@@ -20,6 +21,8 @@ const TransactionsView = ({ transactions, budgetCycle, transactionsImportDuplica
 
   const [transactionDetailModalTransaction, setTransactionDetailModalTransaction] = useState(null);
   const [isTransactionDetailModalOpen, setIsTransactionDetailModalOpen] = useState(false);
+  const [transactionDeleteModalTransaction, setTransactionDeleteModalTransaction] = useState(null);
+  const [isTransactionDeleteModalOpen, setIsTransactionDeleteModalOpen] = useState(false);
   const currentBudgetCycleTransactions = useBudgetCycleTransactions(transactions, budgetCycle);
 
   useConsoleLog(currentBudgetCycleTransactions, "currentBudgetCycleTransactions:");
@@ -32,9 +35,22 @@ const TransactionsView = ({ transactions, budgetCycle, transactionsImportDuplica
     setIsTransactionDetailModalOpen(false);
   };
 
+  const openTransactionDeleteModal = ()=>{
+    setIsTransactionDeleteModalOpen(true);
+  };
+
+  const closeTransactionDeleteModal = ()=>{
+    setIsTransactionDeleteModalOpen(false);
+  };
+
   const onTransactionEditButtonClick = transaction=>{
     setTransactionDetailModalTransaction(transaction);
     openTransactionDetailModal();
+  };
+
+  const onTransactionDeleteButtonClick = transaction=>{
+    setTransactionDeleteModalTransaction(transaction);
+    openTransactionDeleteModal();
   };
 
   const onTransactionDetailModalSubmit = (updatedTransaction)=>{
@@ -42,14 +58,20 @@ const TransactionsView = ({ transactions, budgetCycle, transactionsImportDuplica
     closeTransactionDetailModal();
   };
 
+  const onTransactionDeleteModalSubmit = (deletedTransaction)=>{
+    onTransactionDeleteModalSubmitProp(transactionDeleteModalTransaction, deletedTransaction);
+    closeTransactionDeleteModal();
+  };
+
   return (
     <div className="view transactions-view">
       <div className="container-fluid">
         <h1 className="display-1">Ledger</h1>
         <TransactionsImportForm onSubmit={onTransactionsImportFormSubmit} onFileInputChange={onTransactionsImportFormFileInputChange} />
-        <TransactionsData transactions={currentBudgetCycleTransactions} onTransactionEditButtonClick={onTransactionEditButtonClick} />
+        <TransactionsData transactions={currentBudgetCycleTransactions} onTransactionEditButtonClick={onTransactionEditButtonClick} onTransactionDeleteButtonClick={onTransactionDeleteButtonClick} />
       </div>
       <TransactionDetailModal transaction={transactionDetailModalTransaction} buttonsOptions={{cancelButton: "Cancel", okButton: "Save"}} isOpen={isTransactionDetailModalOpen} onClose={closeTransactionDetailModal} onSubmit={onTransactionDetailModalSubmit} />
+      <TransactionDeleteModal transaction={transactionDeleteModalTransaction} isOpen={isTransactionDeleteModalOpen} onClose={closeTransactionDeleteModal} onSubmit={onTransactionDeleteModalSubmit} />
       <TransactionsImportDuplicatesModal newTransactions={transactionsImportDuplicatesModalNewTransactions} duplicates={transactionsImportDuplicatesModalDuplicates} isOpen={isTransactionsImportDuplicatesModalOpen} onClose={onTransactionsImportDuplicatesModalClose} onSubmit={onTransactionsImportDuplicatesModalSubmit} />
       <TransactionsImportConfirmedModal transactions={transactionsImportConfirmedModalTransactions} isOpen={isTransactionsImportConfirmedModalOpen} onClose={closeTransactionsImportConfirmedModal} onSubmit={onTransactionsImportConfirmedModalSubmit} />
     </div>

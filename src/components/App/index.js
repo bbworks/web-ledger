@@ -112,17 +112,21 @@ const App = () => {
 
   const setTransactionsHandler = (previousTransactions, newTransactions, callback, oldTransaction)=>{
     //If there are no new transactions, short-circuit
-    if ((Array.isArray(newTransactions) ? !newTransactions.length : !newTransactions)) return previousTransactions;
+    if ((Array.isArray(newTransactions) ? !newTransactions.length : newTransactions !== false && !newTransactions)) return previousTransactions;
 
-    //Check that we have an array of transactions
-    let transactionsArray = newTransactions;
-    if (!(newTransactions instanceof Array)) transactionsArray = [newTransactions];
+    //If there are new transactions, massage them
+    let transactions;
+    if (newTransactions) {
+      //Check that we have an array of transactions
+      let transactionsArray = newTransactions;
+      if (!(newTransactions instanceof Array)) transactionsArray = [newTransactions];
 
-    //Type check transactions data to convert from strings to the correct type
-    const typeCheckedTransactions = typeCheckTransactions(transactionsArray);
+      //Type check transactions data to convert from strings to the correct type
+      const typeCheckedTransactions = typeCheckTransactions(transactionsArray);
 
-    //Assign category & notes from description
-    const transactions = typeCheckedTransactions.map(transaction=>categorizeTransactionByDescription(transaction));
+      //Assign category & notes from description
+      transactions = typeCheckedTransactions.map(transaction=>categorizeTransactionByDescription(transaction));
+    }
 
     //Return the data manipulation callback result, sorted
     if (callback) return callback(previousTransactions, transactions, oldTransaction)
@@ -169,6 +173,23 @@ const App = () => {
 
       //Run through transaction normalization
       return setTransactionsHandler(previousTransactions, newTransaction, callback, oldTransaction);
+    });
+  };
+
+  const deleteTransactionHandler = deletedTransaction=>{
+    //Delete a single transaction
+    setTransactions(previousTransactions=>{
+      const callback = (previousTransactions, transaction, deletedTransaction)=>{
+        //Update transactions with the new transaction
+        const transactions = [...previousTransactions]; //create deep copy
+        const index = transactions.indexOf(deletedTransaction);
+        transactions.splice(index, 1);
+
+        return transactions;
+      };
+
+      //Run through transaction normalization
+      return setTransactionsHandler(previousTransactions, false, callback, deletedTransaction);
     });
   };
 
@@ -235,6 +256,10 @@ const App = () => {
 
   const onTransactionDetailModalSubmit = (oldTransaction, updatedTransaction)=>{
     updateTransactionHandler(oldTransaction, updatedTransaction);
+  };
+
+  const onTransactionDeleteModalSubmit = deletedTransaction=>{
+    deleteTransactionHandler(deletedTransaction);
   };
 
   const openTransactionsImportDuplicatesModal = ()=>{
@@ -346,7 +371,7 @@ const App = () => {
             <BudgetsView transactions={transactions} budgetsData={budgetsData} budgetCycle={budgetCycle} setFooterNavbar={setFooterNavbar} />
           </Route>
           <Route path="/transactions" exact>
-            <TransactionsView transactions={transactions} budgetCycle={budgetCycle} transactionsImportDuplicatesModalNewTransactions={transactionsImportDuplicatesModalNewTransactions} transactionsImportDuplicatesModalDuplicates={transactionsImportDuplicatesModalDuplicates} isTransactionsImportDuplicatesModalOpen={isTransactionsImportDuplicatesModalOpen} onTransactionsImportDuplicatesModalClose={closeTransactionsImportDuplicatesModal} onTransactionsImportDuplicatesModalSubmit={onTransactionsImportDuplicatesModalSubmit} onTransactionsImportFormSubmit={onTransactionsImportFormSubmit} onTransactionsImportFormFileInputChange={onTransactionsImportFormFileInputChange} onTransactionDetailModalSubmit={onTransactionDetailModalSubmit} transactionsImportConfirmedModalTransactions={transactionsImportConfirmedModalTransactions} isTransactionsImportConfirmedModalOpen={isTransactionsImportConfirmedModalOpen} closeTransactionsImportConfirmedModal={closeTransactionsImportConfirmedModal} onTransactionsImportConfirmedModalSubmit={onTransactionsImportConfirmedModalSubmit} setFooterNavbar={setFooterNavbar} />
+            <TransactionsView transactions={transactions} budgetCycle={budgetCycle} transactionsImportDuplicatesModalNewTransactions={transactionsImportDuplicatesModalNewTransactions} transactionsImportDuplicatesModalDuplicates={transactionsImportDuplicatesModalDuplicates} isTransactionsImportDuplicatesModalOpen={isTransactionsImportDuplicatesModalOpen} onTransactionsImportDuplicatesModalClose={closeTransactionsImportDuplicatesModal} onTransactionsImportDuplicatesModalSubmit={onTransactionsImportDuplicatesModalSubmit} onTransactionsImportFormSubmit={onTransactionsImportFormSubmit} onTransactionsImportFormFileInputChange={onTransactionsImportFormFileInputChange} onTransactionDetailModalSubmit={onTransactionDetailModalSubmit} onTransactionDeleteModalSubmit={onTransactionDeleteModalSubmit} transactionsImportConfirmedModalTransactions={transactionsImportConfirmedModalTransactions} isTransactionsImportConfirmedModalOpen={isTransactionsImportConfirmedModalOpen} closeTransactionsImportConfirmedModal={closeTransactionsImportConfirmedModal} onTransactionsImportConfirmedModalSubmit={onTransactionsImportConfirmedModalSubmit} setFooterNavbar={setFooterNavbar} />
           </Route>
           <Route path="/settings" exact>
             <SettingsView setFooterNavbar={setFooterNavbar} settings={settings} onSubmit={onSettingsViewSubmit}/>

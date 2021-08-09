@@ -1,9 +1,12 @@
 import {useState, useEffect} from 'react';
-import TransactionsTableTransactions from './../TransactionsTableTransactions';
+
+import TransactionsTableTransaction from './../TransactionsTableTransaction';
+
 import {convertNumberToCurrency, getSumByProp} from './../../utilities';
+
 import './index.scss';
 
-const TransactionsTableBody = ({ transactions, onTransactionEditButtonClick })=>{
+const TransactionsTableBody = ({ transactions, onTransactionEditButtonClick, onTransactionDeleteButtonClick })=>{
   const calculatePaymentAmountTotal = ()=>{
     return convertNumberToCurrency(
       getSumByProp(
@@ -20,9 +23,11 @@ const TransactionsTableBody = ({ transactions, onTransactionEditButtonClick })=>
     setTotalAmount(calculatePaymentAmountTotal());
   }, [transactions]);
 
+  if(!transactions.length) return null;
+
   return (
     <tbody>
-      <TransactionsTableTransactions transactions={transactions} onTransactionEditButtonClick={onTransactionEditButtonClick} />
+      {transactions.map((transaction, i)=><TransactionsTableTransaction key={i} transaction={transaction} onTransactionEditButtonClick={onTransactionEditButtonClick} onTransactionDeleteButtonClick={onTransactionDeleteButtonClick} />)}
       <tr className="total">
         <td></td>
         <td></td>

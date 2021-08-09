@@ -237,6 +237,7 @@ export const formatTransactionDisplay = function(transaction) {
     AccountNumber: transaction.AccountNumber || "",
     Type: transaction.Type || "",
     Description: nullCoalesce(transaction.DescriptionDisplay, getTransactionDefaultDescriptionDisplay(transaction.Description)) || "",
+    DescriptionDisplay: transaction.DescriptionDisplay || "",
     Amount: convertNumberToCurrency(transaction.Amount) || "",
     Category: transaction.Category || "",
     Notes: transaction.Notes || "",

@@ -33,8 +33,8 @@ const TransactionsImportConfirmedModal = ({ transactions, duplicates, isOpen, on
           </div>
         </Modal.Body>
         <Modal.Footer>
-        <button className="btn btn-secondary" type="button" tabIndex="1" onClick={onClose}>Cancel import</button>
-        <button className="btn btn-primary" type="submit" tabIndex="2">Save</button>
+          <button className="btn btn-secondary" type="button" tabIndex="1" onClick={onClose}>Cancel import</button>
+          <button className="btn btn-primary" type="submit" tabIndex="2">Save</button>
         </Modal.Footer>
       </form>
     </Modal>
