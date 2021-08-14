@@ -19,9 +19,9 @@ const BudgetsView = ({ transactions, budgetsData, budgetCycle, setFooterNavbar }
   const currentBudgetCycleTransactions = useBudgetCycleTransactions(transactions, budgetCycle);
 
   return (
-    <div className="view budgets-view container-fluid py-2">
-      <div className="budget-graphs container">
-        <h2 className="budgets-title text-center fw-bold">Month Overview</h2>
+    <div className="view budgets-view">
+    <h1 className="page-title display-3">Month Overview</h1>
+      <div className="budget-graphs">
 
         {
           (

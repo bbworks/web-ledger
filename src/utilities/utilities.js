@@ -217,3 +217,15 @@ export const convertDateStringToDate = (dateString, dateStringFormat)=>{
     getDatePartByFormat(dateString, dateStringFormat, dayFormatRegEx, getDayByFormat)
   );
 };
+
+export const isDescendantOf = (element, potentialParent) => {
+  if (
+    element.parentElement &&
+    potentialParent &&
+    element.parentElement !== potentialParent
+  ) return isDescendantOf(element.parentElement, potentialParent);
+
+  return element.parentElement != null &&
+    potentialParent != null &&
+    element.parentElement === potentialParent;
+};

@@ -1,0 +1,63 @@
+.transaction-row {
+  display: flex;
+  width: 100%;
+  border-bottom: 1px solid rgb(200,200,200);
+
+  &.released {
+    transition: transform 0.15s ease-out;
+  }
+
+  & > * {
+    width: 100%;
+    flex-shrink: 0;
+  }
+
+  &-container {
+    display: block;
+    padding: 1rem 0.5rem;
+  }
+
+  &-description-container {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.25rem;
+  }
+
+  &-description {
+    color: rgb(75,75,75);
+    font-weight: 100;
+
+    &.uncategorized {
+      font-size: 1.15rem;
+      font-family: monospace;
+    }
+  }
+
+  &-amount {
+    color: red;
+    font-weight: bold;
+  }
+
+  &-subdescription-container {
+    color: rgb(150,150,150);
+    font-size: 0.75rem;
+  }
+
+  &-delete-button {
+    display: none;
+    outline: none;
+    border: none;
+    color: white;
+    padding: 0;
+    background-color: red;
+    text-align: left;
+
+    &.show {
+      display: block;
+    }
+
+    &-text {
+      padding: 0.5rem 1rem;
+    }
+  }
+}
