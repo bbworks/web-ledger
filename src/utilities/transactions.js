@@ -1,16 +1,10 @@
 import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON, convertDateStringToDate, areObjectsEqual, getBudgetAmountSpentFromTransactions, getMonthFromNumber, getCurrentYear, getBillingCycleFromDate} from './utilities.js';
 
-//Declare private functions
-const getTransactionDefaultDescriptionDisplay = function(description) {
-  if (!description) return "";
-
-  return `*${
-    description
-      //.replace(/([\w\'&]+)/g, p1=>p1[0].toUpperCase() + p1.substring(1).toLowerCase()) /* set Pascal casing between words */
-  }`;
+//Declare public functions
+export const getTransactionDefaultDescriptionDisplay = function(transaction) {
+  return nullCoalesce(transaction.DescriptionDisplay, `*${transaction.Description}`) || "";
 };
 
-//Declare public functions
 export const typeCheckTransactions = function (transactions) {
   return transactions.map(transaction=>(
     {
@@ -244,7 +238,7 @@ export const formatTransactionDisplay = function(transaction) {
     TransactionDate: (transaction.TransactionDate ? new Date(transaction.TransactionDate).toLocaleDateString().toString() : ""),
     AccountNumber: transaction.AccountNumber || "",
     Type: transaction.Type || "",
-    Description: nullCoalesce(transaction.DescriptionDisplay, getTransactionDefaultDescriptionDisplay(transaction.Description)) || "",
+    Description: transaction.Description || "",
     DescriptionDisplay: transaction.DescriptionDisplay || "",
     Amount: convertNumberToCurrency(transaction.Amount) || "",
     Category: transaction.Category || "",

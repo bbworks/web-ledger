@@ -26,6 +26,7 @@
   &-description {
     color: rgb(75,75,75);
     font-weight: 100;
+    padding-right: 0.5rem;
 
     &.uncategorized {
       font-size: 1.15rem;
@@ -36,6 +37,7 @@
   &-amount {
     color: red;
     font-weight: bold;
+    white-space: pre;
   }
 
   &-subdescription-container {

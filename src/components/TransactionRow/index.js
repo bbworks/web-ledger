@@ -2,7 +2,7 @@ import {useState, useEffect, useRef} from 'react';
 
 import TagBadge from './../TagBadge';
 
-import {isDescendantOf, formatTransactionDisplay} from './../../utilities';
+import {isDescendantOf, getTransactionDefaultDescriptionDisplay, formatTransactionDisplay} from './../../utilities';
 
 import './index.scss';
 
@@ -34,7 +34,12 @@ const TransactionRow = ({ transaction, onTransactionEditButtonClick:onTransactio
     Tags: [],
   });
 
-  useEffect(()=>setTransactionDisplay(formatTransactionDisplay(transaction)), [transaction]);
+  useEffect(()=>{
+    setTransactionDisplay({
+      ...formatTransactionDisplay(transaction),
+      Description: getTransactionDefaultDescriptionDisplay(transaction),
+    })
+  }, [transaction]);
 
   const onTransactionEditButtonClick = event=>{
     if (isDragFeatureActive()) return;
