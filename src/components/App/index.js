@@ -362,7 +362,7 @@ const App = () => {
   return (
     <div className="App">
       <Router basename={(process.env.NODE_ENV === "production" ? process.env.PUBLIC_URL : null)}>
-      <Header signedInUser={signedInUser} />
+        <Header signedInUser={signedInUser} />
         <Switch>
           <Route path={["/dashboard", "/"]} exact>
             <DashboardView signedInUser={signedInUser} transactions={transactions} accountsData={accountsData} accountData={accountData} budgetsData={budgetsData} budgetCycle={budgetCycle} onBudgetCycleChange={onBudgetCycleChange} setFooterNavbar={setFooterNavbar} />
