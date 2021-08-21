@@ -168,7 +168,7 @@ const dropdownMasterEventListener = event=>{
 
   const checkIfClickedOrFocusedOutsideOfDropdown = event=>{
     //If we click outside of the dropdown or its children, close it
-    if (!isDescendantOf(event.target, dropdown)) closeDropdown();
+    if (event.target !== dropdownInput) closeDropdown();
   };
 
 
