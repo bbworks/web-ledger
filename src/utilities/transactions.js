@@ -9,15 +9,15 @@ export const typeCheckTransactions = function (transactions) {
   return transactions.map(transaction=>(
     {
       ...transaction,
-      PostedDate: transaction.PostedDate && new Date(transaction.PostedDate),
-      TransactionDate: transaction.TransactionDate && new Date(transaction.TransactionDate),
-      Type: (transaction.Type ? transaction.Type : null),
-      Category: (transaction.Category ? transaction.Category : null),
-      Description: (transaction.Description ? transaction.Description : null),
-      Category: (transaction.Category ? transaction.Category : null),
-      Amount: (isNaN(transaction.Amount) ? Number(transaction.Amount.replace(/(\$|,)/g, "")) : Number(transaction.Amount)),
-      Notes: (transaction.Notes ? transaction.Notes : null),
-      Tags: (!isFalsy(transaction.Tags) ? transaction.Tags : []),
+      PostedDate: transaction.PostedDate ? new Date(transaction.PostedDate) : null,
+      TransactionDate: transaction.TransactionDate ? new Date(transaction.TransactionDate) : null,
+      Type: transaction.Type ? transaction.Type : null,
+      Category: transaction.Category ? transaction.Category : null,
+      Description: transaction.Description ? transaction.Description : null,
+      Category: transaction.Category ? transaction.Category : null,
+      Amount: isNaN(transaction.Amount) ? Number(transaction.Amount.replace(/(\$|,)/g, "")) : Number(transaction.Amount),
+      Notes: transaction.Notes ? transaction.Notes : null,
+      Tags: !isFalsy(transaction.Tags) ? transaction.Tags : [],
 
     }
   ));
@@ -47,15 +47,15 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (matches = Description.match(/CREDIT CARD PAYMENT ONLINE BANKING TRANSFER TO \d{4} \d{6}\*{6}(\d{4})/i))  categorizedTransactionData = {Category: null, DescriptionDisplay: `Payment for CCD *${matches[1]}`, Notes: null};
 
   //Bills
-  else if (Description.match(/Simplisafe 888-957-4675 Ma/i))  categorizedTransactionData = {Category: "SimpliSafe (for mom)", DescriptionDisplay: "Charge to CCD *3991", Notes: null};
-  else if (Description.match(/SDC\*Laurens Electric C Laurens SC/i))  categorizedTransactionData = {Category: "Laurens Electric ProTec Security", DescriptionDisplay: "Charge to CCD *3991", Notes: null};
-  else if (Description.match(/SJWD Water District 8649492805 SC/i))  categorizedTransactionData = {Category: "SJWD Water District", DescriptionDisplay: "Charge to CCD *3991", Notes: null};
-  else if (Description.match(/State Farm Insurance 8009566310 Il/i))  categorizedTransactionData = {Category: "State Farm auto insurance", DescriptionDisplay: "Charge to CCD *3991", Notes: null};
-  else if (Description.match(/Spotify USA(?: New York NY)?/i))  categorizedTransactionData = {Category: "Spotify Premium subscription", DescriptionDisplay: "Charge to CCD *3991", Notes: null};
-  else if (Description.match(/Netflix.Com Netflix.Com Ca/i))  categorizedTransactionData = {Category: "Netflix Premium subscription", DescriptionDisplay: "Charge to CCD *3991", Notes: null};
-  else if (Description.match(/Ddv \*Discoveryplus 0123456789 TN/i))  categorizedTransactionData = {Category: "Discovery Plus subscription", DescriptionDisplay: "Charge to CCD *3991", Notes: null};
-  else if (Description.match(/(?:AT&T \*Payment|ATT\*BILL PAYMENT) 800-288-2020 TX/i))  categorizedTransactionData = {Category: "AT&T Internet", DescriptionDisplay: "Charge to CCD *3991", Notes: null};
-  else if (Description.match(/KIRBY SANITATION\/C&J E 8648778887 SC/i))  categorizedTransactionData = {Category: "Kirby Sanitation", DescriptionDisplay: "Charge to CCD *3991", Notes: null};
+  else if (Description.match(/Simplisafe 888-957-4675 Ma/i))  categorizedTransactionData = {Category: "SimpliSafe (for mom)", DescriptionDisplay: "SimpliSafe", Notes: null};
+  else if (Description.match(/SDC\*Laurens Electric C Laurens SC/i))  categorizedTransactionData = {Category: "Laurens Electric ProTec Security", DescriptionDisplay: "Laurens Electric ProTec Security", Notes: null};
+  else if (Description.match(/SJWD Water District 8649492805 SC/i))  categorizedTransactionData = {Category: "SJWD Water District", DescriptionDisplay: "SJWD Water", Notes: null};
+  else if (Description.match(/State Farm Insurance 8009566310 Il/i))  categorizedTransactionData = {Category: "State Farm auto insurance", DescriptionDisplay: "State Farm", Notes: null};
+  else if (Description.match(/Spotify USA(?: New York NY)?/i))  categorizedTransactionData = {Category: "Spotify Premium subscription", DescriptionDisplay: "Spotify Premium", Notes: null};
+  else if (Description.match(/Netflix.Com Netflix.Com Ca/i))  categorizedTransactionData = {Category: "Netflix Premium subscription", DescriptionDisplay: "Netflix Premium", Notes: null};
+  else if (Description.match(/Ddv \*Discoveryplus 0123456789 TN/i))  categorizedTransactionData = {Category: "Discovery Plus subscription", DescriptionDisplay: "Discovery Plus", Notes: null};
+  else if (Description.match(/(?:AT&T \*Payment|ATT\*BILL PAYMENT) 800-288-2020 TX/i))  categorizedTransactionData = {Category: "AT&T Internet", DescriptionDisplay: "AT&T Internet", Notes: null};
+  else if (Description.match(/KIRBY SANITATION\/C&J E 8648778887 SC/i))  categorizedTransactionData = {Category: "Kirby Sanitation", DescriptionDisplay: "Kirby Sanitation", Notes: null};
 
   //Recurring expenses
 
@@ -93,9 +93,10 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/CKE\*TACO DOG SPARTANBU SPARTANBURG SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Taco Dog", Notes: null};
   else if (Description.match(/WAFFLE HOUSE \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Waffle House", Notes: null};
   else if (Description.match(/Chili's \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Chili's", Notes: null};
-  else if (Description.match(/Sweet Basil Thai Cusin Greenville SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Sweet Basil Thai Cusine", Notes: null};
   else if (Description.match(/Paisanos Italian Resta/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Paisanos Italian Restaurant", Notes: null};
+  else if (Description.match(/Sweet Basil Thai Cusin Greenville SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Sweet Basil Thai Cusine", Notes: null};
   else if (Description.match(/Panda Hibachi Duncan SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Panda Hibachi", Notes: null};
+  else if (Description.match(/PF Changs #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "PF Changs", Notes: null};
   else if (Description.match(/(?:Chipotle \d+ \w+ \w{2}|Chipotle Online 1800\d{6} CA)/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Chipotle", Notes: null};
   else if (Description.match(/TST\* WILLY TACO - HUB SPARTANBURG SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Willy Taco", Notes: null};
   else if (Description.match(/El Tejano Mexican Rest/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "El Tejano", Notes: null};

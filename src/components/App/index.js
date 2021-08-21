@@ -144,7 +144,7 @@ const App = () => {
     });
   };
 
-  const importTransactionsHandler = newTransactions=>{
+  const importTransactionsWrapper = newTransactions=>{
     //Import new transactions
     setTransactions(previousTransactions=>{
       const callback = (previousTransactions, newTransactions)=>{
@@ -157,7 +157,7 @@ const App = () => {
     });
   };
 
-  const updateTransactionHandler = (oldTransaction, newTransaction)=>{
+  const updateTransactionWrapper = (oldTransaction, newTransaction)=>{
     //Update a single transaction
     setTransactions(previousTransactions=>{
       const callback = (previousTransactions, newTransactions, oldTransaction)=>{
@@ -176,7 +176,7 @@ const App = () => {
     });
   };
 
-  const deleteTransactionHandler = deletedTransaction=>{
+  const deleteTransactionWrapper = deletedTransaction=>{
     //Delete a single transaction
     setTransactions(previousTransactions=>{
       const callback = (previousTransactions, transaction, deletedTransaction)=>{
@@ -193,7 +193,7 @@ const App = () => {
     });
   };
 
-  const appendTransactionsHandler = newTransactions=>{
+  const appendTransactionsWrapper = newTransactions=>{
     //Import new transactions
     setTransactions(previousTransactions=>{
       const callback = (previousTransactions, newTransactions)=>{
@@ -243,7 +243,7 @@ const App = () => {
     const transactions = importTransactions(scrapedTransactionsData, "scraped");
 
     //Set the new transactions data
-    importTransactionsHandler(transactions);
+    importTransactionsWrapper(transactions);
   };
 
   const onTransactionsImportFormFileInputChange = transactionsDataArray=>{
@@ -251,15 +251,15 @@ const App = () => {
     const transactions = importTransactions(transactionsDataArray, "csv");
 
     //Set the new transactions data
-    importTransactionsHandler(transactions);
+    importTransactionsWrapper(transactions);
   };
 
   const onTransactionDetailModalSubmit = (oldTransaction, updatedTransaction)=>{
-    updateTransactionHandler(oldTransaction, updatedTransaction);
+    updateTransactionWrapper(oldTransaction, updatedTransaction);
   };
 
   const onTransactionDeleteModalSubmit = deletedTransaction=>{
-    deleteTransactionHandler(deletedTransaction);
+    deleteTransactionWrapper(deletedTransaction);
   };
 
   const openTransactionsImportDuplicatesModal = ()=>{
@@ -289,7 +289,7 @@ const App = () => {
 
   const onTransactionsImportConfirmedModalSubmit = confirmedTransactions=>{
     //Update transactions with the new transaction
-    appendTransactionsHandler(confirmedTransactions);
+    appendTransactionsWrapper(confirmedTransactions);
 
     //Close the modal
     closeTransactionsImportConfirmedModal();
