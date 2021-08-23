@@ -16,8 +16,10 @@ export const typeCheckTransactions = function (transactions) {
       ...transaction,
       PostedDate: parseGoogleSheetsDate(transaction.PostedDate),
       TransactionDate: parseGoogleSheetsDate(transaction.TransactionDate),
-      Amount: parseGoogleSheetsNumber(transaction.Amount.replace(/(\$|,)/g, "")),
+      Amount: parseGoogleSheetsNumber(isNaN(transaction.Amount) ? transaction.Amount.replace(/(\$|,)/g, "") : transaction.Amount),
       Tags: !isFalsy(transaction.Tags) ? transaction.Tags : [],
+      DateCreated: parseGoogleSheetsDate(transaction.DateCreated),
+      DateModified: parseGoogleSheetsDate(transaction.DateModified),
     }
   ));
 };
@@ -161,6 +163,9 @@ export const importTransactions = function(transactionsData, dataType) {
         .map(transactionLine=>{
           if (!transactionLine) return null;
 
+          //Get the current date
+          const currentDate = new Date();
+
           //Determine if this matches a transaction line
           const isMatch = transactionLine.match(/(\d{2}\/\d{2}\/\d{2})\t\t([^\t]+)\t(-?)\$([\d,]+\.\d{2})/);
           if (!isMatch) {
@@ -185,6 +190,8 @@ export const importTransactions = function(transactionsData, dataType) {
             Tags: [],
             IsAutoCategorized: false,
             IsUpdatedByUser: false,
+            DateCreated: currentDate,
+            DateModified: currentDate,
           };
         })
         //Filter out anything that didn't become a transaction
@@ -210,6 +217,9 @@ export const importTransactions = function(transactionsData, dataType) {
       const Payments = (transaction.Payments ? transaction.Payments.trim() : null);
       const Debit = (transaction.Debit ? transaction.Debit.trim() : null);
       const Credit = (transaction.Credit ? transaction.Credit.trim() : null);
+
+      //Get the current date
+      const currentDate = new Date();
 
       //Validate calculated values
       const type = (
@@ -238,6 +248,8 @@ export const importTransactions = function(transactionsData, dataType) {
         Tags: [],
         IsAutoCategorized: false,
         IsUpdatedByUser: false,
+        DateCreated: currentDate,
+        DateModified: currentDate,
       };
     });
   }

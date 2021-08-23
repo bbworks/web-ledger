@@ -123,6 +123,7 @@ const TransactionDetailModal = ({ transaction, categories, types, buttonsOptions
       };
     }, {
       IsUpdatedByUser: true,
+      DateModified: new Date(),
     });
     console.log("Data submitted from TransactionDetailModal", data);
 
