@@ -7,7 +7,7 @@ import {nullCoalesce, formatTransactionDisplay} from './../../utilities';
 
 import './index.scss';
 
-const TransactionDetailModal = ({ transaction, buttonsOptions, isOpen, onClose, onSubmit })=>{
+const TransactionDetailModal = ({ transaction, categories, types, buttonsOptions, isOpen, onClose, onSubmit })=>{
   const [PostedDate, setPostedDate] = useState(""); //empty string, as initial value for input[type="text"]
   const [TransactionDate, setTransactionDate] = useState(""); //empty string, as initial value for input[type="text"]
   const [AccountNumber, setAccountNumber] = useState(""); //empty string, as initial value for input[type="text"]
@@ -18,58 +18,6 @@ const TransactionDetailModal = ({ transaction, buttonsOptions, isOpen, onClose, 
   const [Type, setType] = useState(""); //empty string, as initial value for input[type="text"]
   const [Notes, setNotes] = useState(""); //empty string, as initial value for input[type="text"]
   const [Tags, setTags] = useState([]);
-
-  useEffect(()=>{
-    if(!transaction) return;
-
-    console.log("Updating TransactionDetailModal state based on updated prop \"transaction\".", transaction, PostedDate, TransactionDate, AccountNumber, Amount, Description, Category, Notes, Type, Tags)
-    const transactionDisplay = formatTransactionDisplay(transaction);
-    setPostedDate(transactionDisplay.PostedDate);
-    setTransactionDate(transactionDisplay.TransactionDate);
-    setAccountNumber(transactionDisplay.AccountNumber);
-    setAmount(transactionDisplay.Amount);
-    setDescription(transactionDisplay.Description);
-    setDescriptionDisplay(transactionDisplay.DescriptionDisplay);
-    setCategory(transactionDisplay.Category);
-    setNotes(transactionDisplay.Notes);
-    setType(transactionDisplay.Type);
-    setTags(transactionDisplay.Tags);
-  }, [transaction]);
-
-  const categories = [
-    "",
-    "Savings",
-    "Gas",
-    "Church",
-    "Groceries/Necessities",
-    "LoveInAction",
-    "Family Outings",
-    "Personal Spending",
-    "Miscellaneous",
-    "Sharonview mortgage & escrow",
-    "HOA dues",
-    "Duke Energy",
-    "SJWD Water District",
-    "Piedmont Natural Gas",
-    "Kirby Sanitation",
-    "Laurens Electric ProTec Security",
-    "SimpliSafe (for mom)",
-    "AT&T Internet",
-    "State Farm auto insurance",
-    "AT&T phone bill",
-    "Spotify Premium subscription",
-    "Netflix Premium subscription",
-    "Discovery Plus subscription",
-    "YMCA membership",
-  ];
-
-  const types = [
-    "",
-    "Charges",
-    "Payments",
-    "Debit",
-    "Credit",
-  ];
 
   const transactionDetails = [
     {name: "PostedDate", placeholder: "PostedDate", value: PostedDate, tag: "input", tagType: "text", setState: setPostedDate, disabled: false},
@@ -83,6 +31,26 @@ const TransactionDetailModal = ({ transaction, buttonsOptions, isOpen, onClose, 
     {name: "Notes", placeholder: "Notes", value: Notes, tag: "textarea", tagType: null, setState: setNotes, disabled: false},
     {name: "Tags", placeholder: "Tags", value: Tags, tag: "input", tagType: "text", setState: setTags, disabled: false},
   ];
+
+  //When the transaction changes,
+  // or the modal is opened or closed,
+  // reset the state
+  useEffect(()=>{
+    if(!transaction) return;
+
+    const transactionDisplay = formatTransactionDisplay(transaction);
+    setPostedDate(transactionDisplay.PostedDate);
+    setTransactionDate(transactionDisplay.TransactionDate);
+    setAccountNumber(transactionDisplay.AccountNumber);
+    setAmount(transactionDisplay.Amount);
+    setDescription(transactionDisplay.Description);
+    setDescriptionDisplay(transactionDisplay.DescriptionDisplay);
+    setCategory(transactionDisplay.Category);
+    setNotes(transactionDisplay.Notes);
+    setType(transactionDisplay.Type);
+    setTags(transactionDisplay.Tags);
+    console.log("Updating TransactionDetailModal state based on updated prop \"transaction\".", transaction, PostedDate, TransactionDate, AccountNumber, Amount, Description, Category, Notes, Type, Tags)
+  }, [transaction, isOpen]);
 
   const onTransactionDetailInputContainerClick = event=>{
     const transactionDetailInput = event.target;
@@ -133,19 +101,29 @@ const TransactionDetailModal = ({ transaction, buttonsOptions, isOpen, onClose, 
 
   const transactionModalFormOnSubmit = event=>{
     const transactionModalForm = event.target;
+    const formattedTransaction = formatTransactionDisplay(transaction);
 
     //Prevent the form from submitting
     event.preventDefault();
 
-    //Aggregate the form data into an object
-    const data = [...transactionModalForm.querySelectorAll("[name]")].reduce((accumulator,input)=>{
-      const obj = {};
-      let {name, value} = input;
-      value = (name === "Tags" ? (value ? value.split(/\s*,\s*/) : []) : value);
+    //Aggregate the form data into an object,
+    // and add that the transaction has been
+    // updated by the user
+    const data = [...transactionModalForm.querySelectorAll("[name]")].reduce((accumulator,{name, value})=>{
+      //If the value has not changed, return
+      if (value === formattedTransaction[name]) return accumulator;
 
-      obj[name] = (value instanceof Array && value.length === 0 ? [] : nullCoalesce(value));
-      return accumulator = {...accumulator, ...obj};
-    }, {});
+      //Vaildate the value
+      value = (name === "Tags" ? (value ? value.split(/\s*,\s*/) : []) : value); //Tags validation
+      value = (value instanceof Array && value.length === 0 ? [] : nullCoalesce(value)) //Array validation
+
+      return {
+        ...accumulator,
+        [name]: value,
+      };
+    }, {
+      IsUpdatedByUser: true,
+    });
     console.log("Data submitted from TransactionDetailModal", data);
 
     //Update the transaction with the new form data
@@ -177,9 +155,8 @@ const TransactionDetailModal = ({ transaction, buttonsOptions, isOpen, onClose, 
           ))}
         </Modal.Body>
         <Modal.Footer>
-          {Object.entries(buttonsOptions).map((buttonObj, i)=>(
-            <button key={buttonObj[0]} className={`btn ${(buttonObj[0] === "okButton" ? "btn-primary" : (buttonObj[0] === "cancelButton" ? "btn-secondary" : ''))}`} type={(buttonObj[0] === "okButton" ? "submit" : "button")} {...(buttonObj[0] === "cancelButton" ? {"data-bs-dismiss": "modal"} : '')} tabIndex={transactionDetails.length+i+1} onKeyDown={onTransactionDetailInputKeyDown} {...(buttonObj[0] === "cancelButton" ? {onClick: onClose} : '')} >{buttonObj[1]}</button>
-          ))}
+          <button className="btn btn-secondary" type="button" tabIndex={transactionDetails.length+1} onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary" type="submit" tabIndex={transactionDetails.length+2}>Save</button>
         </Modal.Footer>
       </form>
     </Modal>

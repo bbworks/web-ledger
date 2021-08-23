@@ -1,38 +1,49 @@
 import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON, convertDateStringToDate, areObjectsEqual, getBudgetAmountSpentFromTransactions, getMonthFromNumber, getCurrentYear, getBillingCycleFromDate} from './utilities.js';
+import {parseGoogleSheetsNumber, parseGoogleSheetsDate} from './../googleApi';
 
 //Declare public functions
 export const getTransactionDefaultDescriptionDisplay = function(transaction) {
   return nullCoalesce(transaction.DescriptionDisplay, `*${transaction.Description}`) || "";
 };
 
+export const isTransactionAutoCategorizedOrUpdatedByUser = transaction=>{
+  return transaction.IsAutoCategorized === true || transaction.IsUpdatedByUser === true;
+};
+
 export const typeCheckTransactions = function (transactions) {
   return transactions.map(transaction=>(
     {
       ...transaction,
-      PostedDate: transaction.PostedDate ? new Date(transaction.PostedDate) : null,
-      TransactionDate: transaction.TransactionDate ? new Date(transaction.TransactionDate) : null,
-      Type: transaction.Type ? transaction.Type : null,
-      Category: transaction.Category ? transaction.Category : null,
-      Description: transaction.Description ? transaction.Description : null,
-      Category: transaction.Category ? transaction.Category : null,
-      Amount: isNaN(transaction.Amount) ? Number(transaction.Amount.replace(/(\$|,)/g, "")) : Number(transaction.Amount),
-      Notes: transaction.Notes ? transaction.Notes : null,
+      PostedDate: parseGoogleSheetsDate(transaction.PostedDate),
+      TransactionDate: parseGoogleSheetsDate(transaction.TransactionDate),
+      Amount: parseGoogleSheetsNumber(transaction.Amount.replace(/(\$|,)/g, "")),
       Tags: !isFalsy(transaction.Tags) ? transaction.Tags : [],
-
     }
   ));
 };
 
 export const categorizeTransactionByDescription = function(transaction) {
-  const {DescriptionDisplay, Description, Tags, Category, Notes} = transaction;
+  const {DescriptionDisplay, Description, Tags, Category, Notes, IsAutoCategorized, IsUpdatedByUser} = transaction;
 
-  //Skip the transaction if there is no Description
-  if (!Description) return transaction;
+  //If
+  // 1) the transaction has already either
+  // been auto-categorized, or updated by the user,
+  // 2) the transaction already has a
+  // DescriptionDisplay or Category or Notes, or
+  // 3) the transaction has no Description to categorized on,
+  // there is no need to auto-categorized this transaction,
+  // as either it has been auto-categorized, or the user
+  // manually updated the transaction data
+  if (
+    (isTransactionAutoCategorizedOrUpdatedByUser(transaction)) ||
+    (DescriptionDisplay || Category || Notes) ||
+    !Description
+  ) return transaction;
 
   //Define a base for categorized transaction data
   let categorizedTransactionData = {};
 
-  //Define matches, if we need matched capture groups
+  //Define matches, if matched capture groups are needed
   let matches;
 
   //Income
@@ -86,10 +97,18 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/Bojangles \d+ \w+/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Bojangles", Notes: null};
   else if (Description.match(/Cook Out [\w ]+(?: \w+ \w{2})?/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Cook Out", Notes: null};
   else if (Description.match(/Wendys #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Wendy's", Notes: null};
+  else if (Description.match(/Krystal [\d\w]+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Krystal", Notes: null};
+  else if (Description.match(/Checkers Drive In \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Checkers", Notes: null};
   else if (Description.match(/Jack in the Box \d+ \w+/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Jack In The Box", Notes: null};
   else if (Description.match(/Wayback Burgers \d{10} \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Wayback Burgers", Notes: null};
-  else if (Description.match(/KFC [\w\d]+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "KFC", Notes: null};
+  else if (Description.match(/KFC \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "KFC", Notes: null};
   else if (Description.match(/Taco Bell #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Taco Bell", Notes: null};
+  else if (Description.match(/(?:Chipotle \d+ \w+ \w{2}|Chipotle Online 1800\d{6} CA)/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Chipotle", Notes: null};
+  else if (Description.match(/Taco Casa #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Taco Casa", Notes: null};
+  else if (Description.match(/TST\* WILLY TACO - HUB SPARTANBURG SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Willy Taco", Notes: null};
+  else if (Description.match(/El Tejano Mexican Rest/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "El Tejano", Notes: null};
+  else if (Description.match(/La Fogata Mexican Rest Simpsonville Sc/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "La Fogata", Notes: null};
+  else if (Description.match(/El Molcajete Duncan Sc/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "El Molcajete", Notes: null};
   else if (Description.match(/CKE\*TACO DOG SPARTANBU SPARTANBURG SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Taco Dog", Notes: null};
   else if (Description.match(/WAFFLE HOUSE \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Waffle House", Notes: null};
   else if (Description.match(/Chili's \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Chili's", Notes: null};
@@ -97,11 +116,6 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/Sweet Basil Thai Cusin Greenville SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Sweet Basil Thai Cusine", Notes: null};
   else if (Description.match(/Panda Hibachi Duncan SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Panda Hibachi", Notes: null};
   else if (Description.match(/PF Changs #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "PF Changs", Notes: null};
-  else if (Description.match(/(?:Chipotle \d+ \w+ \w{2}|Chipotle Online 1800\d{6} CA)/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Chipotle", Notes: null};
-  else if (Description.match(/TST\* WILLY TACO - HUB SPARTANBURG SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Willy Taco", Notes: null};
-  else if (Description.match(/El Tejano Mexican Rest/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "El Tejano", Notes: null};
-  else if (Description.match(/La Fogata Mexican Rest Simpsonville Sc/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "La Fogata", Notes: null};
-  else if (Description.match(/El Molcajete Duncan Sc/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "El Molcajete", Notes: null};
   else if (Description.match(/Pizza Hut \d+ \d+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Pizza Hut", Notes: null};
   else if (Description.match(/Tutti Frutti Spartanburg SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Tutti Frutti", Notes: null};
   else if (Description.match(/KRISPY KREME \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Krispy Kreme", Notes: null};
@@ -109,10 +123,6 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/Applebees \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Applebee's", Notes: null};
   else if (Description.match(/Dunkin #\d+ \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Dunkin", Notes: null};
   else if (Description.match(/Shipwreck Cove Duncan SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Shipwreck Cove", Notes: null};
-
-  else if (Description.match(/Taco Casa #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Taco Casa", Notes: null};
-  else if (Description.match(/Krystal [\d\w]+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Krystal", Notes: null};
-  else if (Description.match(/Checkers Drive In \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Checkers", Notes: null};
 
   //Church
   else if (Description.match(/Brookwood Church Donat Simpsonville Sc/i))  categorizedTransactionData = {Category: "Church", DescriptionDisplay: "Brookwood Church", Notes: "online giving"};
@@ -173,6 +183,8 @@ export const importTransactions = function(transactionsData, dataType) {
             Category: null,
             Notes: null,
             Tags: [],
+            IsAutoCategorized: false,
+            IsUpdatedByUser: false,
           };
         })
         //Filter out anything that didn't become a transaction
@@ -224,6 +236,8 @@ export const importTransactions = function(transactionsData, dataType) {
         Category: null,
         Notes: null,
         Tags: [],
+        IsAutoCategorized: false,
+        IsUpdatedByUser: false,
       };
     });
   }

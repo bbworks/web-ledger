@@ -65,7 +65,11 @@ export const convertSheetsArraysToJSON = (data, delimiter=",")=>{
     line.reduce((obj, value, i)=>
       ({
         ...obj,
-        [keys[i]]: value,
+        [keys[i]]: (
+          value === "" ?
+          null :
+          (value === "TRUE" ? true : (value === "FALSE" ? false : value))
+        ),
       })
   , {})
   );
@@ -79,7 +83,11 @@ export const convertJSONToSheetsArray = (JSON, delimiter=",")=>{
   return [
     headers,
     ...JSON.map(object=>
-      headers.map(header=>(Array.isArray(object[header]) ? object[header].join(",") : object[header]))
+      headers.map(header=>(
+        object[header] === null ?
+        "" :
+        (Array.isArray(object[header]) ? object[header].join(",") : object[header]))
+      )
     )
   ];
 };
@@ -137,4 +145,14 @@ export const convertArrayToA1Notation = (rowsColumnsArray, startingCell="A1")=>{
   const columnLetter = convertColumnNumberToColumnLetter(startingColumnIndex+columns-1);
   const rowNumber = startingRow+rows-1;
   return `${startingCell}:${columnLetter}${rowNumber}`;
+};
+
+export const parseGoogleSheetsNumber = value=>{
+  let potentialNumber;
+  return (value && (potentialNumber = Number(value)) && !isNaN(potentialNumber) ? potentialNumber : null);
+};
+
+export const parseGoogleSheetsDate = value=>{
+  let potentialDate;
+  return (value && (potentialDate = (new Date(value))) && !isNaN(potentialDate.getTime()) ? potentialDate : null);
 };

@@ -1,7 +1,9 @@
+import {parseGoogleSheetsNumber, parseGoogleSheetsDate} from './../googleApi';
+
 export const typeCheckAccountData = accountData=>{
   return accountData.map(data=>({
     ...data,
-    CreditScore: (data.CreditScore ? Number(data.CreditScore) : null),
-    LastUpdated: (data.LastUpdated ? new Date(data.LastUpdated) : null),
+    CreditScore: parseGoogleSheetsNumber(data.CreditScore),
+    LastUpdated: parseGoogleSheetsDate(data.LastUpdated),
   }));
 };
