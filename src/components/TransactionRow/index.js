@@ -173,7 +173,7 @@ const TransactionRow = ({ transaction, onTransactionEditButtonClick:onTransactio
       <div className="transaction-row-container" onClick={onTransactionEditButtonClick} >
         <div className="transaction-row-description-container">
           <span className={`transaction-row-description ${(!transaction.DescriptionDisplay ? "uncategorized" : "")}`}>{transactionDisplay.Description}</span>
-          <span className="transaction-row-amount">{transactionDisplay.Amount}</span>
+          <span className={`transaction-row-amount${transaction.Amount >= 0 ? " positive" : ""}`}>{transactionDisplay.Amount}</span>
         </div>
         <div className="transaction-row-subdescription-container">
           <span className="transaction-row-account">{transactionDisplay.AccountNumber}</span>

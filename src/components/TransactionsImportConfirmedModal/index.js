@@ -13,22 +13,36 @@ const TransactionsImportConfirmedModal = ({ transactions, duplicates, isOpen, on
     onSubmitProp(transactions);
   };
 
+  const longestTransactionDate = Math.max(...transactions.map(({TransactionDate})=>TransactionDate.toLocaleDateString().length));
+  const longestAmount = Math.max(...transactions.map(({Amount})=>`${Amount >= 0 ? " " : ""}${convertNumberToCurrency(Amount)}`.length));
+  const longestDescription = Math.max(...transactions.map(({Description})=>Description.length));
+
   return (
-    <Modal id="transaction-confirmed-duplicate-modal" show={isOpen} onHide={onClose}>
+    <Modal className="transaction-import-confirmed-modal" show={isOpen} onHide={onClose}>
       <Modal.Header>
         <Modal.Title className="modal-title">Transactions imported!</Modal.Title>
         <button className="btn-close" type="button" data-bs-dismiss="modal" onClick={onClose}></button>
       </Modal.Header>
-      <form className="transaction-confirmed-duplicate-modal-form" onSubmit={onSubmit}>
+      <form className="transaction-import-confirmed-modal-form" onSubmit={onSubmit}>
         <Modal.Body>
           <p>Successfully imported {transactions.length} transactions.</p>
           <div className="overflow-auto">
             {
-              transactions.map((transaction, i)=>(
-                <div key={i}>
-                  {`${(transaction.TransactionDate).toLocaleDateString()} ${convertNumberToCurrency(transaction.Amount)} ${transaction.Description}`}
-                </div>
-              ))
+              transactions.map((transaction, i)=>{
+                const transactionDateString = transaction.TransactionDate.toLocaleDateString();
+                const amountString = `${transaction.Amount >= 0 ? " " : ""}${convertNumberToCurrency(transaction.Amount)}`;
+                const descriptionString = transaction.Description;
+
+                const transactionDateSpaces = Array(longestTransactionDate-transactionDateString.length).fill(" ").join("");
+                const amountSpaces = Array(longestAmount-amountString.length).fill(" ").join("");
+                const descriptionSpaces = Array(longestDescription-descriptionString.length).fill(" ").join("");
+
+                return (
+                  <div key={i} className="confirmed-transaction">
+                    {`${transactionDateString}${transactionDateSpaces}  ${amountString}${amountSpaces}  ${descriptionString}${descriptionSpaces}`}
+                  </div>
+                );
+            })
             }
           </div>
         </Modal.Body>

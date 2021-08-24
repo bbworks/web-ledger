@@ -132,8 +132,13 @@ const App = () => {
       }
     });
 
-    //If there were no duplicates, append the new transactions
-    if (!duplicates.length) return [...previousTransactions, ...newTransactions];
+    //If there were no duplicates,
+    // open the confirmed imported transactions modal
+    if (!duplicates.length) {
+      setTransactionsImportConfirmedModalTransactions(newTransactions);
+      openTransactionsImportConfirmedModal();
+      return previousTransactions;
+    }
 
     //Otherwise, ask user to confirm true duplicates,
     // and just return the previous data for now

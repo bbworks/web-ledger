@@ -35,12 +35,12 @@ const BudgetGraphStatusIcon = ({ budget, overBudget, overEarned })=> {
         iconText = "Earned";
         iconColor = "success";
       }
-      if (overEarned) {
+      else if (overEarned) {
         iconClass = "fas fa-check-circle";
         iconText = "Over-earned";
         iconColor = "success";
       }
-      if (!overEarned) {
+      else if (!overEarned) {
         iconClass = "fas fa-exclamation-triangle";
         iconText = "Under-earned";
         iconColor = "warning";

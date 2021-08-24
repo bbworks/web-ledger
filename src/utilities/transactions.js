@@ -29,16 +29,13 @@ export const categorizeTransactionByDescription = function(transaction) {
 
   //If
   // 1) the transaction has already either
-  // been auto-categorized, or updated by the user,
-  // 2) the transaction already has a
-  // DescriptionDisplay or Category or Notes, or
-  // 3) the transaction has no Description to categorized on,
+  // been auto-categorized, or updated by the user, or
+  // 2) the transaction has no Description to categorized on,
   // there is no need to auto-categorized this transaction,
   // as either it has been auto-categorized, or the user
   // manually updated the transaction data
   if (
     (isTransactionAutoCategorizedOrUpdatedByUser(transaction)) ||
-    (DescriptionDisplay || Category || Notes) ||
     !Description
   ) return transaction;
 
@@ -49,15 +46,23 @@ export const categorizeTransactionByDescription = function(transaction) {
   let matches;
 
   //Income
-       if (Description.match(/ELECTRONIC\/ACH CREDIT \w{5} US , INC\. PAYROLL \d{10}/i))  categorizedTransactionData = {Category: "Infor payroll", DescriptionDisplay: "Deposit to CHG *7740", Notes: null};
-  else if (Description.match(/INTEREST PAYMENT PAID THIS STATEMENT THRU \d{2}\/\d{2}/i))  categorizedTransactionData = {Category: "Other income", DescriptionDisplay: "Interest paid", Notes: null};
+       if (matches = Description.match(/ELECTRONIC\/ACH CREDIT (\w{5} \w{2} , \w{3}\.) PAYROLL \d{10}/i))  categorizedTransactionData = {Category: "Infor payroll", DescriptionDisplay: `${matches[1]}`, Notes: null};
+  else if (matches = Description.match(/INTEREST PAYMENT PAID THIS STATEMENT THRU \d{2}\/\d{2}/i))  categorizedTransactionData = {Category: "Other income", DescriptionDisplay: `Interest paid ${matches[1]}/${matches[2]}`, Notes: null};
+
+  //Deposits
+  else if (Description.match(/MOBILE CHECK DEPOSIT/i))  categorizedTransactionData = {Category: null, DescriptionDisplay: "Mobile check deposit", Notes: null};
+
+  //Withdrawals
+  else if (Description.match(/ATM CASH WITHDRAWAL (?:\d{4} \w{4} \d{12)|[\w ]+}/i))  categorizedTransactionData = {Category: null, DescriptionDisplay: "ATM withdrawal", Notes: null};
 
   //Transfers
-  else if (matches = Description.match(/ONLINE BANKING TRANSFER (?:MOBILE APP TRANSFER )?TO (?:\d{4} )?(\d{13})/i))  categorizedTransactionData = {Category: null, DescriptionDisplay: `Transfer to *${matches[1].substring(matches[1].length-4)}`, Notes: null};
-  else if (matches = Description.match(/ONLINE BANKING TRANSFER CREDIT FROM \d{4} (\d{13})/i))  categorizedTransactionData = {Category: null, DescriptionDisplay: `Transfer from *${matches[1].substring(matches[1].length-4)}`, Notes: null};
+  else if (matches = Description.match(/ONLINE BANKING TRANSFER (?:MOBILE APP TRANSFER )?TO (?:\d{4} )?\d{9}(\d{4})/i))  categorizedTransactionData = {Category: null, DescriptionDisplay: `Transfer to *${matches[1]}`, Notes: null};
+  else if (matches = Description.match(/ONLINE BANKING TRANSFER CREDIT FROM \d{4} \d{9}(\d{4})/i))  categorizedTransactionData = {Category: null, DescriptionDisplay: `Transfer from *${matches[1]}`, Notes: null};
+  else if (matches = Description.match(/AUTOMATIC TRANSFER DEBIT \w+ \w+ TRANSFER \d{9}(\d{4})-\d \d{10}/i))  categorizedTransactionData = {Category: null, DescriptionDisplay: `Automatic transfer to *${matches[1]}`, Notes: null};
+  else if (matches = Description.match(/ZELLE TRANSFER TO (.+ ) \d{2}\/\d{2} \w+/i))  categorizedTransactionData = {Category: null, DescriptionDisplay: `Zelle transfer to *${matches[1]}`, Notes: null};
 
   //Payments
-  else if (matches = Description.match(/CREDIT CARD PAYMENT ONLINE BANKING TRANSFER TO \d{4} \d{6}\*{6}(\d{4})/i))  categorizedTransactionData = {Category: null, DescriptionDisplay: `Payment for CCD *${matches[1]}`, Notes: null};
+  else if (matches = Description.match(/CREDIT CARD PAYMENT (?:MOBILE APP PAYMENT|ONLINE BANKING TRANSFER) TO \d{4} \d{6}\*{6}(\d{4})/i))  categorizedTransactionData = {Category: null, DescriptionDisplay: `Payment for CCD *${matches[1]}`, Notes: null};
 
   //Bills
   else if (Description.match(/Simplisafe 888-957-4675 Ma/i))  categorizedTransactionData = {Category: "SimpliSafe (for mom)", DescriptionDisplay: "SimpliSafe", Notes: null};
@@ -82,10 +87,10 @@ export const categorizeTransactionByDescription = function(transaction) {
 
   //Groceies & Necessities
   else if (Description.match(/Walmart Grocery [\d-]+ Ar/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Walmart Supercenter", Notes: "grocery pickup"};
-  else if (Description.match(/(?:Wal-Mart|WM Supercenter) #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Walmart Supercenter", Notes: "grocery pickup"};
+  else if (Description.match(/(?:Wal-Mart|WM Supercenter) #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Walmart Supercenter", Notes: null};
   else if (Description.match(/Target #?\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Target", Notes: null};
   else if (Description.match(/Ingles Markets #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Ingles", Notes: null};
-  else if (Description.match(/Publix #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Publix", Notes: "grocery pickup"};
+  else if (Description.match(/Publix #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Publix", Notes: null};
   else if (Description.match(/(?:Sams ?Club #8142 Spartanburg SC|Sams Club #8142 864-574-3480 SC)/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Sam's Club", Notes: null};
   else if (Description.match(/Walgreens #\d+/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Walgreens", Notes: null};
   else if (Description.match(/Dollar Tree \w+ \w{2}/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Dollar Tree", Notes: null};
@@ -141,9 +146,9 @@ export const categorizeTransactionByDescription = function(transaction) {
   //Final categorizedTransactionData
   categorizedTransactionData = {
     //only add a category/displayed description/notes, based on the description, if one is not already present
-    Category: nullCoalesce(Category, categorizedTransactionData.Category),
-    DescriptionDisplay: nullCoalesce(DescriptionDisplay, categorizedTransactionData.DescriptionDisplay),
-    Notes: nullCoalesce(Notes, categorizedTransactionData.Notes),
+    Category: Category || categorizedTransactionData.Category,
+    DescriptionDisplay: DescriptionDisplay || categorizedTransactionData.DescriptionDisplay,
+    Notes: Notes || categorizedTransactionData.Notes,
   };
 
   //Return the transaction with updated categorization data

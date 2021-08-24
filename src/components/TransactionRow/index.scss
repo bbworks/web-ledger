@@ -38,6 +38,10 @@
     color: red;
     font-weight: bold;
     white-space: pre;
+
+    &.positive {
+      color: rgb(76,175,80);
+    }
   }
 
   &-subdescription-container {
