@@ -52,7 +52,7 @@ const TransactionsImportForm = ({ onSubmit:onSubmitProp, onFileInputChange:onFil
   };
 
   return (
-    <div>
+    <div className="mb-3">
       <div className="d-flex justify-content-end">
         <button className="transaction-import-form-toggle btn btn-dark" type="button" onClick={toggleOnClick}>Import Transactions</button>
       </div>
