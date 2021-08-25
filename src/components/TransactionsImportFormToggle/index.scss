@@ -1,0 +1,14 @@
+.transaction-import-form-toggle {
+  position: fixed;
+  bottom: 5rem;
+  right: 1rem;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+
+  &-icon {
+    color: white;
+    font-size: 2.5rem;
+    font-weight: 300;
+  }
+}
