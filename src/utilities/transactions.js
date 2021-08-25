@@ -63,6 +63,7 @@ export const categorizeTransactionByDescription = function(transaction) {
 
   //Payments
   else if (matches = Description.match(/CREDIT CARD PAYMENT (?:MOBILE APP PAYMENT|ONLINE BANKING TRANSFER) TO \d{4} \d{6}\*{6}(\d{4})/i))  categorizedTransactionData = {Category: null, DescriptionDisplay: `Payment for CCD *${matches[1]}`, Notes: null};
+  else if (matches = Description.match(/PAYMENT - \w{5} \w{3} \w{7} \w{2}/i))  categorizedTransactionData = {Category: null, DescriptionDisplay: `Credit card payment`, Notes: null};
 
   //Bills
   else if (Description.match(/Simplisafe 888-957-4675 Ma/i))  categorizedTransactionData = {Category: "SimpliSafe (for mom)", DescriptionDisplay: "SimpliSafe", Notes: null};

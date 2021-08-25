@@ -1,0 +1,40 @@
+.transaction-data-search-form {
+  background-color: rgb(200,200,200);
+  width: 100%;
+  padding: 1rem;
+  padding-bottom: 0.25rem;
+
+  &-input-container {
+    display: flex;
+    align-items: center;
+    background-color: white;
+    padding: 0 0.5rem;
+    border-radius: 1rem;
+    overflow: hidden;
+
+    .transaction-data-search-form-icon {
+      color: rgb(200,200,200);
+    }
+
+    .transaction-data-search-form-input {
+      flex-grow: 1;
+      background: none;
+      border: none;
+      outline: none;
+      padding: 0.25rem 1rem;
+    }
+  }
+
+  .transaction-data-search-form-search-filters {
+    padding: 0.25rem;
+    overflow-x: auto;
+    white-space: nowrap;
+
+    .transaction-data-search-form-search-filter {
+      font-weight: 300;
+      padding: 0.25rem 0.75rem;
+      padding-left: 0.5rem;
+      margin-right: 0.25rem;
+    }
+  }
+}
