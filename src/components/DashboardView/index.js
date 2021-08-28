@@ -15,13 +15,13 @@ const DashboardView = ({ signedInUser, transactions, accountsData, accountData, 
     setFooterNavbar(route);
   }, []);
 
-  const currentBudgetCycleTransactions = useBudgetCycleTransactions(transactions, budgetCycle);
+  const budgetCycleTransactions = useBudgetCycleTransactions(transactions, budgetCycle);
 
   return (
     <div className="view dashboard-view d-flex flex-column">
       <main className="main flex-grow-1">
         <DashboardTop transactions={transactions} accountsData={accountsData} accountData={accountData} budgetCycle={budgetCycle} onBudgetCycleChange={onBudgetCycleChange} />
-        <DashboardContent transactions={currentBudgetCycleTransactions} budgetsData={budgetsData} />
+        <DashboardContent budgetCycleTransactions={budgetCycleTransactions} budgetsData={budgetsData} />
       </main>
     </div>
   );

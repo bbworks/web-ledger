@@ -3,11 +3,11 @@ import DashboardShowcase from './../DashboardShowcase';
 
 import './index.scss';
 
-const DashboardContent = ({ transactions, budgetsData })=>{
+const DashboardContent = ({ budgetCycleTransactions, budgetsData })=>{
   return (
     <div className="dashboard-content container-fluid overflow-auto">
-      <DashboardShowcase transactions={transactions} budgetsData={budgetsData} />
-      <DashboardInsights transactions={transactions} budgetsData={budgetsData} />
+      <DashboardShowcase />
+      <DashboardInsights budgetCycleTransactions={budgetCycleTransactions} budgetsData={budgetsData} />
     </div>
   );
 };

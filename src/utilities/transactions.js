@@ -47,7 +47,7 @@ export const categorizeTransactionByDescription = function(transaction) {
 
   //Income
        if (matches = Description.match(/ELECTRONIC\/ACH CREDIT (\w{5} \w{2} , \w{3}\.) PAYROLL \d{10}/i))  categorizedTransactionData = {Category: "Infor payroll", DescriptionDisplay: `${matches[1]}`, Notes: null};
-  else if (matches = Description.match(/INTEREST PAYMENT PAID THIS STATEMENT THRU \d{2}\/\d{2}/i))  categorizedTransactionData = {Category: "Other income", DescriptionDisplay: `Interest paid ${matches[1]}/${matches[2]}`, Notes: null};
+  else if (matches = Description.match(/INTEREST PAYMENT PAID THIS STATEMENT THRU (\d{2})\/(\d{2})/i))  categorizedTransactionData = {Category: "Other income", DescriptionDisplay: `Interest paid ${matches[1]}/${matches[2]}`, Notes: null};
 
   //Deposits
   else if (Description.match(/MOBILE CHECK DEPOSIT/i))  categorizedTransactionData = {Category: null, DescriptionDisplay: "Mobile check deposit", Notes: null};
@@ -108,7 +108,7 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/Krystal [\d\w]+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Krystal", Notes: null};
   else if (Description.match(/Checkers Drive In \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Checkers", Notes: null};
   else if (Description.match(/Jack in the Box \d+ \w+/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Jack In The Box", Notes: null};
-  else if (Description.match(/Wayback Burgers \d{10} \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Wayback Burgers", Notes: null};
+  else if (Description.match(/Wayback Burgers \w{10} \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Wayback Burgers", Notes: null};
   else if (Description.match(/KFC \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "KFC", Notes: null};
   else if (Description.match(/Taco Bell #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Taco Bell", Notes: null};
   else if (Description.match(/(?:Chipotle \d+ \w+ \w{2}|Chipotle Online 1800\d{6} CA)/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Chipotle", Notes: null};
@@ -118,6 +118,7 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/La Fogata Mexican Rest Simpsonville Sc/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "La Fogata", Notes: null};
   else if (Description.match(/El Molcajete Duncan Sc/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "El Molcajete", Notes: null};
   else if (Description.match(/CKE\*TACO DOG SPARTANBU SPARTANBURG SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Taco Dog", Notes: null};
+  else if (Description.match(/Tropical Grille \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Tropical Grille", Notes: null};
   else if (Description.match(/WAFFLE HOUSE \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Waffle House", Notes: null};
   else if (Description.match(/Chili's \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Chili's", Notes: null};
   else if (Description.match(/Paisanos Italian Resta/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Paisanos Italian Restaurant", Notes: null};
@@ -144,6 +145,9 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/[\w\* ]+ amzn.com\/billwa/i))  categorizedTransactionData = {Category: null, DescriptionDisplay: "Amazon", Notes: null};
   else if (Description.match(/SPARTANBURGCO TREAS 8645962603 SC/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Spartanburg County Treasury", Notes: null};
 
+  //If there was no match, return the original transaction
+  else return transaction;
+
   //Final categorizedTransactionData
   categorizedTransactionData = {
     //only add a category/displayed description/notes, based on the description, if one is not already present
@@ -155,7 +159,8 @@ export const categorizeTransactionByDescription = function(transaction) {
   //Return the transaction with updated categorization data
   return {
     ...transaction,
-    ...categorizedTransactionData
+    ...categorizedTransactionData,
+    IsAutoCategorized: true,
   };
 };
 
@@ -213,7 +218,7 @@ export const importTransactions = function(transactionsData, dataType) {
 
     //For each CSV file, convert the contents to JSON
     return transactionsData.map(transaction=>{
-      const Date = (transaction.Date ? transaction.Date.trim() : null);
+      const _Date = (transaction.Date ? transaction.Date.trim() : null);
       const TransactionDate = (transaction.TransactionDate ? transaction.TransactionDate.trim() : null);
       const PostedDate = (transaction.PostedDate ? transaction.PostedDate.trim() : null);
       const Description = (transaction.Description ? transaction.Description.trim() : null);
@@ -238,7 +243,7 @@ export const importTransactions = function(transactionsData, dataType) {
           null
         )
       );
-      const transactionDate = convertDateStringToDate(nullCoalesce(TransactionDate, Date), "MM/dd/yyyy");
+      const transactionDate = convertDateStringToDate(nullCoalesce(TransactionDate, _Date), "MM/dd/yyyy");
       if (isFalsy(type) || isFalsy(transactionDate)) throw new Error(`Unable to read transaction.\r\n${transaction}`);
 
       return {

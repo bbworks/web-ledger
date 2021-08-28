@@ -1,4 +1,9 @@
-.transaction-data {
+.transactions-data {
   width: 100%;
   overflow-x: hidden;
+
+  .transactions-count {
+    font-size: 0.875rem;
+    font-style: italic;
+  }
 }

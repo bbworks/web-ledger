@@ -38,9 +38,9 @@ const TransactionsView = ({ transactions, budgetCycle, transactionsImportDuplica
   const [transactionDeleteModalTransaction, setTransactionDeleteModalTransaction] = useState(null);
   const [isTransactionDeleteModalOpen, setIsTransactionDeleteModalOpen] = useState(false);
 
-  const currentBudgetCycleTransactions = useBudgetCycleTransactions(filteredTransactions, budgetCycle);
+  const budgetCycleTransactions = useBudgetCycleTransactions(filteredTransactions, budgetCycle);
 
-  useConsoleLog(currentBudgetCycleTransactions, "currentBudgetCycleTransactions:");
+  useConsoleLog(budgetCycleTransactions.all, "budgetCycleTransactions:");
 
   useEffect(()=>{
     if (!transactions.length) return;
@@ -105,7 +105,7 @@ const TransactionsView = ({ transactions, budgetCycle, transactionsImportDuplica
     <div className="view transactions-view">
       <h1 className="page-title display-3">Transactions</h1>
       <TransactionsImportForm isOpen={isTransactionImportFormOpen} onSubmit={onTransactionsImportFormSubmit} onFileInputChange={onTransactionsImportFormFileInputChange} />
-      <TransactionsData transactions={currentBudgetCycleTransactions} onTransactionEditButtonClick={onTransactionEditButtonClick} onTransactionDeleteButtonClick={onTransactionDeleteButtonClick} />
+      <TransactionsData budgetCycleTransactions={budgetCycleTransactions} onTransactionEditButtonClick={onTransactionEditButtonClick} onTransactionDeleteButtonClick={onTransactionDeleteButtonClick} />
       <TransactionsImportFormToggle onClick={onTransactionImportFormToggleClick} />
       <TransactionDetailModal transaction={transactionDetailModalTransaction} categories={transactionCategories} types={transactionTypes} isOpen={isTransactionDetailModalOpen} onClose={closeTransactionDetailModal} onSubmit={onTransactionDetailModalSubmit} />
       <TransactionDeleteModal transaction={transactionDeleteModalTransaction} isOpen={isTransactionDeleteModalOpen} onClose={closeTransactionDeleteModal} onSubmit={onTransactionDeleteModalSubmit} />

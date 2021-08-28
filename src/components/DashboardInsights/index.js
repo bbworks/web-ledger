@@ -5,18 +5,18 @@ import {convertNumberToCurrency, getBudgetAmountSpentFromTransactions} from './.
 
 import './index.scss';
 
-const DashboardInsights = ({ transactions, budgetsData })=>{
+const DashboardInsights = ({ budgetCycleTransactions, budgetsData })=>{
   const [insights, setInsights] = useState([]);
 
   const runInsights = ()=>{
-    if (!transactions.length || !budgetsData.length) return;
+    if (!budgetCycleTransactions.all.length || !budgetsData.length) return;
 
     //First, remove all insights
     setInsights([]);
 
     /* Check if there is money left in the "Personal Spending" budget */
     const personalSpendingBudgetData = budgetsData.find(budgetData=>budgetData.Name==="Personal Spending");
-    const personalSpendingBudgetLeft = getBudgetAmountSpentFromTransactions("Personal Spending", transactions) - personalSpendingBudgetData.Amount;
+    const personalSpendingBudgetLeft = getBudgetAmountSpentFromTransactions("Personal Spending", budgetCycleTransactions.all) - personalSpendingBudgetData.Amount;
     if (personalSpendingBudgetLeft > 0) {
       const insight = {
         type: "primary",
@@ -43,7 +43,7 @@ const DashboardInsights = ({ transactions, budgetsData })=>{
     /* Check if a bill has gone up */
     const bills = budgetsData.filter(budgetData=>budgetData.type==="bill");
     bills.forEach(bill=>{
-      const amountSpent = getBudgetAmountSpentFromTransactions(bill.name, transactions)
+      const amountSpent = getBudgetAmountSpentFromTransactions(bill.name, budgetCycleTransactions.all)
       if (!amountSpent) return;
       if (Math.abs(amountSpent) > Math.abs(bill.amount)) {
         const insight = {
@@ -58,7 +58,7 @@ const DashboardInsights = ({ transactions, budgetsData })=>{
 
   useEffect(()=>{
     runInsights();
-  }, [transactions, budgetsData]);
+  }, [budgetCycleTransactions, budgetsData]);
 
   return (
     <div className="dashboard-insights container mt-5">

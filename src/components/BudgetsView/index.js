@@ -16,7 +16,7 @@ const BudgetsView = ({ transactions, budgetsData, budgetCycle, setFooterNavbar }
     setFooterNavbar(route);
   }, []);
 
-  const currentBudgetCycleTransactions = useBudgetCycleTransactions(transactions, budgetCycle);
+  const budgetCycleTransactions = useBudgetCycleTransactions(transactions, budgetCycle);
 
   return (
     <div className="view budgets-view">
@@ -29,7 +29,7 @@ const BudgetsView = ({ transactions, budgetsData, budgetCycle, setFooterNavbar }
             '' :
             budgetsData.map(budgetData=>{
               const {Name, Amount, Type} = budgetData;
-              return <BudgetGraph key={Name} budget={{...budgetData, color: "#2196f3", amountSpent: getBudgetAmountSpentFromTransactions(Name, currentBudgetCycleTransactions)}}/>
+              return <BudgetGraph key={Name} budget={{...budgetData, color: "#2196f3", amountSpent: getBudgetAmountSpentFromTransactions(Name, budgetCycleTransactions.all)}}/>
             })
           )
         }

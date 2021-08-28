@@ -2,24 +2,47 @@ import {useState, useEffect} from 'react';
 
 const useBudgetCycleTransactions = (transactions, budgetCycle)=>{
   //Declare functions
-  const getBudgetCycleTransactions = (transactions, budgetCycle)=>{
+  const getLastBudgetCycleIncomeTransactions = (transactions, budgetCycle)=>{
     if (!transactions.length || !budgetCycle) return [];
 
     const lastBudgetCycleMonth = ((budgetCycle.getMonth() - 1 + 12) % 12); //last month, looping over 12
     const lastBudgetCycleYear = (budgetCycle.getMonth() -1 < 0 ? budgetCycle.getFullYear() - 1 : budgetCycle.getFullYear());
 
-    //Get last cycle's income transactions
-    const lastBudgetCycleIncomeTransactions = transactions
+    return transactions
       .filter(({TransactionDate})=>TransactionDate.getMonth() === lastBudgetCycleMonth && TransactionDate.getFullYear() === lastBudgetCycleYear)
-      .filter(({Category})=>Category === "Infor payroll");
+      .filter(({Category})=>["Infor payroll", "Other income"].includes(Category));
+  };
+
+  const getCurrentBudgetCycleIncomeTransactions = (transactions, budgetCycle)=>{
+    if (!transactions.length || !budgetCycle) return [];
+
+    return transactions
+      .filter(({TransactionDate})=>TransactionDate.getMonth() === budgetCycle.getMonth() && TransactionDate.getFullYear() === budgetCycle.getFullYear())
+      .filter(transaction=>!["Infor payroll", "Other income"].includes(transaction.Category) && transaction.Amount >= 0 && !transaction.Description.match(/CREDIT CARD PAYMENT (?:MOBILE APP PAYMENT|ONLINE BANKING TRANSFER) TO \d{4} \d{6}\*{6}(\d{4})/i) && !transaction.Description.match(/PAYMENT - \w{5} \w{3} \w{7} \w{2}/i));
+  };
+
+  const getCurrentBudgetCycleExpenseTransactions = (transactions, budgetCycle)=>{
+    if (!transactions.length || !budgetCycle) return [];
+
+    return transactions
+      .filter(({TransactionDate})=>TransactionDate.getMonth() === budgetCycle.getMonth() && TransactionDate.getFullYear() === budgetCycle.getFullYear())
+      .filter(transaction=>!["Infor payroll", "Other income"].includes(transaction.Category) && transaction.Amount < 0 && !transaction.Description.match(/CREDIT CARD PAYMENT (?:MOBILE APP PAYMENT|ONLINE BANKING TRANSFER) TO \d{4} \d{6}\*{6}(\d{4})/i) && !transaction.Description.match(/PAYMENT - \w{5} \w{3} \w{7} \w{2}/i));
+  };
+
+  const getBudgetCycleTransactions = (transactions, budgetCycle)=>{
+    //Get last cycle's income transactions
+    const lastBudgetCycleIncomeTransactions = getLastBudgetCycleIncomeTransactions(transactions, budgetCycle);
+    const currentBudgetCycleIncomeTransactions = getCurrentBudgetCycleIncomeTransactions(transactions, budgetCycle);
 
     //Get this month's transactions (minus income)
-    const thisBudgetCycleTransactions = transactions
-      .filter(({TransactionDate})=>TransactionDate.getMonth() === budgetCycle.getMonth() && TransactionDate.getFullYear() === budgetCycle.getFullYear())
-      .filter(({Category})=>Category !== "Infor payroll");
+    const currentBudgetCycleExpenseTransactions = getCurrentBudgetCycleExpenseTransactions(transactions, budgetCycle);
 
-    return [...lastBudgetCycleIncomeTransactions, ...thisBudgetCycleTransactions];
-  }
+    return {
+      income: [...lastBudgetCycleIncomeTransactions, ...currentBudgetCycleIncomeTransactions],
+      expenses: currentBudgetCycleExpenseTransactions,
+      get all() {return [...this.income, ...this.expenses].flat()},
+    };
+  };
 
   //Initialize state
   const [budgetCycleTransactions, setBudgetCycleTransactions] = useState(getBudgetCycleTransactions(transactions, budgetCycle));
