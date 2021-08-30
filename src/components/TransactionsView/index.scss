@@ -1,3 +1,9 @@
 .view.transactions-view {
+  padding-left: 0;
+  padding-right: 0;
   background-color: whitesmoke;
+
+  .page-title {
+    padding: 0 1rem;
+  }
 }

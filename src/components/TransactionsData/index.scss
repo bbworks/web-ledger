@@ -1,9 +1,35 @@
 .transactions-data {
   width: 100%;
   overflow-x: hidden;
+  margin-bottom: 4rem;
 
-  .transactions-count {
-    font-size: 0.875rem;
-    font-style: italic;
+  .transaction-rows-heading {
+    padding: 0 0.5rem;
+    margin-top: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .transaction-row {
+    padding: 0 1rem;
+  }
+
+  .transaction-row-container {
+    margin-right: 1rem;
+  }
+
+  .transactions-information {
+    padding: 0 1rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgb(50,50,50);
+
+    .transactions-count {
+      font-size: 0.875rem;
+      font-style: italic;
+    }
+
+    .transactions-total {
+      font-weight: bold;
+      font-size: 1rem;
+    }
   }
 }

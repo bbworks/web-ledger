@@ -8,38 +8,14 @@ import {convertNumberToCurrency} from './../../utilities';
 
 import './index.scss';
 
-const TransactionsData = ({ budgetCycleTransactions, onTransactionEditButtonClick, onTransactionDeleteButtonClick })=>{
-  const filterTransactionsBySearchFilters = (transactions, searchFilters)=>{
-    //Filter transactions (or render them all) based on current search filters
-    return transactions.filter(t=>searchFilters.map(a=>(t.DescriptionDisplay || t.Description).match(new RegExp(a, "i"))).every(i=>i))
-  };
-
-  const [searchFilters, setSearchFilters] = useState([]);
-  const [filteredTransactions, setFilteredTransactions] = useState(filterTransactionsBySearchFilters(budgetCycleTransactions.all, searchFilters));
-
-  const onTransactionDataSearchFormSubmit = search=>{
-    setSearchFilters(previousSearchFilters=>[...previousSearchFilters, search]);
-  };
-
-  const onFilterClick = removedSearchFilter=>{
-    setSearchFilters(previousSearchFilters=>{
-      const newSearchFilters = [...previousSearchFilters];
-      return newSearchFilters.splice(newSearchFilters.indexOf(removedSearchFilter),1) && newSearchFilters;
-    });
-  };
-
-  //Keep filtered transactions updated
-  useEffect(()=>
-    setFilteredTransactions(filterTransactionsBySearchFilters(budgetCycleTransactions.all, searchFilters))
-  , [budgetCycleTransactions, searchFilters]);
-
+const TransactionsDataRows = ({ filteredBudgetCycleTransactions, heading, searchFilters, onTransactionEditButtonClick, onTransactionDeleteButtonClick })=>{
   //Temporary variable used to render date headings
   let currentDateRendered;
 
   return (
-    <div className="transactions-data">
-      <TransactionDataSearchForm searchFilters={searchFilters} onSubmit={onTransactionDataSearchFormSubmit} onFilterClick={onFilterClick} />
-      {filteredTransactions
+    <div className="transaction-rows">
+      {searchFilters.length ? null : <h2 className="transaction-rows-heading">{heading}</h2>}
+      {filteredBudgetCycleTransactions
       //Sort remaining transactions
       .sort((a,b)=>b.TransactionDate-a.TransactionDate)
       //Add in the date separators
@@ -62,9 +38,63 @@ const TransactionsData = ({ budgetCycleTransactions, onTransactionEditButtonClic
         <TransactionRowDateSeparator key={i} date={transaction.Date} count={transaction.Count} /> :
         <TransactionRow key={i} transaction={transaction} onTransactionEditButtonClick={onTransactionEditButtonClick} onTransactionDeleteButtonClick={onTransactionDeleteButtonClick} />
       ))}
+    </div>
+  );
+};
+
+const TransactionsData = ({ budgetCycleTransactions, onTransactionEditButtonClick, onTransactionDeleteButtonClick })=>{
+  const filterTransactionsBySearchFilters = (budgetCycleTransactions, searchFilters)=>{
+    //Filter transactions (or render them all) based on current search filters
+    const newlyFilteredBudgetCycleTransactions = {
+      ...budgetCycleTransactions,
+      income: budgetCycleTransactions.income.filter(t=>searchFilters.map(a=>(t.DescriptionDisplay || t.Description).match(new RegExp(a, "i"))).every(i=>i)),
+      expenses: budgetCycleTransactions.expenses.filter(t=>searchFilters.map(a=>(t.DescriptionDisplay || t.Description).match(new RegExp(a, "i"))).every(i=>i)),
+    };
+    Object.defineProperty(newlyFilteredBudgetCycleTransactions, "all", Object.getOwnPropertyDescriptor(budgetCycleTransactions, "all"));
+    return newlyFilteredBudgetCycleTransactions;
+  };
+
+  const [searchFilters, setSearchFilters] = useState([]);
+  const [filteredBudgetCycleTransactions, setFilteredBudgetCycleTransactions] = useState(filterTransactionsBySearchFilters(budgetCycleTransactions, searchFilters));
+
+  const filteredIncomeTotal = convertNumberToCurrency(filteredBudgetCycleTransactions.income.reduce((total, t)=>total+=t.Amount, 0))
+  const filteredExpensesTotal = convertNumberToCurrency(filteredBudgetCycleTransactions.expenses.reduce((total, t)=>total+=t.Amount, 0))
+  const filteredRemainingTotal = convertNumberToCurrency(filteredBudgetCycleTransactions.all.reduce((total, t)=>total+=t.Amount, 0))
+
+  const onTransactionDataSearchFormSubmit = search=>{
+    setSearchFilters(previousSearchFilters=>[...previousSearchFilters, search]);
+  };
+
+  const onFilterClick = removedSearchFilter=>{
+    setSearchFilters(previousSearchFilters=>{
+      const newSearchFilters = [...previousSearchFilters];
+      return newSearchFilters.splice(newSearchFilters.indexOf(removedSearchFilter),1) && newSearchFilters;
+    });
+  };
+
+  //Keep filtered transactions updated
+  useEffect(()=>
+    setFilteredBudgetCycleTransactions(filterTransactionsBySearchFilters(budgetCycleTransactions, searchFilters))
+  , [budgetCycleTransactions, searchFilters]);
+
+  useEffect(()=>console.log(filteredBudgetCycleTransactions), [filteredBudgetCycleTransactions]);
+
+  return (
+    <div className="transactions-data">
+      <TransactionDataSearchForm searchFilters={searchFilters} onSubmit={onTransactionDataSearchFormSubmit} onFilterClick={onFilterClick} />
+      {
+        searchFilters.length ?
+        <TransactionsDataRows filteredBudgetCycleTransactions={filteredBudgetCycleTransactions.all} searchFilters={searchFilters} onTransactionEditButtonClick={onTransactionEditButtonClick} onTransactionDeleteButtonClick={onTransactionDeleteButtonClick}/> :
+        <>
+          <TransactionsDataRows filteredBudgetCycleTransactions={filteredBudgetCycleTransactions.income} heading="Income" searchFilters={searchFilters} onTransactionEditButtonClick={onTransactionEditButtonClick} onTransactionDeleteButtonClick={onTransactionDeleteButtonClick}/>
+          <TransactionsDataRows filteredBudgetCycleTransactions={filteredBudgetCycleTransactions.expenses} heading="Expenses" searchFilters={searchFilters} onTransactionEditButtonClick={onTransactionEditButtonClick} onTransactionDeleteButtonClick={onTransactionDeleteButtonClick}/>
+        </>
+      }
       <div className="transactions-information d-flex justify-content-between mb-4 mr-2">
-        <span className="transactions-count">{(filteredTransactions.length ? filteredTransactions.length : 0)} transactions</span>
-        <span className="">{convertNumberToCurrency(filteredTransactions.reduce((total, t)=>total+=t.Amount, 0))}</span>
+        <span className="transactions-count">{(filteredBudgetCycleTransactions.all.length ? filteredBudgetCycleTransactions.all.length : 0)} transactions</span>
+        <div>
+          <div className="transactions-total">{filteredRemainingTotal} total</div>
+        </div>
       </div>
     </div>
   );
