@@ -8,15 +8,12 @@ import DashboardBudgetCycleDropdown from './../DashboardBudgetCycleDropdown';
 import './index.scss';
 
 const DashboardTop = ({ transactions, accountsData, accountData, budgetCycle, onBudgetCycleChange })=>{
-  useEffect(()=>console.log("Accounts data:", accountsData), [accountsData]);
-
   const budgetCycleTransactions = useBudgetCycleTransactions(transactions, budgetCycle);
 
   const currentBudgetCycleIncome = budgetCycleTransactions.income.length && budgetCycleTransactions.income.reduce((total, t)=>total+=t.Amount, 0);
   const currentBudgetCycleExpenses = budgetCycleTransactions.expenses.length && budgetCycleTransactions.expenses.reduce((total, t)=>total+=t.Amount, 0);
   const currentBudgetCycleRemaining = currentBudgetCycleIncome+currentBudgetCycleExpenses;
 
-  console.log(currentBudgetCycleIncome, currentBudgetCycleExpenses, budgetCycleTransactions)
   return (
     <div className="dashboard-top">
       <div className="dashboard-account-overview container-fluid py-2 px-3">

@@ -40,19 +40,15 @@ export const getMonthFromNumber = number=>{
   return null;
 };
 
-export const getCurrentYear = (date)=>{
-  return date.getFullYear();
-};
-
 export const getBudgetCycleFromDate = date=>{
   return new Date(date.getFullYear(), date.getMonth());
 };
 
-export const getBudgetCycleString = date=>{
-  return `${getMonthFromNumber(date.getMonth())} ${getCurrentYear(date)}`;
+export const getBudgetCycleString = budgetCycle=>{
+  return `${getMonthFromNumber(budgetCycle.getMonth())} ${budgetCycle.getFullYear()}`;
 };
 
-export const getBudgetCycleDescription = (budgetCycle,todayBudgetCycle=(new Date()))=>{
+export const getBudgetCycleDescription = (budgetCycle, todayBudgetCycle=(new Date()))=>{
   const fullYearDifference = todayBudgetCycle.getFullYear() - budgetCycle.getFullYear();
   const monthDifference = (fullYearDifference*12) + (todayBudgetCycle.getMonth() - budgetCycle.getMonth());
   if (monthDifference < 0) return null;

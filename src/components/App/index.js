@@ -81,10 +81,15 @@ const App = () => {
 
   const transactionTypes = [
     null,
-    "Charges",
-    "Payments",
-    "Debit",
-    "Credit",
+    //Credit card
+    "Charges",     //-
+    "Payments",    //+
+
+    //Checking/Savings
+    "Withdrawal",  //-
+    "Deposit",     //+
+    "Transfer",    //+/-
+    "Payment",     //-
   ];
 
   //Log data

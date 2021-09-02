@@ -35,9 +35,12 @@ const TransactionRow = ({ transaction, onTransactionEditButtonClick:onTransactio
   });
 
   useEffect(()=>{
+    const formattedTransactionDisplay = formatTransactionDisplay(transaction);
     setTransactionDisplay({
-      ...formatTransactionDisplay(transaction),
+      ...formattedTransactionDisplay,
       Description: getTransactionDefaultDescriptionDisplay(transaction),
+      AccountNumber: formattedTransactionDisplay.AccountNumber || "*----",
+      Category: formattedTransactionDisplay.Category || "[uncategorized]"
     })
   }, [transaction]);
 
@@ -178,7 +181,7 @@ const TransactionRow = ({ transaction, onTransactionEditButtonClick:onTransactio
         <div className="transaction-row-subdescription-container">
           <span className="transaction-row-account">{transactionDisplay.AccountNumber}</span>
           &nbsp;|&nbsp;
-          <span className="transaction-row-category">{transactionDisplay.Category || "uncategorized"}</span>
+          <span className="transaction-row-category">{transactionDisplay.Category}</span>
         </div>
       </div>
       <button className={`transaction-row-delete-button ${(isDeleteButtonVisible ? "show" : "")}`} onClick={onTransactionDeleteButtonClick}>

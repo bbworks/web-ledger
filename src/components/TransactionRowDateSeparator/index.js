@@ -24,7 +24,7 @@ const TransactionRowDateSeparator = ({ date, count })=>{
   };
 
   return (
-    <div key={date.getMilliseconds()} className="transaction-row-date-separator d-flex justify-content-between p-1 px-3">
+    <div key={date.getTime()} className="transaction-row-date-separator d-flex justify-content-between p-1 px-3">
       <div>{convertDateToDateHeaderString(date)}</div>
       <div>({count})</div>
     </div>

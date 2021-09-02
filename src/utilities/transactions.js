@@ -1,15 +1,7 @@
-import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON, convertDateStringToDate, areObjectsEqual, getBudgetAmountSpentFromTransactions, getMonthFromNumber, getCurrentYear, getBillingCycleFromDate} from './utilities.js';
+import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON, convertDateStringToDate, areObjectsEqual, getBudgetAmountSpentFromTransactions, getMonthFromNumber, getBillingCycleFromDate, getBudgetCycleFromDate} from './../utilities';
 import {parseGoogleSheetsNumber, parseGoogleSheetsDate} from './../googleApi';
 
 //Declare public functions
-export const getTransactionDefaultDescriptionDisplay = function(transaction) {
-  return nullCoalesce(transaction.DescriptionDisplay, `*${transaction.Description}`) || "";
-};
-
-export const isTransactionAutoCategorizedOrUpdatedByUser = transaction=>{
-  return transaction.IsAutoCategorized === true || transaction.IsUpdatedByUser === true;
-};
-
 export const typeCheckTransactions = function (transactions) {
   return transactions.map(transaction=>(
     {
@@ -18,14 +10,122 @@ export const typeCheckTransactions = function (transactions) {
       TransactionDate: parseGoogleSheetsDate(transaction.TransactionDate),
       Amount: parseGoogleSheetsNumber(isNaN(transaction.Amount) ? transaction.Amount.replace(/(\$|,)/g, "") : transaction.Amount),
       Tags: !isFalsy(transaction.Tags) ? transaction.Tags : [],
+      BudgetCycle: parseGoogleSheetsDate(transaction.BudgetCycle),
       DateCreated: parseGoogleSheetsDate(transaction.DateCreated),
       DateModified: parseGoogleSheetsDate(transaction.DateModified),
     }
   ));
 };
 
+export const importTransactions = function(transactionsData, dataType) {
+  try {
+    //if this is scraped from online app
+    if (dataType === "scraped") {
+      //Spilt the string of transactions into an array
+      return transactionsData
+        .split(/(?:\r\n|\r|\n)/)
+        .map(transactionLine=>{
+          if (!transactionLine) return null;
+
+          //Get the current date
+          const currentDate = new Date();
+
+          //Determine if this matches a transaction line
+          const isMatch = transactionLine.match(/(\d{2}\/\d{2}\/\d{2})\t\t([^\t]+)\t(-?)\$([\d,]+\.\d{2})/);
+          if (!isMatch) {
+            console.warn(`Unable to read transaction.\r\n${transactionLine}`);
+            return null;
+          }
+
+          //Save and trim the matched data
+          const [fullMatch, TransactionDate, Description, IsNegativeAmount, Amount] = [...isMatch].map(match=>(match ? match.trim() : match));
+
+          //Return the new transaction object
+          return {
+            PostedDate: null,
+            TransactionDate: convertDateStringToDate(TransactionDate, "MM/dd/yy"),
+            AccountNumber: null,
+            Type: null,
+            Description,
+            DescriptionDisplay: null,
+            Amount: Number(`${IsNegativeAmount}${Amount}`.replace(",","")),
+            Category: null,
+            Notes: null,
+            Tags: [],
+            BudgetCycle: getBudgetCycleFromDate(currentDate),
+            IsAutoCategorized: false,
+            IsUpdatedByUser: false,
+            DateCreated: currentDate,
+            DateModified: currentDate,
+          };
+        })
+        //Filter out anything that didn't become a transaction
+        .filter(transaction=>transaction !== null)
+        //Bring in transactions in ascending TransactionDate
+        .reverse();
+    }
+
+    //Otherwise, this is CSV or JSON data
+
+    //If CSV data, convert it to JSON first
+    if (dataType === "csv") transactionsData = transactionsData.map(csvData=>convertCSVToJSON(csvData)).flat();
+
+    //For each CSV file, convert the contents to JSON
+    return transactionsData.map(transaction=>{
+      const _Date = (transaction.Date ? transaction.Date.trim() : null);
+      const PostedDate = (transaction.PostedDate ? transaction.PostedDate.trim() : null);
+      const TransactionDate = (transaction.TransactionDate ? transaction.TransactionDate.trim() : null);
+      const AccountNumber = (transaction["Card No."] ? transaction["Card No."].trim() : null);
+      const Type = (transaction.Type ? transaction.Type.trim() : null);
+      const Description = (transaction.Description ? transaction.Description.trim() : null);
+      const Charges = (transaction.Charges ? transaction.Charges.trim() : null);
+      const Payments = (transaction.Payments ? transaction.Payments.trim() : null);
+      const Debit = (transaction.Debit ? transaction.Debit.trim() : null);
+      const Credit = (transaction.Credit ? transaction.Credit.trim() : null);
+
+      //Get the current date
+      const currentDate = new Date();
+
+      //Validate calculated values
+      const type = (
+        Object.keys(transaction).includes("Credit") && Object.keys(transaction).includes("Debit") ?
+          //Checking/Savings account
+          nullCoalesce(Type, (Credit && (Number(Credit) || Credit !== "0") ? "Credit" : (Debit && (Number(Debit) || Debit !== "0") ? "Debit" : null))) : (
+          Object.keys(transaction).includes("Charges") && Object.keys(transaction).includes("Payments") ?
+          //Credit Card account
+          nullCoalesce(Type, (Charges && (Number(Charges) || Charges !== "0") ? "Charges" : (Payments && (Number(Payments) || Payments !== "0") ? "Payments" : null))) :
+          null
+        )
+      );
+      const transactionDate = convertDateStringToDate(nullCoalesce(TransactionDate, _Date), "MM/dd/yyyy");
+      if (isFalsy(type) || isFalsy(transactionDate)) throw new Error(`Unable to read transaction.\r\n${transaction}`);
+
+      return {
+        PostedDate: (PostedDate ? convertDateStringToDate(PostedDate, "MM/dd/yyyy") : null),
+        TransactionDate: transactionDate,
+        AccountNumber: (AccountNumber ? `*${AccountNumber}` : null),
+        Type: type,
+        Description,
+        DescriptionDisplay: null,
+        Amount: Number(`${(["Charges","Debit"].includes(type) ? "-" : "")}${transaction[type]}`),
+        Category: null,
+        Notes: null,
+        Tags: [],
+        BudgetCycle: getBudgetCycleFromDate(currentDate),
+        IsAutoCategorized: false,
+        IsUpdatedByUser: false,
+        DateCreated: currentDate,
+        DateModified: currentDate,
+      };
+    });
+  }
+  catch (err) {
+    throw err;
+  }
+};
+
 export const categorizeTransactionByDescription = function(transaction) {
-  const {DescriptionDisplay, Description, Tags, Category, Notes, IsAutoCategorized, IsUpdatedByUser} = transaction;
+  const {TransactionDate, DescriptionDisplay, Description, Category, Notes, Tags, BudgetCycle, IsAutoCategorized, IsUpdatedByUser} = transaction;
 
   //If
   // 1) the transaction has already either
@@ -46,8 +146,9 @@ export const categorizeTransactionByDescription = function(transaction) {
   let matches;
 
   //Income
-       if (matches = Description.match(/ELECTRONIC\/ACH CREDIT (\w{5} \w{2} , \w{3}\.) PAYROLL \d{10}/i))  categorizedTransactionData = {Category: "Infor payroll", DescriptionDisplay: `${matches[1]}`, Notes: null};
-  else if (matches = Description.match(/INTEREST PAYMENT PAID THIS STATEMENT THRU (\d{2})\/(\d{2})/i))  categorizedTransactionData = {Category: "Other income", DescriptionDisplay: `Interest paid ${matches[1]}/${matches[2]}`, Notes: null};
+  // NOTE: Always sets budget cycle values to the next month's budget cycle
+       if (matches = Description.match(/ELECTRONIC\/ACH CREDIT (\w{5} \w{2} , \w{3}\.) PAYROLL \d{10}/i))  categorizedTransactionData = {Category: "Infor payroll", DescriptionDisplay: `${matches[1]}`, Notes: null, /*BudgetCycle: getBudgetCycleFromDate(new Date(TransactionDate.getMonth()+1))*/};
+  else if (matches = Description.match(/INTEREST PAYMENT PAID THIS STATEMENT THRU (\d{2})\/(\d{2})/i))  categorizedTransactionData = {Category: "Other income", DescriptionDisplay: `Interest paid ${matches[1]}/${matches[2]}`, Notes: null, /*BudgetCycle: getBudgetCycleFromDate(new Date(TransactionDate.getMonth()+1))*/};
 
   //Deposits
   else if (Description.match(/MOBILE CHECK DEPOSIT/i))  categorizedTransactionData = {Category: null, DescriptionDisplay: "Mobile check deposit", Notes: null};
@@ -154,6 +255,7 @@ export const categorizeTransactionByDescription = function(transaction) {
     Category: Category || categorizedTransactionData.Category,
     DescriptionDisplay: DescriptionDisplay || categorizedTransactionData.DescriptionDisplay,
     Notes: Notes || categorizedTransactionData.Notes,
+    //BudgetCycle: categorizedTransactionData.BudgetCycle,
   };
 
   //Return the transaction with updated categorization data
@@ -164,109 +266,8 @@ export const categorizeTransactionByDescription = function(transaction) {
   };
 };
 
-export const importTransactions = function(transactionsData, dataType) {
-  try {
-    //if this is scraped from online app
-    if (dataType === "scraped") {
-      //Spilt the string of transactions into an array
-      return transactionsData
-        .split(/(?:\r\n|\r|\n)/)
-        .map(transactionLine=>{
-          if (!transactionLine) return null;
-
-          //Get the current date
-          const currentDate = new Date();
-
-          //Determine if this matches a transaction line
-          const isMatch = transactionLine.match(/(\d{2}\/\d{2}\/\d{2})\t\t([^\t]+)\t(-?)\$([\d,]+\.\d{2})/);
-          if (!isMatch) {
-            console.warn(`Unable to read transaction.\r\n${transactionLine}`);
-            return null;
-          }
-
-          //Save and trim the matched data
-          const [fullMatch, TransactionDate, Description, IsNegativeAmount, Amount] = [...isMatch].map(match=>(match ? match.trim() : match));
-
-          //Return the new transaction object
-          return {
-            PostedDate: null,
-            TransactionDate: convertDateStringToDate(TransactionDate, "MM/dd/yy"),
-            AccountNumber: null,
-            Type: null,
-            Description,
-            DescriptionDisplay: null,
-            Amount: Number(`${IsNegativeAmount}${Amount}`.replace(",","")),
-            Category: null,
-            Notes: null,
-            Tags: [],
-            IsAutoCategorized: false,
-            IsUpdatedByUser: false,
-            DateCreated: currentDate,
-            DateModified: currentDate,
-          };
-        })
-        //Filter out anything that didn't become a transaction
-        .filter(transaction=>transaction !== null)
-        //Bring in transactions in ascending TransactionDate
-        .reverse();
-    }
-
-    //Otherwise, this is CSV or JSON data
-
-    //If CSV data, convert it to JSON first
-    if (dataType === "csv") transactionsData = transactionsData.map(csvData=>convertCSVToJSON(csvData)).flat();
-
-    //For each CSV file, convert the contents to JSON
-    return transactionsData.map(transaction=>{
-      const _Date = (transaction.Date ? transaction.Date.trim() : null);
-      const TransactionDate = (transaction.TransactionDate ? transaction.TransactionDate.trim() : null);
-      const PostedDate = (transaction.PostedDate ? transaction.PostedDate.trim() : null);
-      const Description = (transaction.Description ? transaction.Description.trim() : null);
-      const AccountNumber = (transaction["Card No."] ? transaction["Card No."].trim() : null);
-      const Type = (transaction.Type ? transaction.Type.trim() : null);
-      const Charges = (transaction.Charges ? transaction.Charges.trim() : null);
-      const Payments = (transaction.Payments ? transaction.Payments.trim() : null);
-      const Debit = (transaction.Debit ? transaction.Debit.trim() : null);
-      const Credit = (transaction.Credit ? transaction.Credit.trim() : null);
-
-      //Get the current date
-      const currentDate = new Date();
-
-      //Validate calculated values
-      const type = (
-        Object.keys(transaction).includes("Credit") && Object.keys(transaction).includes("Debit") ?
-        //Checking/Savings account
-        nullCoalesce(Type, (Credit && (Number(Credit) || Credit !== "0") ? "Credit" : (Debit && (Number(Debit) || Debit !== "0") ? "Debit" : null))) : (
-          Object.keys(transaction).includes("Charges") && Object.keys(transaction).includes("Payments") ?
-          //Credit Card account
-          nullCoalesce(Type, (Charges && (Number(Charges) || Charges !== "0") ? "Charges" : (Payments && (Number(Payments) || Payments !== "0") ? "Payments" : null))) :
-          null
-        )
-      );
-      const transactionDate = convertDateStringToDate(nullCoalesce(TransactionDate, _Date), "MM/dd/yyyy");
-      if (isFalsy(type) || isFalsy(transactionDate)) throw new Error(`Unable to read transaction.\r\n${transaction}`);
-
-      return {
-        PostedDate: (!isFalsy(PostedDate) ? convertDateStringToDate(PostedDate, "MM/dd/yyyy") : null),
-        TransactionDate: transactionDate,
-        AccountNumber: (AccountNumber ? `*${AccountNumber}` : null),
-        Type: type,
-        Description,
-        DescriptionDisplay: null,
-        Amount: Number(`${(["Charges","Debit"].includes(type) ? "-" : "")}${transaction[type]}`),
-        Category: null,
-        Notes: null,
-        Tags: [],
-        IsAutoCategorized: false,
-        IsUpdatedByUser: false,
-        DateCreated: currentDate,
-        DateModified: currentDate,
-      };
-    });
-  }
-  catch (err) {
-    throw err;
-  }
+export const getTransactionDefaultDescriptionDisplay = function(transaction) {
+  return nullCoalesce(transaction.DescriptionDisplay, `*${transaction.Description}`) || "";
 };
 
 export const formatTransactionDisplay = function(transaction) {
@@ -301,7 +302,11 @@ export const isTransactionDuplicate = (potentialDuplicate, transactions)=>{
 export const getBudgetCyclesFromTransactions = transactions=>{
   return [
     ...new Set(
-      transactions.map(({TransactionDate})=>new Date(TransactionDate.getFullYear(), TransactionDate.getMonth()).toJSON())
+      transactions.map(({BudgetCycle})=>getBudgetCycleFromDate(BudgetCycle))
     )
   ].map(date=>new Date(date));
+};
+
+export const isTransactionAutoCategorizedOrUpdatedByUser = transaction=>{
+  return transaction.IsAutoCategorized === true || transaction.IsUpdatedByUser === true;
 };
