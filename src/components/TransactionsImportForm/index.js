@@ -49,7 +49,7 @@ const TransactionsImportForm = ({ isOpen, onSubmit:onSubmitProp, onFileInputChan
   return (
     !isOpen ?
     null :
-    <form className="transaction-import-form mb-4" onSubmit={onSubmit}>
+    <form className="transaction-import-form" onSubmit={onSubmit}>
       <div>
         <label className="form-label">Transactions</label>
         <div className="input-group mb-2">

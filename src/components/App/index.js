@@ -86,6 +86,8 @@ const App = () => {
     "Payments",    //+
 
     //Checking/Savings
+    "Debit",       //-
+    "Credit",      //+
     "Withdrawal",  //-
     "Deposit",     //+
     "Transfer",    //+/-

@@ -4,7 +4,7 @@ import TransactionDataSearchForm from './../TransactionDataSearchForm';
 import TransactionRowDateSeparator from './../TransactionRowDateSeparator';
 import TransactionRow from './../TransactionRow';
 
-import {convertNumberToCurrency} from './../../utilities';
+import {convertNumberToCurrency, getTransactionsAmountTotal} from './../../utilities';
 
 import './index.scss';
 
@@ -14,7 +14,16 @@ const TransactionsDataRows = ({ filteredBudgetCycleTransactions, heading, search
 
   return (
     <div className="transaction-rows">
-      {searchFilters.length ? null : <h2 className="transaction-rows-heading">{heading}</h2>}
+      {searchFilters.length ? null : (
+        <div className="transaction-rows-heading-container d-flex justify-content-between align-items-end mb-2">
+          <h2 className="transaction-rows-heading mb-0">{heading}</h2>
+          <div className="fw-bold">
+            <span className="transaction-rows-heading-count">{convertNumberToCurrency(getTransactionsAmountTotal(filteredBudgetCycleTransactions))}</span>
+            &nbsp;
+            <span className="transaction-rows-heading-count me-3">({filteredBudgetCycleTransactions.length})</span>
+          </div>
+        </div>
+      )}
       {filteredBudgetCycleTransactions
       //Sort remaining transactions
       .sort((a,b)=>b.TransactionDate-a.TransactionDate)

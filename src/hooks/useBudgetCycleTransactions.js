@@ -34,6 +34,29 @@ const useBudgetCycleTransactions = (transactions, budgetCycle)=>{
       &&
       //Remove payment transactions
       !(transaction.Type === "Payment")
+      &&
+      //Remove corresponding credit/debit transfers
+      !(transaction.Type==="Transfer" && transactions.find(transaction2=>
+        transaction.TransactionDate.getTime()===transaction2.TransactionDate.getTime() &&
+        transaction.Amount===-transaction2.Amount &&
+        transaction.DescriptionDisplay.match(/\*(\d{4})/)[1]===transaction2.AccountNumber.match(/\*(\d{4})/)[1] &&
+        transaction.AccountNumber.match(/\*(\d{4})/)[1]===transaction2.DescriptionDisplay.match(/\*(\d{4})/)[1]
+      ))
+    );
+
+    console.log(
+      "Filtered corresponding credit/debit transfers",
+      transactions.filter(transaction=>getBudgetCycleFromDate(transaction.BudgetCycle || transaction.TransactionDate).getTime() === budgetCycle.getTime()
+      &&
+      //Remove payment transactions
+      !(transaction.Type === "Payment")
+      &&
+      transaction.Type==="Transfer" && transactions.find(transaction2=>
+        transaction.TransactionDate.getTime()===transaction2.TransactionDate.getTime() &&
+        transaction.Amount===-transaction2.Amount &&
+        transaction.DescriptionDisplay.match(/\*(\d{4})/)[1]===transaction2.AccountNumber.match(/\*(\d{4})/)[1] &&
+        transaction.AccountNumber.match(/\*(\d{4})/)[1]===transaction2.DescriptionDisplay.match(/\*(\d{4})/)[1]
+      ))
     );
 
     //Get last budget cycle's income
@@ -45,7 +68,6 @@ const useBudgetCycleTransactions = (transactions, budgetCycle)=>{
     //Get this month's transactions (minus income)
     const currentBudgetCycleExpenseTransactions = getCurrentBudgetCycleExpenseTransactions(currentBudgetCycleTransactions, budgetCycle);
 
-    console.log({income: [...lastBudgetCycleIncomeTransactions, ...currentBudgetCycleIncomeTransactions], expenses: currentBudgetCycleExpenseTransactions, all: currentBudgetCycleTransactions})
     return {
       income: [...lastBudgetCycleIncomeTransactions, ...currentBudgetCycleIncomeTransactions],
       expenses: currentBudgetCycleExpenseTransactions,
