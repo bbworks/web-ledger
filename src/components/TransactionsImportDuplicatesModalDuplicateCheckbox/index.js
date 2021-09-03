@@ -1,13 +1,9 @@
-import {useState} from 'react';
-
 import {convertNumberToCurrency} from './../../utilities';
 
 import './index.scss';
 
 const TransactionsImportDuplicatesModalDuplicateCheckbox = ({ id, duplicateData, onChange:onChangeProp })=>{
   const onChange = event=>{
-    const isChecked = event.target.checked;
-
     //Update the duplicate's confirmation state in the parent
     const updatedDuplicateData = {
       ...duplicateData,

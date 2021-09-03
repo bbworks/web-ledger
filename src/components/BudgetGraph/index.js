@@ -1,5 +1,3 @@
-import {useState, useEffect} from 'react';
-
 import {convertNumberToCurrency} from './../../utilities';
 
 import BudgetGraphStatusIcon from './../BudgetGraphStatusIcon';

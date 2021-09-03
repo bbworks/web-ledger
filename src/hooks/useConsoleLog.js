@@ -1,7 +1,7 @@
 import {useEffect} from 'react';
 
 const useConsoleLog = (object, ...args)=>{
-  return useEffect(()=>console.log(args[0], object, ...args.slice(1)), [object])
+  return useEffect(()=>console.log(args[0], object, ...args.slice(1)), [object, args])
 };
 
 export default useConsoleLog;

@@ -1,12 +1,12 @@
 //Import package dependencies
 import {useState, useEffect} from 'react';
-import {BrowserRouter as Router, Switch, Route, Link} from 'react-router-dom';
+import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
 
 //Import source code
 import {getBudgetCycleFromDate, typeCheckTransactions, isTransactionDuplicate, categorizeTransactionByDescription, importTransactions, typeCheckBudgetsData, typeCheckAccountsData, typeCheckAccountData, throwException} from './../../utilities';
 import {getSpreadsheetId, setSpreadsheetId, getClientId, setClientId, initAuthorization} from './../../googleApi';
 import {getTransactions, updateTransactions, getBudgetsData, getAccountsData, getAccountData} from './../../api';
-import {useScript, useConsoleLog, useLocalStorage} from './../../hooks';
+import {useScript, useConsoleLog} from './../../hooks';
 
 //Import custom components
 import SignInView from './../SignInView';
@@ -102,27 +102,37 @@ const App = () => {
   useConsoleLog(signedInUser, "signedInUser:");
   useConsoleLog(budgetCycle, "budgetCycle:");
 
-  //Load the Google API
   const gapiLoaded = useScript("https://apis.google.com/js/api.js");
 
-  //When the Google API JS library loads, initialize the Google API
-  useEffect(()=>connectToGoogleAPI(), [gapiLoaded]);
+  //Create helper functions
+  const saveSettings = savedSettings=>{
+    //Call the update function for each setting
+    Object.entries(savedSettings).forEach(([settingName, settingValue])=>
+      settings[settingName].update(settingValue)
+    );
+  };
 
-  //Whenever the user gets logged in,
-  // attempt to query for data
-  useEffect(async ()=>{
-    if (!signedInUser) return;
-    setTransactionsWrapper(await getTransactions());
-    setBudgetsDataWrapper(await getBudgetsData());
-    setAccountsDataWrapper(await getAccountsData());
-    setAccountDataWrapper(await getAccountData());
-  }, [signedInUser]);
+  const connectToGoogleAPI = async ()=>{
+    if(!gapiLoaded) return;
 
-  //Whenever the transactions are updated, save them off as well
-  useEffect(()=>{
-    if (!transactions.length) return;
-    updateTransactions(transactions);
-  }, [transactions]);
+    //Try to initialize the Google API
+    try {
+      initAuthorization(onSignInChange, onSignInChange);
+    }
+    catch (err) {
+      //If credentials weren't found, prompt the user for the credentials
+      if (err.name === "CredentialsNotFoundError") {
+        return openSignInSettingsModal();
+        // throw new Error("Failed to get authorization credentials.");
+      }
+      console.log("test")
+      return throwException(err);
+    }
+  };
+
+  const onBudgetCycleChange = budgetCycle=>{
+    setBudgetCycle(budgetCycle);
+  };
 
   //Create state handlers
   const checkTransactionsForDuplicates = (previousTransactions, newTransactions)=>{
@@ -346,13 +356,6 @@ const App = () => {
     setSignedInUser(signInInfo);
   };
 
-  const saveSettings = savedSettings=>{
-    //Call the update function for each setting
-    Object.entries(savedSettings).forEach(([settingName, settingValue])=>
-      settings[settingName].update(settingValue)
-    );
-  };
-
   const onSettingsViewSubmit = submittedSettings=>{
     saveSettings(submittedSettings);
   };
@@ -372,27 +375,29 @@ const App = () => {
     saveSettings(submittedSettings);
   };
 
-  const connectToGoogleAPI = async ()=>{
-    if(!gapiLoaded) return;
+  //When the Google API JS library loads, initialize the Google API
+  useEffect(()=>
+    connectToGoogleAPI()
+    , [gapiLoaded]);
 
-    //Try to initialize the Google API
-    try {
-      initAuthorization(onSignInChange, onSignInChange);
-    }
-    catch (err) {
-      //If credentials weren't found, prompt the user for the credentials
-      if (err.name === "CredentialsNotFoundError") {
-        return openSignInSettingsModal();
-        // throw new Error("Failed to get authorization credentials.");
-      }
-      console.log("test")
-      return throwException(err);
-    }
-  };
+  //Whenever the user gets logged in,
+  // attempt to query for data
+  useEffect(()=>{
+    //Run async function inside necessary useEffect sync function
+    (async ()=>{
+      if (!signedInUser) return;
+      setTransactionsWrapper(await getTransactions());
+      setBudgetsDataWrapper(await getBudgetsData());
+      setAccountsDataWrapper(await getAccountsData());
+      setAccountDataWrapper(await getAccountData());
+    })();
+  }, [signedInUser]);
 
-  const onBudgetCycleChange = budgetCycle=>{
-    setBudgetCycle(budgetCycle);
-  };
+  //Whenever the transactions are updated, save them off as well
+  useEffect(()=>{
+    if (!transactions.length) return;
+    updateTransactions(transactions);
+  }, [transactions]);
 
 
   //If the user has not signed in, send them to the sign in page,

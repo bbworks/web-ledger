@@ -18,7 +18,7 @@ const TransactionsView = ({ transactions, budgetCycle, transactionsImportDuplica
   const route = useLocation().pathname;
   useEffect(()=>{
     setFooterNavbar(route);
-  }, []);
+  }, [route]);
 
   const [isTransactionImportFormOpen, setIsTransactionImportFormOpen] = useState(false);
 
@@ -40,7 +40,7 @@ const TransactionsView = ({ transactions, budgetCycle, transactionsImportDuplica
 
   const budgetCycleTransactions = useBudgetCycleTransactions(filteredTransactions, budgetCycle);
 
-  useConsoleLog(budgetCycleTransactions.all, "budgetCycleTransactions:");
+  useConsoleLog(budgetCycleTransactions, "budgetCycleTransactions");
 
   useEffect(()=>{
     if (!transactions.length) return;

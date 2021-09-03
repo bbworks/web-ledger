@@ -3,7 +3,7 @@ import {useState, useEffect} from 'react';
 import Modal from 'react-bootstrap/Modal';
 
 import TransactionsImportDuplicatesModalDuplicateCheckbox from './../TransactionsImportDuplicatesModalDuplicateCheckbox';
-import {areObjectsEqual, isTransactionDuplicate} from './../../utilities';
+import {isTransactionDuplicate} from './../../utilities';
 
 import './index.scss';
 
@@ -11,11 +11,10 @@ const TransactionsImportDuplicatesModal = ({ newTransactions, duplicates, isOpen
   const [duplicatesData, setDuplicatesData] = useState(duplicates.map(duplicate=>({duplicate, confirmed: true})));
 
   useEffect(()=>{
-    console.log("Updating duplicates data from duplicates: ", duplicates);
-    setDuplicatesData(duplicates.map(duplicate=>({duplicate, confirmed: true})));
-  }, [duplicates]);
+    if(!duplicatesData.length) return;
 
-  useEffect(()=>console.log("Duplicates data: ", duplicates), [duplicatesData]);
+    console.log("Duplicates data: ", duplicatesData);
+  }, [duplicatesData]);
 
   const onSubmit = event=>{
     //Prevent the form from submitting

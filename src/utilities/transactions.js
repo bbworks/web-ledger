@@ -1,4 +1,4 @@
-import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON, convertDateStringToDate, areObjectsEqual, getBudgetAmountSpentFromTransactions, getMonthFromNumber, getBillingCycleFromDate, getBudgetCycleFromDate} from './../utilities';
+import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON, convertDateStringToDate, areObjectsEqual, getBudgetCycleFromDate} from './../utilities';
 import {parseGoogleSheetsNumber, parseGoogleSheetsDate} from './../googleApi';
 
 //Declare private functions
@@ -130,7 +130,7 @@ export const importTransactions = function(transactionsData, dataType) {
 };
 
 export const categorizeTransactionByDescription = function(transaction) {
-  const {TransactionDate, DescriptionDisplay, Description, Category, Notes, Tags, BudgetCycle, IsAutoCategorized, IsUpdatedByUser} = transaction;
+  const {DescriptionDisplay, Description, Category, Notes} = transaction;
 
   //If
   // 1) the transaction has already either

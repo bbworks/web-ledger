@@ -1,5 +1,3 @@
-import {useState, useEffect} from 'react';
-
 import Modal from 'react-bootstrap/Modal';
 
 import './index.scss';

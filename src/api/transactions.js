@@ -11,16 +11,6 @@ export const getTransactions = async ()=>{
   }
 };
 
-export const insertTransactions = async ()=>{
-  try {
-    return;
-  }
-  catch (err) {
-    throwException(err, false);
-    return;
-  }
-};
-
 export const updateTransactions = async transactions=>{
   try {
     return await updateSheetsSpreadsheetValues("Transactions Data", transactions);
@@ -28,15 +18,5 @@ export const updateTransactions = async transactions=>{
   catch (err) {
     throwException(err, false);
     return [];
-  }
-};
-
-export const deleteTransactions = async ()=>{
-  try {
-    return;
-  }
-  catch (err) {
-    throwException(err, false);
-    return;
   }
 };

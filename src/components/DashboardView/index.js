@@ -13,7 +13,7 @@ const DashboardView = ({ signedInUser, transactions, accountsData, accountData, 
   const route = useLocation().pathname;
   useEffect(()=>{
     setFooterNavbar(route);
-  }, []);
+  }, [route]);
 
   const budgetCycleTransactions = useBudgetCycleTransactions(transactions, budgetCycle);
 

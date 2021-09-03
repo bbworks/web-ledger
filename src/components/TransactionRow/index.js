@@ -1,13 +1,10 @@
 import {useState, useEffect, useRef} from 'react';
 
-import TagBadge from './../TagBadge';
-
 import {isDescendantOf, getTransactionDefaultDescriptionDisplay, formatTransactionDisplay} from './../../utilities';
 
 import './index.scss';
 
 const TransactionRow = ({ transaction, onTransactionEditButtonClick:onTransactionEditButtonClickProp, onTransactionDeleteButtonClick:onTransactionDeleteButtonClickProp })=>{
-  const [isDeleteButtonVisible, setIsDeleteButtonVisible] = useState(true);
   const [startingX, setStartingX] = useState(0);
   const [startingTouch, setstartingTouch] = useState({});
   const [translateX, setTranslateX] = useState(0);
@@ -184,7 +181,7 @@ const TransactionRow = ({ transaction, onTransactionEditButtonClick:onTransactio
           <span className="transaction-row-category">{transactionDisplay.Category}</span>
         </div>
       </div>
-      <button className={`transaction-row-delete-button ${(isDeleteButtonVisible ? "show" : "")}`} onClick={onTransactionDeleteButtonClick}>
+      <button className={"transaction-row-delete-button"} onClick={onTransactionDeleteButtonClick}>
         <span className="transaction-row-delete-button-text">Delete</span>
       </button>
     </div>

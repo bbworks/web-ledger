@@ -20,18 +20,6 @@
 
 
 (()=>{
-const isDescendantOf = (element, potentialAncestor) => {
-  if (
-    element &&
-    potentialAncestor &&
-    element !== potentialAncestor
-  ) return isDescendantOf(element.parentElement, potentialAncestor);
-
-  return element != null &&
-    potentialAncestor != null &&
-    element === potentialAncestor;
-};
-
 const isDescendantOfDropdown = element => {
   if (
     !element.classList.contains("input-dropdown") &&
@@ -174,7 +162,6 @@ const dropdownMasterEventListener = event=>{
 
   //Declare event listeners
   const dropdownListItemOnMouseEnter = event=>{
-    const dropdownListItems = [...dropdown.querySelectorAll(".input-dropdown-list-item")];
     const selectedDropdownListItem = event.target;
     setDropdownItemsSelection(selectedDropdownListItem);
   };

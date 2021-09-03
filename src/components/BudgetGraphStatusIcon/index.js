@@ -1,7 +1,3 @@
-import {useState, useEffect} from 'react';
-
-import {convertNumberToCurrency} from './../../utilities';
-
 import './index.scss';
 
 const BudgetGraphStatusIcon = ({ budget, overBudget, overEarned })=> {

@@ -21,7 +21,7 @@ const DashboardInsights = ({ budgetCycleTransactions, budgetsData })=>{
       const insight = {
         type: "primary",
         title: "Insights",
-        text: `You have ${convertNumberToCurrency(personalSpendingBudgetLeft)} left in \"Personal Spending\".`
+        text: `You have ${convertNumberToCurrency(personalSpendingBudgetLeft)} left in "Personal Spending".`
       };
       setInsights(previousInsights=>[...previousInsights, insight]);
     }

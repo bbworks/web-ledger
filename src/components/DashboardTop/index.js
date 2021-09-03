@@ -1,5 +1,3 @@
-import {useState, useEffect} from 'react';
-
 import {convertNumberToCurrency} from './../../utilities';
 import {useBudgetCycleTransactions} from './../../hooks';
 
@@ -14,12 +12,18 @@ const DashboardTop = ({ transactions, accountsData, accountData, budgetCycle, on
   const currentBudgetCycleExpenses = budgetCycleTransactions.expenses.length && budgetCycleTransactions.expenses.reduce((total, t)=>total+=t.Amount, 0);
   const currentBudgetCycleRemaining = currentBudgetCycleIncome+currentBudgetCycleExpenses;
 
+  const getLastUpdatedDate = transactions=>{
+    if (!transactions.length) return null;
+
+    return new Date(Math.max(...transactions.map(t=>[t.DateCreated.getTime(), t.DateModified.getTime()]).flat()));
+  };
+
   return (
     <div className="dashboard-top">
       <div className="dashboard-account-overview container-fluid py-2 px-3">
         <div className="container-fluid text-end text-muted my-2">
           Last Updated:&nbsp;
-          <span className="dashboard-accounts-total d-inline">6/29/2021</span>
+          <span className="dashboard-accounts-total d-inline">{getLastUpdatedDate(transactions) ? getLastUpdatedDate(transactions).toLocaleDateString() : "--"}</span>
         </div>
         <div className="row">
           <div className="dashboard-accounts-total-container col text-center fw-bold h4 d-flex flex-column border-end border-2">

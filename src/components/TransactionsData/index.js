@@ -5,6 +5,7 @@ import TransactionRowDateSeparator from './../TransactionRowDateSeparator';
 import TransactionRow from './../TransactionRow';
 
 import {convertNumberToCurrency, getTransactionsAmountTotal} from './../../utilities';
+import {useConsoleLog} from './../../hooks';
 
 import './index.scss';
 
@@ -66,9 +67,7 @@ const TransactionsData = ({ budgetCycleTransactions, onTransactionEditButtonClic
   const [searchFilters, setSearchFilters] = useState([]);
   const [filteredBudgetCycleTransactions, setFilteredBudgetCycleTransactions] = useState(filterTransactionsBySearchFilters(budgetCycleTransactions, searchFilters));
 
-  const filteredIncomeTotal = convertNumberToCurrency(filteredBudgetCycleTransactions.income.reduce((total, t)=>total+=t.Amount, 0))
-  const filteredExpensesTotal = convertNumberToCurrency(filteredBudgetCycleTransactions.expenses.reduce((total, t)=>total+=t.Amount, 0))
-  const filteredRemainingTotal = convertNumberToCurrency(filteredBudgetCycleTransactions.all.reduce((total, t)=>total+=t.Amount, 0))
+  const filteredRemainingTotal = convertNumberToCurrency(getTransactionsAmountTotal(filteredBudgetCycleTransactions.all));
 
   const onTransactionDataSearchFormSubmit = search=>{
     setSearchFilters(previousSearchFilters=>[...previousSearchFilters, search]);
@@ -86,7 +85,7 @@ const TransactionsData = ({ budgetCycleTransactions, onTransactionEditButtonClic
     setFilteredBudgetCycleTransactions(filterTransactionsBySearchFilters(budgetCycleTransactions, searchFilters))
   , [budgetCycleTransactions, searchFilters]);
 
-  useEffect(()=>console.log(filteredBudgetCycleTransactions), [filteredBudgetCycleTransactions]);
+  useConsoleLog(filteredBudgetCycleTransactions, "filteredBudgetCycleTransactions");
 
   return (
     <div className="transactions-data">

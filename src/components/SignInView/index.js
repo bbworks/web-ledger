@@ -1,5 +1,3 @@
-import {useState, useEffect} from 'react';
-
 import Logo from './../Logo';
 import GoogleApiSignInButton from './../GoogleApiSignInButton';
 

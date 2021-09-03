@@ -1,4 +1,4 @@
-import {getSpreadsheetId, setSpreadsheetId, convertSheetsArraysToJSON, convertJSONToSheetsArray, getDynamicPropertyByArray, convertColumnNumberToColumnLetter, convertColumnLetterToColumnNumber, convertArrayToA1Notation} from './utilities.js'
+import {getSpreadsheetId, convertSheetsArraysToJSON, convertJSONToSheetsArray, getDynamicPropertyByArray, convertArrayToA1Notation} from './utilities.js'
 
 export const callGoogleApiFunction = (googleApi, resourceType, method, optionsParam, pageToken)=>{
   //Declare variables

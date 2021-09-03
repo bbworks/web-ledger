@@ -1,5 +1,3 @@
-import {useState, useEffect} from 'react';
-
 import './index.scss';
 
 const TransactionRowDateSeparator = ({ date, count })=>{

@@ -10,7 +10,7 @@ const SettingsView = ({ setFooterNavbar, settings, onSubmit })=>{
   const route = useLocation().pathname;
   useEffect(()=>{
     setFooterNavbar(route);
-  }, []);
+  }, [route]);
 
   return (
     <div className="view settings-view">

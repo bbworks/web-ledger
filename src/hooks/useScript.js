@@ -45,7 +45,7 @@ const useScript = (src, optionsParam)=>{
         setIsLoaded(false);
       }
     });
-  }, []);
+  }, [src, optionsParam]);
 
   return isLoaded;
 };
