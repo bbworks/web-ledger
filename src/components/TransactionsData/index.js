@@ -53,12 +53,32 @@ const TransactionsDataRows = ({ filteredBudgetCycleTransactions, heading, search
 };
 
 const TransactionsData = ({ budgetCycleTransactions, onTransactionEditButtonClick, onTransactionDeleteButtonClick })=>{
+  const defaultTransactionProperty = "DescriptionDisplay";
+
   const filterTransactionsBySearchFilters = (budgetCycleTransactions, searchFilters)=>{
+    const filterBudgetCycleTransactions = budgetCycleTransactions=>{
+      return budgetCycleTransactions
+        .filter(t=>
+          searchFilters.map(({key:searchKey, value:searchValue})=>{
+            const value = t[searchKey ?? defaultTransactionProperty];
+            const escapedSearchValue = searchValue.replace(/([-\/\\^$*+?.()|[\]{}])/g, '\\$1');
+
+            if (!value && !(searchKey === "Category" && searchValue === "Miscellaneous")) return false;
+
+            const typeCheckedValue = (value instanceof Date ? value.toJSON() : value);
+
+            if (searchKey === "Category" && searchValue === "Miscellaneous") return typeCheckedValue === null || typeCheckedValue.match(new RegExp(escapedSearchValue, "i"));
+            return typeCheckedValue.match(new RegExp(escapedSearchValue, "i"));
+          })
+          .every(i=>i)
+        );
+    };
+
     //Filter transactions (or render them all) based on current search filters
     const newlyFilteredBudgetCycleTransactions = {
       ...budgetCycleTransactions,
-      income: budgetCycleTransactions.income.filter(t=>searchFilters.map(a=>(t.DescriptionDisplay || t.Description).match(new RegExp(a, "i"))).every(i=>i)),
-      expenses: budgetCycleTransactions.expenses.filter(t=>searchFilters.map(a=>(t.DescriptionDisplay || t.Description).match(new RegExp(a, "i"))).every(i=>i)),
+      income: filterBudgetCycleTransactions(budgetCycleTransactions.income),
+      expenses: filterBudgetCycleTransactions(budgetCycleTransactions.expenses),
     };
     Object.defineProperty(newlyFilteredBudgetCycleTransactions, "all", Object.getOwnPropertyDescriptor(budgetCycleTransactions, "all"));
     return newlyFilteredBudgetCycleTransactions;
@@ -68,9 +88,10 @@ const TransactionsData = ({ budgetCycleTransactions, onTransactionEditButtonClic
   const [filteredBudgetCycleTransactions, setFilteredBudgetCycleTransactions] = useState(filterTransactionsBySearchFilters(budgetCycleTransactions, searchFilters));
 
   const filteredRemainingTotal = convertNumberToCurrency(getTransactionsAmountTotal(filteredBudgetCycleTransactions.all));
+  const transactionProperties = (filteredBudgetCycleTransactions.all?.length ? Object.keys(filteredBudgetCycleTransactions.all[0]).filter(property=>!["DateCreated","DateModified","IsAutoCategorized","IsUpdatedByUser"].includes(property)) : []);
 
-  const onTransactionDataSearchFormSubmit = search=>{
-    setSearchFilters(previousSearchFilters=>[...previousSearchFilters, search]);
+  const onTransactionDataSearchFormSubmit = searchObject=>{
+    setSearchFilters(previousSearchFilters=>[...previousSearchFilters, searchObject]);
   };
 
   const onFilterClick = removedSearchFilter=>{
@@ -87,9 +108,11 @@ const TransactionsData = ({ budgetCycleTransactions, onTransactionEditButtonClic
 
   useConsoleLog(filteredBudgetCycleTransactions, "filteredBudgetCycleTransactions");
 
+  useEffect(()=>console.log(searchFilters), [searchFilters])
+
   return (
     <div className="transactions-data">
-      <TransactionDataSearchForm searchFilters={searchFilters} onSubmit={onTransactionDataSearchFormSubmit} onFilterClick={onFilterClick} />
+      <TransactionDataSearchForm budgetCycleTransactions={budgetCycleTransactions} transactionProperties={transactionProperties} searchFilters={searchFilters} onSubmit={onTransactionDataSearchFormSubmit} onFilterClick={onFilterClick} />
       {
         searchFilters.length ?
         <TransactionsDataRows filteredBudgetCycleTransactions={filteredBudgetCycleTransactions.all} searchFilters={searchFilters} onTransactionEditButtonClick={onTransactionEditButtonClick} onTransactionDeleteButtonClick={onTransactionDeleteButtonClick}/> :
