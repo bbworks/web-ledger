@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react';
 
-import TransactionDataSearchForm from './../TransactionDataSearchForm';
+import TransactionsDataSearchForm from './../TransactionsDataSearchForm';
 import TransactionRowDateSeparator from './../TransactionRowDateSeparator';
 import TransactionRow from './../TransactionRow';
 
@@ -90,7 +90,7 @@ const TransactionsData = ({ budgetCycleTransactions, onTransactionEditButtonClic
   const filteredRemainingTotal = convertNumberToCurrency(getTransactionsAmountTotal(filteredBudgetCycleTransactions.all));
   const transactionProperties = (filteredBudgetCycleTransactions.all?.length ? Object.keys(filteredBudgetCycleTransactions.all[0]).filter(property=>!["DateCreated","DateModified","IsAutoCategorized","IsUpdatedByUser"].includes(property)) : []);
 
-  const onTransactionDataSearchFormSubmit = searchObject=>{
+  const onTransactionsDataSearchFormSubmit = searchObject=>{
     setSearchFilters(previousSearchFilters=>[...previousSearchFilters, searchObject]);
   };
 
@@ -112,7 +112,7 @@ const TransactionsData = ({ budgetCycleTransactions, onTransactionEditButtonClic
 
   return (
     <div className="transactions-data">
-      <TransactionDataSearchForm budgetCycleTransactions={budgetCycleTransactions} transactionProperties={transactionProperties} searchFilters={searchFilters} onSubmit={onTransactionDataSearchFormSubmit} onFilterClick={onFilterClick} />
+      <TransactionsDataSearchForm budgetCycleTransactions={budgetCycleTransactions} transactionProperties={transactionProperties} searchFilters={searchFilters} onSubmit={onTransactionsDataSearchFormSubmit} onFilterClick={onFilterClick} />
       {
         searchFilters.length ?
         <TransactionsDataRows filteredBudgetCycleTransactions={filteredBudgetCycleTransactions.all} searchFilters={searchFilters} onTransactionEditButtonClick={onTransactionEditButtonClick} onTransactionDeleteButtonClick={onTransactionDeleteButtonClick}/> :

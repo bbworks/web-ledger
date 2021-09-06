@@ -2,7 +2,7 @@ import {useState, useEffect, useRef} from 'react';
 
 import './index.scss';
 
-const TransactionDataSearchForm = ({ budgetCycleTransactions, transactionProperties, searchFilters, onSubmit:onSubmitProp, onFilterClick:onFilterClickProp })=>{
+const TransactionsDataSearchForm = ({ budgetCycleTransactions, transactionProperties, searchFilters, onSubmit:onSubmitProp, onFilterClick:onFilterClickProp })=>{
   const [search, setSearch] = useState("");
   const [isSearchSuggestionsOpen, setIsSearchSuggestionsOpen] = useState(false);
   const [activeSearchSuggestion, setActiveSearchSuggestion] = useState(null);
@@ -10,7 +10,16 @@ const TransactionDataSearchForm = ({ budgetCycleTransactions, transactionPropert
   const transactionsDataSearchFormInput = useRef(null);
 
   const getUniqueTransactionsPropertiesValues = (budgetCycleTransactions, property)=>{
-    return [...new Set(budgetCycleTransactions.map(t=>{const value = t[property]; return (value instanceof Date ? value.toJSON() : value)}).filter(t=>t))].sort((a,b)=>a<b ? -1 : b<a ? 1 : 0);
+    return [
+      ...new Set(
+        budgetCycleTransactions.map(t=>{
+          const value = t[property];
+          return (value instanceof Date ? value.toJSON() : value)
+        })
+        .filter(t=>(Array.isArray(t) ? t.length : t))
+      )
+    ]
+      .sort((a,b)=>a<b ? -1 : b<a ? 1 : 0);
   };
 
   const getSearchSuggestions = ()=>{
@@ -119,4 +128,4 @@ const TransactionDataSearchForm = ({ budgetCycleTransactions, transactionPropert
   );
 };
 
-export default TransactionDataSearchForm;
+export default TransactionsDataSearchForm;
