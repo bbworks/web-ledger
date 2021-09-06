@@ -3,11 +3,12 @@ import {useState, useEffect} from 'react';
 import Modal from 'react-bootstrap/Modal';
 import TransactionDetailModalInput from './../TransactionDetailModalInput';
 
-import {nullCoalesce, formatTransactionDisplay} from './../../utilities';
+import {nullCoalesce, formatTransactionDisplay, getBudgetCycleString, getBudgetCycleFromBudgetCycleString} from './../../utilities';
 
 import './index.scss';
 
-const TransactionDetailModal = ({ transaction, categories, types, buttonsOptions, isOpen, onClose, onSubmit })=>{
+const TransactionDetailModal = ({ transaction, allBudgetCycles, categories, types, buttonsOptions, isOpen, onClose, onSubmit })=>{
+  const [BudgetCycle, setBudgetCycle] = useState(""); //empty string, as initial value for input[type="text"]
   const [PostedDate, setPostedDate] = useState(""); //empty string, as initial value for input[type="text"]
   const [TransactionDate, setTransactionDate] = useState(""); //empty string, as initial value for input[type="text"]
   const [AccountNumber, setAccountNumber] = useState(""); //empty string, as initial value for input[type="text"]
@@ -20,8 +21,9 @@ const TransactionDetailModal = ({ transaction, categories, types, buttonsOptions
   const [Tags, setTags] = useState([]);
 
   const transactionDetails = [
-    {name: "PostedDate", placeholder: "PostedDate", value: PostedDate, tag: "input", tagType: "text", setState: setPostedDate, disabled: false},
-    {name: "TransactionDate", placeholder: "TransactionDate", value: TransactionDate, tag: "input", tagType: "text", setState: setTransactionDate, disabled: false},
+    {name: "BudgetCycle", placeholder: "Select a budget cycle", value: BudgetCycle, items: allBudgetCycles.map(b=>getBudgetCycleString(b)), tag: "input", tagType: "text", setState: setBudgetCycle, disabled: false},
+    {name: "PostedDate", placeholder: "Posted Date", value: PostedDate, tag: "input", tagType: "text", setState: setPostedDate, disabled: false},
+    {name: "TransactionDate", placeholder: "Transaction Date", value: TransactionDate, tag: "input", tagType: "text", setState: setTransactionDate, disabled: false},
     {name: "AccountNumber", placeholder: "Account Number", value: AccountNumber, tag: "input", tagType: "text", setState: setAccountNumber, disabled: false},
     {name: "Amount", placeholder: "Amount", value: Amount, tag: "input", tagType: "text", setState: setAmount, disabled: false},
     {name: "Description", placeholder: "Description", value: Description, tag: "input", tagType: "text", setState: setDescription, disabled: true},
@@ -39,6 +41,7 @@ const TransactionDetailModal = ({ transaction, categories, types, buttonsOptions
     if(!transaction) return;
 
     const transactionDisplay = formatTransactionDisplay(transaction);
+    setBudgetCycle(transactionDisplay.BudgetCycle);
     setPostedDate(transactionDisplay.PostedDate);
     setTransactionDate(transactionDisplay.TransactionDate);
     setAccountNumber(transactionDisplay.AccountNumber);
@@ -115,6 +118,7 @@ const TransactionDetailModal = ({ transaction, categories, types, buttonsOptions
 
       //Vaildate the value
       value = (name === "Tags" ? (value ? value.split(/\s*,\s*/) : []) : value); //Tags validation
+      value = (name === "BudgetCycle" ? (value ? getBudgetCycleFromBudgetCycleString(value) : null) : value); //BudgetCycle validation
       value = (value instanceof Array && value.length === 0 ? [] : nullCoalesce(value)) //Array validation
 
       return {

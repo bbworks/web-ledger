@@ -1,28 +1,8 @@
-import {useState, useEffect} from 'react';
-
-import {getBudgetCycleString, getBudgetCyclesFromTransactions, getBudgetCycleDescription, getBudgetCycleFromDate} from './../../utilities';
+import {getBudgetCycleString, getBudgetCycleDescription} from './../../utilities';
 
 import './index.scss';
 
-const DashboardBudgetCycleDropdown = ({ transactions, budgetCycle, onChange:onChangeProp })=>{
-  const todayBudgetCycle = getBudgetCycleFromDate(new Date());
-
-  const getAllBudgetCycles = ()=>{
-    return [
-      ...new Set([
-        todayBudgetCycle, //assure the current month is an option as well
-        ...getBudgetCyclesFromTransactions(transactions),
-      ].map(date=>date.toJSON()))
-    ]
-      .map(JSON=>new Date(JSON));
-  };
-
-  const [allBudgetCycles, setAllBudgetCycles] = useState(getAllBudgetCycles());
-
-  useEffect(()=>
-    setAllBudgetCycles(getAllBudgetCycles())
-  , [transactions]);
-
+const DashboardBudgetCycleDropdown = ({ transactions, budgetCycle, allBudgetCycles, onChange:onChangeProp })=>{
   const onClick = event=>{
     const budgetCycleJSON = event.target.getAttribute("data-budget-cycle");
     if (!budgetCycleJSON) return;

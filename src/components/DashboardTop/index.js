@@ -5,7 +5,7 @@ import DashboardBudgetCycleDropdown from './../DashboardBudgetCycleDropdown';
 
 import './index.scss';
 
-const DashboardTop = ({ transactions, accountsData, accountData, budgetCycle, onBudgetCycleChange })=>{
+const DashboardTop = ({ transactions, accountsData, accountData, budgetCycle, allBudgetCycles, onBudgetCycleChange })=>{
   const budgetCycleTransactions = useBudgetCycleTransactions(transactions, budgetCycle);
 
   const currentBudgetCycleIncome = budgetCycleTransactions.income.length && budgetCycleTransactions.income.reduce((total, t)=>total+=t.Amount, 0);
@@ -36,7 +36,7 @@ const DashboardTop = ({ transactions, accountsData, accountData, budgetCycle, on
           </div>
         </div>
       </div>
-      <DashboardBudgetCycleDropdown transactions={transactions} budgetCycle={budgetCycle} onChange={onBudgetCycleChange} />
+      <DashboardBudgetCycleDropdown transactions={transactions} budgetCycle={budgetCycle} allBudgetCycles={allBudgetCycles} onChange={onBudgetCycleChange} />
     </div>
   );
 };

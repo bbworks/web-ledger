@@ -17,7 +17,7 @@ const TransactionDetailModalInput = ({ transactionDetail, tabIndex, onClick, onB
             <transactionDetail.tag className="transaction-modal-input transaction-modal-input-tags form-control" type={transactionDetail.tagType} placeholder={transactionDetail.placeholder} tabIndex={tabIndex} onKeyDown={onKeyDown}></transactionDetail.tag>
           </div>
         ) : (
-        ["Category", "Type"].includes(transactionDetail.name) ?
+        ["Category", "Type", "BudgetCycle"].includes(transactionDetail.name) ?
           <InputDropdown name={transactionDetail.name} value={transactionDetail.value} items={transactionDetail.items} placeholder={transactionDetail.placeholder} disabled tabIndex={tabIndex} onKeyDown={onKeyDown} onChange={onChange}/>
         :
           <transactionDetail.tag className="transaction-modal-input transaction-modal-input-text form-control" name={transactionDetail.name} value={transactionDetail.value} type={transactionDetail.tagType} placeholder={transactionDetail.placeholder} tabIndex={tabIndex} disabled {...(transactionDetail.disabled && {"data-stay-disabled": true})} onKeyDown={onKeyDown} onChange={onChange}>{transactionDetail.tag !== "input" ? transactionDetail.value : null}</transactionDetail.tag>
