@@ -9,7 +9,7 @@ import TransactionsImportDuplicatesModal from './../TransactionsImportDuplicates
 import TransactionsImportConfirmedModal from './../TransactionsImportConfirmedModal';
 import TransactionsImportFormToggle from './../TransactionsImportFormToggle';
 
-import {useConsoleLog, useBudgetCycleTransactions} from './../../hooks';
+import {useBudgetCycleTransactions} from './../../hooks';
 
 import './index.scss';
 
@@ -39,8 +39,6 @@ const TransactionsView = ({ transactions, budgetCycle, allBudgetCycles, transact
   const [isTransactionDeleteModalOpen, setIsTransactionDeleteModalOpen] = useState(false);
 
   const budgetCycleTransactions = useBudgetCycleTransactions(filteredTransactions, budgetCycle);
-
-  useConsoleLog(budgetCycleTransactions, "budgetCycleTransactions");
 
   useEffect(()=>{
     if (!transactions.length) return;

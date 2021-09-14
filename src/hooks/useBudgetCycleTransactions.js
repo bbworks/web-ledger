@@ -45,7 +45,7 @@ const useBudgetCycleTransactions = (transactions, budgetCycle)=>{
     );
 
     console.log(
-      "Filtered corresponding credit/debit transfers",
+      "useBudgetCycleTransactions filtered corresponding credit/debit transfers",
       transactions.filter(transaction=>getBudgetCycleFromDate(transaction.BudgetCycle || transaction.TransactionDate).getTime() === budgetCycle.getTime()
       &&
       //Remove payment transactions
@@ -68,11 +68,15 @@ const useBudgetCycleTransactions = (transactions, budgetCycle)=>{
     //Get this month's transactions (minus income)
     const currentBudgetCycleExpenseTransactions = getCurrentBudgetCycleExpenseTransactions(currentBudgetCycleTransactions, budgetCycle);
 
-    return {
+    const budgetCycleTransactionsReturn = {
       income: [...lastBudgetCycleIncomeTransactions, ...currentBudgetCycleIncomeTransactions],
       expenses: currentBudgetCycleExpenseTransactions,
       get all() {return [...this.income, ...this.expenses].flat()},
     };
+
+    console.log("budgetCycleTransactions", budgetCycleTransactionsReturn);
+
+    return budgetCycleTransactionsReturn;
   };
 
   //Initialize state

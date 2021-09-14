@@ -1,5 +1,7 @@
 import {useState, useEffect, useRef} from 'react';
 
+import InputDropdown from './../InputDropdown';
+
 import './index.scss';
 
 const TransactionsDataSearchForm = ({ budgetCycleTransactions, transactionProperties, searchFilters, onSubmit:onSubmitProp, onFilterClick:onFilterClickProp })=>{
@@ -23,66 +25,46 @@ const TransactionsDataSearchForm = ({ budgetCycleTransactions, transactionProper
   };
 
   const getSearchSuggestions = ()=>{
-    const escapedSearch = search.replace(/([-\/\\^$*+?.()|[\]{}])/g, '\\$1');
+    const escapedSearch = (
+      search ?
+      search.replace(/([-\/\\^$*+?.()|[\]{}])/g, '\\$1') :
+      ""
+    );
 
     if (!activeSearchSuggestion) return transactionProperties.filter(p=>p.match(new RegExp("^"+escapedSearch, "i")));
 
     return getUniqueTransactionsPropertiesValues(budgetCycleTransactions.all, activeSearchSuggestion);
   };
 
-  const openSearchSuggestions = ()=>{
-    setIsSearchSuggestionsOpen(true);
+  const onTransactionsDataSearchFormActiveSearchSuggestionClick = event=>{
+    setActiveSearchSuggestion(null);
+    setSearch("");
   };
 
-  const closeSearchSuggestions = ()=>{
-    setIsSearchSuggestionsOpen(false);
+  const onTransactionsDataSearchFormInputDropdownKeyDown = event=>{
+    if(activeSearchSuggestion && event.target.value === "" && event.keyCode === 8 /* Backspace */) {
+      setActiveSearchSuggestion(null);
+      setSearch("");
+      return;
+    }
   };
 
-  const onTransactionsDataSearchFormInputFocus = event=>{
-    //if (activeSearchSuggestion) return;
-
-    openSearchSuggestions();
-  };
-
-  const onTransactionsDataSearchFormInputBlur = event=>{
-    //closeSearchSuggestions();
-  };
-
-  const onTransactionsDataSearchFormSearchSuggestionClick = event=>{
-    const suggestion = event.target.innerText;
-
-    if (!activeSearchSuggestion) {
+  const onTransactionsDataSearchFormInputDropdownSubmit = (event, newSearch)=>{
+    //If an active search filter has not yet been applied,
+    // and a list item was selected, apply a search filter
+    if (!activeSearchSuggestion && event.isSelectedListItem) {
+      setActiveSearchSuggestion(newSearch);
+      setSearch(""); //set to "" so it will propagate down to InputDropdown
       transactionsDataSearchFormInput.current.focus();
-      setActiveSearchSuggestion(suggestion);
       return;
     }
 
+    //Otherwise, set the new search value
     transactionsDataSearchFormInput.current.focus();
-    setSearch(suggestion);
-    closeSearchSuggestions();
+    onSubmit(newSearch);
   };
 
-  const onTransactionsDataSearchFormActiveSearchSuggestionClick = event=>{
-    setActiveSearchSuggestion(null);
-  };
-
-  const onTransactionsDataSearchFormInputKeyDown = event=>{
-    if(activeSearchSuggestion && event.target.value === "" && event.keyCode === 8) {
-      setActiveSearchSuggestion(null);
-    }
-  };
-
-  const onTransactionsDataSearchFormInputChange = event=>{
-    const searchText = event.target.value;
-    setSearch(searchText);
-  };
-
-  const onSubmit = event=>{
-    event.preventDefault();
-
-    //Save the search value
-    const searchValue = search;
-
+  const onSubmit = searchValue=>{
     //Reset the search value
     setSearch("");
 
@@ -106,22 +88,21 @@ const TransactionsDataSearchForm = ({ budgetCycleTransactions, transactionProper
     <form className="transactions-data-search-form" onSubmit={onSubmit}>
       <div className="transactions-data-search-form-input-container">
         <i className="transactions-data-search-form-icon fas fa-search"></i>
-        {activeSearchSuggestion ? (
-          <span className="transactions-data-search-form-active-search-suggestion badge rounded-pill" onClick={onTransactionsDataSearchFormActiveSearchSuggestionClick}>
-            <i className="transactions-data-search-form-active-search-suggestion-x fas fa-xs fa-times me-1"></i>
-            {activeSearchSuggestion}
-          </span>
-        ) : null}
-        <input className="transactions-data-search-form-input" type="input" placeholder="Search..." value={search} ref={transactionsDataSearchFormInput} onChange={onTransactionsDataSearchFormInputChange} onKeyDown={onTransactionsDataSearchFormInputKeyDown} onFocus={onTransactionsDataSearchFormInputFocus} onBlur={onTransactionsDataSearchFormInputBlur}/>
+        {
+          activeSearchSuggestion ?
+          (
+            <span className="transactions-data-search-form-active-search-suggestion badge rounded-pill" onClick={onTransactionsDataSearchFormActiveSearchSuggestionClick}>
+              <i className="transactions-data-search-form-active-search-suggestion-x fas fa-xs fa-times me-1"></i>
+              {activeSearchSuggestion}
+            </span>
+          ) :
+          null
+        }
+        <InputDropdown className="transactions-data-search-form-input" value={search} items={getSearchSuggestions()} placeholder="Search..." inputRef={transactionsDataSearchFormInput} onSubmit={onTransactionsDataSearchFormInputDropdownSubmit} onInputDropdownInputKeyDown={onTransactionsDataSearchFormInputDropdownKeyDown} />
       </div>
       <div className="transactions-data-search-form-search-filters">
         {searchFilters.map(({key:searchKey, value:searchValue}, i)=>(
           <span key={i} className="transactions-data-search-form-search-filter badge rounded-pill bg-secondary" onClick={event=>onFilterClick(searchValue)}><i className="transactions-data-search-form-filter-x fas fa-xs fa-times me-1"></i>{searchKey ? `${searchKey}:` : ""}{searchValue}</span>
-        ))}
-      </div>
-      <div className={`transactions-data-search-form-search-suggestions ${isSearchSuggestionsOpen && getSearchSuggestions().length ? "" : "d-none"}`}>
-        {getSearchSuggestions().map(p=>(
-          <div className="transactions-data-search-form-search-suggestion" onClick={onTransactionsDataSearchFormSearchSuggestionClick}>{p}</div>
         ))}
       </div>
     </form>

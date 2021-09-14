@@ -4,7 +4,7 @@ import TransactionsDataSearchForm from './../TransactionsDataSearchForm';
 import TransactionRowDateSeparator from './../TransactionRowDateSeparator';
 import TransactionRow from './../TransactionRow';
 
-import {convertNumberToCurrency, getTransactionsAmountTotal} from './../../utilities';
+import {convertNumberToCurrency, getTransactionsAmountTotal, matchValueAgainstValue} from './../../utilities';
 import {useConsoleLog} from './../../hooks';
 
 import './index.scss';
@@ -61,14 +61,10 @@ const TransactionsData = ({ budgetCycleTransactions, onTransactionEditButtonClic
         .filter(t=>
           searchFilters.map(({key:searchKey, value:searchValue})=>{
             const value = t[searchKey ?? defaultTransactionProperty];
-            const escapedSearchValue = searchValue.replace(/([-\/\\^$*+?.()|[\]{}])/g, '\\$1');
-
             if (!value && !(searchKey === "Category" && searchValue === "Miscellaneous")) return false;
 
-            const typeCheckedValue = (value instanceof Date ? value.toJSON() : value);
-
-            if (searchKey === "Category" && searchValue === "Miscellaneous") return typeCheckedValue === null || typeCheckedValue.match(new RegExp(escapedSearchValue, "i"));
-            return typeCheckedValue.match(new RegExp(escapedSearchValue, "i"));
+            if (searchKey === "Category" && searchValue === "Miscellaneous") return value === null || value.match(new RegExp(searchValue, "i"));
+            return matchValueAgainstValue(value, searchValue);
           })
           .every(i=>i)
         );
@@ -107,8 +103,6 @@ const TransactionsData = ({ budgetCycleTransactions, onTransactionEditButtonClic
   , [budgetCycleTransactions, searchFilters]);
 
   useConsoleLog(filteredBudgetCycleTransactions, "filteredBudgetCycleTransactions");
-
-  useEffect(()=>console.log(searchFilters), [searchFilters])
 
   return (
     <div className="transactions-data">

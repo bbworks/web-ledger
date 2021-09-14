@@ -229,3 +229,19 @@ export const isDescendantOf = (element, potentialParent) => {
     potentialParent != null &&
     element.parentElement === potentialParent;
 };
+
+export const matchValueAgainstValue = (value, matchedValue)=>{
+  //Perform validations
+  if (!value) value = "";
+  if (value instanceof Date) value = value.toJSON(); //perform Date before Number (as Date() is not NaN)
+  if (!isNaN(value)) value = value.toString();
+
+  if (!matchedValue) matchedValue = "";
+  if (matchedValue instanceof Date) matchedValue = matchedValue.toJSON(); //perform Date before Number (as Date() is not NaN)
+  if (!isNaN(matchedValue)) matchedValue = matchedValue.toString();
+
+  //Escape the matched value to prepare for RegExp
+  const escapedMatchedValue = matchedValue.replace(/([-\/\\^$*+?.()|[\]{}])/g, '\\$1');
+
+  return value.match(new RegExp(`(${escapedMatchedValue})`, "i"));
+};
