@@ -55,40 +55,23 @@ const TransactionDetailModal = ({ transaction, allBudgetCycles, categories, type
     console.log("Updating TransactionDetailModal state based on updated prop \"transaction\".", transaction, PostedDate, TransactionDate, AccountNumber, Amount, Description, Category, Notes, Type, Tags)
   }, [transaction, isOpen]);
 
-  const onTransactionDetailInputContainerClick = event=>{
-    const transactionDetailInput = event.target;
-    if (transactionDetailInput.getAttribute("data-stay-disabled")) return;
-    transactionDetailInput.disabled = false;
-    transactionDetailInput.focus();
-  };
-
-  const onTransactionDetailInputContainerBlur = event=>{
-    const transactionDetailInput = event.target;
-    if (transactionDetailInput.getAttribute("data-stay-disabled")) return;
-    transactionDetailInput.disabled = true;
-  };
-
   const onTransactionDetailInputChange = (event, transactionDetail)=>{
-    transactionDetail.setState(event.target.value)
+    const newValue = event.target.value;
+    transactionDetail.setState(newValue);
   };
 
-  const onTransactionDetailInputKeyDown = event=>{
+  const onTransactionDetailInputKeyPress = event=>{
     const transactionDetailInput = event.target;
-    if (event.keyCode === 9 /* Tab */) {
-      event.preventDefault();
-      const nextOrPrevious = (event.shiftKey === true ? -1 : 1);
-      const inputsArray = [...new Set([...document.querySelector(".transaction-modal-form").querySelectorAll(".transaction-modal-input"), ...document.querySelector(".transaction-modal-form").querySelectorAll("[tabIndex]")])];
-      const nextInput = inputsArray[(inputsArray.indexOf(transactionDetailInput)+nextOrPrevious+inputsArray.length)%inputsArray.length];
-      if (nextInput) {
-        nextInput.disabled = false;
-        nextInput.focus();
-      }
-      return;
-    }
-    if (event.key === "Enter") {
-      event.preventDefault();
 
-      if (transactionDetailInput.classList.contains("transaction-modal-input-tags")) {
+    //If the "Enter" key is pressed on input[name="Tags"],
+    // append the newly added tag
+    if (event.key === "Enter") {
+      if (transactionDetailInput.classList.contains("transaction-detail-modal-input-tags")) {
+        event.preventDefault();
+
+        const newValue = transactionDetailInput.value;
+
+        //Add the additional tag
         setTags([...Tags, transactionDetailInput.value]);
 
         //Reset the input
@@ -96,9 +79,6 @@ const TransactionDetailModal = ({ transaction, allBudgetCycles, categories, type
 
         return;
       }
-
-      transactionDetailInput.disabled = true;
-      return;
     }
   };
 
@@ -148,15 +128,15 @@ const TransactionDetailModal = ({ transaction, allBudgetCycles, categories, type
   };
 
   return (
-    <Modal id="transaction-modal" show={isOpen} onHide={onClose}>
+    <Modal id="transaction-detail-modal" show={isOpen} onHide={onClose}>
       <Modal.Header>
         <Modal.Title className="modal-title">Transaction Detail</Modal.Title>
         <button className="btn-close" type="button" onClick={onClose}></button>
       </Modal.Header>
-      <form className="transaction-modal-form" onSubmit={transactionModalFormOnSubmit}>
+      <form className="transaction-detail-modal-form" onSubmit={transactionModalFormOnSubmit}>
         <Modal.Body>
           {transactionDetails.map((transactionDetail, i)=>(
-            <TransactionDetailModalInput key={transactionDetail.name} transactionDetail={transactionDetail} tabIndex={i+1} onClick={onTransactionDetailInputContainerClick} onBlur={onTransactionDetailInputContainerBlur} onChange={(event)=>onTransactionDetailInputChange(event, transactionDetail)} onKeyDown={onTransactionDetailInputKeyDown} onTagBadgeClick={onTagBadgeClick} />
+            <TransactionDetailModalInput key={transactionDetail.name} transactionDetail={transactionDetail} tabIndex={i+1} onChange={(event)=>onTransactionDetailInputChange(event, transactionDetail)} onKeyPress={onTransactionDetailInputKeyPress} onTagBadgeClick={onTagBadgeClick} />
           ))}
         </Modal.Body>
         <Modal.Footer>

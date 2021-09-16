@@ -26,47 +26,107 @@ export const importTransactions = function(transactionsData, dataType) {
   try {
     //if this is scraped from online app
     if (dataType === "scraped") {
-      //Spilt the string of transactions into an array
       return transactionsData
+        /* Break out the text data into an Array of data lines */
         .split(/(?:\r\n|\r|\n)/)
-        .map(transactionLine=>{
-          if (!transactionLine) return null;
+        /* Filter out invalid transaction data lines */
+        .filter(transactionDataLine=>{
+          if (
+            !transactionDataLine ||
+            transactionDataLine.match(/(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{2}, \d{4}/) ||
+            transactionDataLine.match(/Posted Balance : \$[\d,\.]+/)
+          ) {
+            console.warn(`Unable to read transaction line.\r\n${transactionDataLine}`);
+            return false;
+          }
+          return true;
+        })
+        /* Reduce the transaction data lines into composite transactions objects */
+        .reduce((transactions, transactionDataLine, i)=>{
+          //Make an array of the different pieces of
+          // transaction data this line could represent
+          const newTransactionDataParts = [
+            {
+              name: "Description",
+              isMatch: transactionDataLine.match(/(.+)/),
+              value: (transactionDataLine.match(/(.+)/) ? transactionDataLine.match(/(.+)/)[1] : null),
+            },
+            {
+              name: "TransactionDate",
+              isMatch: transactionDataLine.match(/(\d{2}\/\d{2}\/\d{4})/),
+              value: (transactionDataLine.match(/(\d{2}\/\d{2}\/\d{4})/) ? convertDateStringToDate(transactionDataLine.match(/(\d{2}\/\d{2}\/\d{4})/)[1], "MM/dd/yyyy") : null),
+            },
+            {
+              name: "Amount",
+              isMatch: transactionDataLine.match(/(-?)\$([\d,]+\.\d{2})/),
+              value: (transactionDataLine.match(/(-?)\$([\d,]+\.\d{2})/) ? Number(`${transactionDataLine.match(/(-?)\$([\d,]+\.\d{2})/)[1]}${transactionDataLine.match(/(-?)\$([\d,]+\.\d{2})/)[2].replace(",","")}`) : null),
+            },
+          ];
+
+          //Determine which piece of transaction data this line represents,
+          // based on the transaction data line number
+          const newTransactionDataPart = newTransactionDataParts[i%newTransactionDataParts.length];
+
+          //Determine whether this is a new transaction's data,
+          // based on the transaction data line number
+          const isNewTransaction = i%newTransactionDataParts.length===0;
+
+          //If the line doesn't match the expected transaction data regex,
+          // skip this transaction line with a warning
+          if(!newTransactionDataPart.isMatch) {
+            console.warn(`Unable to read transaction line.\r\n${transactionDataLine}`);
+            return transactions;
+          }
+
+          //Initialize the transaction data variables as all null,
+          // with the exception of the current data line
+          const newTransactionData = {
+            Description: null,
+            TransactionDate: null,
+            Amount: null,
+            [newTransactionDataPart.name]: newTransactionDataPart.value,
+          };
 
           //Get the current date
           const currentDate = new Date();
 
-          //Determine if this matches a transaction line
-          const isMatch = transactionLine.match(/(\d{2}\/\d{2}\/\d{2})\t\t([^\t]+)\t(-?)\$([\d,]+\.\d{2})/);
-          if (!isMatch) {
-            console.warn(`Unable to read transaction.\r\n${transactionLine}`);
-            return null;
-          }
+          //Either build a new transaction object if this is a new transaction's data,
+          // or use a previously built one if still on the previous transaction's data
+          const transaction = (
+            !isNewTransaction ?
+            transactions[transactions.length-1] :
+            {
+              PostedDate: null,
+              TransactionDate: newTransactionData.TransactionDate,
+              AccountNumber: null,
+              Type: null,
+              Description: newTransactionData.Description,
+              DescriptionDisplay: null,
+              Amount: newTransactionData.Amount,
+              Category: null,
+              Notes: null,
+              Tags: [],
+              BudgetCycle: null,
+              IsAutoCategorized: false,
+              IsUpdatedByUser: false,
+              DateCreated: currentDate,
+              DateModified: currentDate,
+            }
+          );
 
-          //Save and trim the matched data
-          const [fullMatch, TransactionDate, Description, IsNegativeAmount, Amount] = [...isMatch].map(match=>(match ? match.trim() : match));
+          //As the BudgetCycle depends on the TransactionDate,
+          // add it when the TransactionDate is found
+          if (newTransactionDataPart.name === "TransactionDate") transaction.BudgetCycle = getBudgetCycleFromDate(newTransactionData.TransactionDate);
 
-          //Return the new transaction object
-          return {
-            PostedDate: null,
-            TransactionDate: convertDateStringToDate(TransactionDate, "MM/dd/yy"),
-            AccountNumber: null,
-            Type: null,
-            Description,
-            DescriptionDisplay: null,
-            Amount: Number(`${IsNegativeAmount}${Amount}`.replace(",","")),
-            Category: null,
-            Notes: null,
-            Tags: [],
-            BudgetCycle: getBudgetCycleFromDate(convertDateStringToDate(TransactionDate, "MM/dd/yy")),
-            IsAutoCategorized: false,
-            IsUpdatedByUser: false,
-            DateCreated: currentDate,
-            DateModified: currentDate,
-          };
-        })
-        //Filter out anything that didn't become a transaction
-        .filter(transaction=>transaction !== null)
-        //Bring in transactions in ascending TransactionDate
+          //If this is a new transaction, add it to the transactions
+          if (isNewTransaction) return transactions.concat(transaction);
+
+          //Otherwise, modify the previous transaction
+          // with the new data and return the transactions
+          transaction[newTransactionDataPart.name] = newTransactionDataPart.value;
+          return transactions;
+        }, [])
+        /* Import transactions in ascending TransactionDate order */
         .reverse();
     }
 
@@ -183,7 +243,7 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/Netflix.Com Netflix.Com Ca/i))  categorizedTransactionData = {Category: "Netflix Premium subscription", DescriptionDisplay: "Netflix Premium", Notes: null};
   else if (Description.match(/Ddv \*Discoveryplus 0123456789 TN/i))  categorizedTransactionData = {Category: "Discovery Plus subscription", DescriptionDisplay: "Discovery Plus", Notes: null};
   else if (Description.match(/(?:AT&T \*Payment|ATT\*BILL PAYMENT) 800-288-2020 TX/i))  categorizedTransactionData = {Category: "AT&T Internet", DescriptionDisplay: "AT&T Internet", Notes: null};
-  else if (Description.match(/KIRBY SANITATION\/C&J E 8648778887 SC/i))  categorizedTransactionData = {Category: "Kirby Sanitation", DescriptionDisplay: "Kirby Sanitation", Notes: null};
+  else if (Description.match(/KIRBY SANITATION (?:\/C&J E )?8648778887 SC/i))  categorizedTransactionData = {Category: "Kirby Sanitation", DescriptionDisplay: "Kirby Sanitation", Notes: null};
 
   //Recurring expenses
 
@@ -194,6 +254,7 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/SPINX #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "Spinx", Notes: null};
   else if (Description.match(/LOVE S TRAVEL \d+ [\w ]+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "Love's", Notes: null};
   else if (Description.match(/SHELL OIL [\d\w]+ [\w ]+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "Shell", Notes: null};
+  else if (Description.match(/INGLES GAS EXP #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "Ingles Gas", Notes: null};
 
   //Groceies & Necessities
   else if (Description.match(/Walmart Grocery [\d-]+ Ar/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Walmart Supercenter", Notes: "grocery pickup"};
@@ -214,7 +275,8 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/Krystal [\d\w]+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Krystal", Notes: null};
   else if (Description.match(/Checkers Drive In \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Checkers", Notes: null};
   else if (Description.match(/Jack in the Box \d+ \w+/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Jack In The Box", Notes: null};
-  else if (Description.match(/Wayback Burgers \w{10} \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Wayback Burgers", Notes: null};
+  else if (Description.match(/Wayback Burgers \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Wayback Burgers", Notes: null};
+  else if (Description.match(/Arbys - \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Arby's", Notes: null};
   else if (Description.match(/PDQ \d+ (OLO )?Greenville SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "PDQ", Notes: null};
   else if (Description.match(/Chick-Fil-A #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Chick-fil-A", Notes: null};
   else if (Description.match(/Bojangles \d+ \w+/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Bojangles", Notes: null};

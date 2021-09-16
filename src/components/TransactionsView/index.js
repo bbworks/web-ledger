@@ -22,28 +22,12 @@ const TransactionsView = ({ transactions, budgetCycle, allBudgetCycles, transact
 
   const [isTransactionImportFormOpen, setIsTransactionImportFormOpen] = useState(false);
 
-  const filterTransactions = transactions=>{
-    // return transactions.filter(transaction=>{
-    //   !(
-    //     transaction.Description.match(/CREDIT CARD PAYMENT (?:MOBILE APP PAYMENT|ONLINE BANKING TRANSFER) TO \d{4} \d{6}\*{6}(\d{4})/i) ||
-    //     transaction.Description.match(/PAYMENT - THANK YOU ATLANTA GA/i)
-    //   )
-    // });
-    return transactions;
-  };
-
-  const [filteredTransactions, setFilteredTransactions] = useState(filterTransactions(transactions));
   const [transactionDetailModalTransaction, setTransactionDetailModalTransaction] = useState(null);
   const [isTransactionDetailModalOpen, setIsTransactionDetailModalOpen] = useState(false);
   const [transactionDeleteModalTransaction, setTransactionDeleteModalTransaction] = useState(null);
   const [isTransactionDeleteModalOpen, setIsTransactionDeleteModalOpen] = useState(false);
 
-  const budgetCycleTransactions = useBudgetCycleTransactions(filteredTransactions, budgetCycle);
-
-  useEffect(()=>{
-    if (!transactions.length) return;
-    setFilteredTransactions(filterTransactions(transactions));
-  }, [transactions]);
+  const budgetCycleTransactions = useBudgetCycleTransactions(transactions, budgetCycle);
 
   const onTransactionImportFormToggleClick = event=>{
     setIsTransactionImportFormOpen(wasOpen=>!wasOpen);

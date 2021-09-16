@@ -98,7 +98,7 @@ const TransactionsDataSearchForm = ({ budgetCycleTransactions, transactionProper
           ) :
           null
         }
-        <InputDropdown className="transactions-data-search-form-input" value={search} items={getSearchSuggestions()} placeholder="Search..." inputRef={transactionsDataSearchFormInput} onSubmit={onTransactionsDataSearchFormInputDropdownSubmit} onInputDropdownInputKeyDown={onTransactionsDataSearchFormInputDropdownKeyDown} />
+        <InputDropdown className="transactions-data-search-form-input" value={search} items={getSearchSuggestions()} placeholder="Search..." inputDropdownInputRef={transactionsDataSearchFormInput} onSubmit={onTransactionsDataSearchFormInputDropdownSubmit} onInputDropdownInputKeyDown={onTransactionsDataSearchFormInputDropdownKeyDown} />
       </div>
       <div className="transactions-data-search-form-search-filters">
         {searchFilters.map(({key:searchKey, value:searchValue}, i)=>(

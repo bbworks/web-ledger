@@ -1,23 +1,24 @@
 // ## FEATUERS
-// - Dropdown list opens when:
+// - InputDropdown list opens when:
 //    * clicked anywhere inside of
 //    * when the .input-dropdown-input receives input
 //    * when the "Up" or "Down" keys are pressed with the .input-dropdown-input focused
-// - Dropdown list closes when:
+// - InputDropdown list closes when:
 //    * a selection is clicked or chosen with the "Enter" key
-//    * a click occurs outside of the dropdown
+//    * a click occurs outside of the InputDropdown
+//    * the InputDropdown loses focus (activates after 100ms, to not conflict with cilck events)
 //    * another element is focused on
 //    * the "Esc" key is pressed
-//    * the chevron is clicked while the dropdown is open
-// - Dropdown list items can be selected by:
+//    * the chevron is clicked while the InputDropdown is open
+// - InputDropdown list items can be selected by:
 //    * clicking on a list item using
 //    * using the "Up" and "Down" keys along with the "Enter" key (when .input-dropdown-input focused)
-// - Dropdown list items can be filtered/highlighted by inputting into .input-dropdown-input
+// - InputDropdown list items can be filtered/highlighted by inputting into .input-dropdown-input
 // ## DESIGN
-// - Dropdown input takes 100% of dropdown width
-// - Dropdown list height maxes out and scrolls afterward
-// - Dropdown list will scroll as selection moves
-// - Dropdown list will only move the selection if the dropdown list was already open--if the dropdown list was opened using the "Up" or "Down" key, the selection will remain on the current value
+// - .input-dropdown-input takes 100% of InputDropdown width
+// - .input-dropdown-list height maxes out and scrolls afterward
+// - .input-dropdown-list will scroll as selection moves
+// - .input-dropdown-list will only move the selection if the InputDropdown list was already open--if the .input-dropdown-list was opened using the "Up" or "Down" key, the selection will remain on the current value
 // ## OPTIONS
 // - setToStartingValueOnInputDropdownClose
 // - selectTopListItemOnInputDropdownInputChange
@@ -32,7 +33,7 @@ import './InputDropdown.css';
 import './index.scss';
 
 const InputDropdown = (props)=>{
-  const { name, value:initialValue="", items:initialItems=[], placeholder, inputRef, className, onSubmit:onSubmitProp } = props;
+  const { name, value:initialValue="", items:initialItems=[], placeholder, tabIndex, inputDropdownInputRef, className, onSubmit:onSubmitProp } = props;
 
   const options = {
     setToStartingValueOnInputDropdownClose: false,
@@ -40,7 +41,8 @@ const InputDropdown = (props)=>{
   };
 
   const inputDropdownInputListeners = Object.entries(props)
-    .filter(([propName, propValue])=>(propName.match("onInputDropdownInput[A-Z]")))
+    .filter(([propName, propValue])=>propName.match("onInputDropdownInput[A-Z]"))
+    .filter(([propName])=>!["onInputDropdownInputChange", "onInputDropdownInputFocus"].includes(propName)) //remove listeners that will be attached to component-level listeners
     .map(([propName, propValue])=>{const matches = propName.match(/onInputDropdownInput(\w+)/);
       return [
         (matches ? `on${matches[1]}` : propName),
@@ -67,7 +69,8 @@ const InputDropdown = (props)=>{
   const [isInputDropdownOpen, setIsInputDropdownOpen] = useState(false);
   const [wasInputDropdownOpen, setWasInputDropdownOpen] = useState(false);
 
-  const inputDropdownList = useRef(null);
+  const inputDropdownListRef = useRef(null);
+  const inputDropdownRef = useRef(null);
 
   //Declare helper functions
   const isDescendantOfDropdown = element => {
@@ -87,12 +90,12 @@ const InputDropdown = (props)=>{
     if(!selectedListItem) return;
 
     //Find the selected list item's DOM node
-    const selectedListItemNode = [...inputDropdownList.current.querySelectorAll(".input-dropdown-list-item")].find(item=>item.innerText === selectedListItem);
+    const selectedListItemNode = [...inputDropdownListRef.current.querySelectorAll(".input-dropdown-list-item")].find(item=>item.innerText === selectedListItem);
 
     if (!selectedListItemNode) return;
 
     const selectedListItemNodeRect = selectedListItemNode.getBoundingClientRect();
-    const inputDropdownListViewport = inputDropdownList.current.getBoundingClientRect();
+    const inputDropdownListViewport = inputDropdownListRef.current.getBoundingClientRect();
     const topIsBelowNotAboveViewportTop = selectedListItemNodeRect.top >= inputDropdownListViewport.top;
     const bottomIsAboveNotBelowViewportBottom = selectedListItemNodeRect.bottom <= inputDropdownListViewport.bottom;
 
@@ -100,13 +103,13 @@ const InputDropdown = (props)=>{
 
     //If the top is above the viewport, attempt to scroll the viewport to the top of the selection (or to the bottom scrollable area, if selection is at the bottom)
     if (!topIsBelowNotAboveViewportTop) {
-      return inputDropdownList.current.scroll({top: inputDropdownList.current.scrollTop + (selectedListItemNodeRect.top - inputDropdownListViewport.top)});
+      return inputDropdownListRef.current.scroll({top: inputDropdownListRef.current.scrollTop + (selectedListItemNodeRect.top - inputDropdownListViewport.top)});
     }
 
     //Or, if the bottom is below the viewport, scroll the viewport down 1 height unit until we can see the selection bottom
     if (!bottomIsAboveNotBelowViewportBottom) {
-      //return inputDropdownList.current.scroll({top: inputDropdownList.current.scrollTop + (selectedListItemNodeRect.height * (Math.floor((selectedListItemNodeRect.bottom - inputDropdownListViewport.bottom)/selectedListItemNodeRect.height)+1))});
-      return inputDropdownList.current.scroll({top: inputDropdownList.current.scrollTop + (selectedListItemNodeRect.bottom - inputDropdownListViewport.bottom)});
+      //return inputDropdownListRef.current.scroll({top: inputDropdownListRef.current.scrollTop + (selectedListItemNodeRect.height * (Math.floor((selectedListItemNodeRect.bottom - inputDropdownListViewport.bottom)/selectedListItemNodeRect.height)+1))});
+      return inputDropdownListRef.current.scroll({top: inputDropdownListRef.current.scrollTop + (selectedListItemNodeRect.bottom - inputDropdownListViewport.bottom)});
     }
   };
 
@@ -176,6 +179,17 @@ const InputDropdown = (props)=>{
 
     //Assure the input dropdown is open
     openInputDropdown();
+
+    //Call the passed listener, if provided
+    if (props.onInputDropdownInputChange) props.onInputDropdownInputChange(event);
+  };
+
+  const onInputDropdownInputFocus = event=>{
+    //Assure the input dropdown is open
+    openInputDropdown();
+
+    //Call the passed listener, if provided
+    if (props.onInputDropdownInputFocus) props.onInputDropdownInputFocus(event);
   };
 
   const onInputDropdownListItemClick = event=>{
@@ -298,6 +312,11 @@ const InputDropdown = (props)=>{
     }
   };
 
+  const onBlur = event=>{
+    //Close the input dropdown
+    window.setTimeout(()=>closeInputDropdown(), 100);
+  };
+
   const onSubmit = (event, value)=>{
     if (onSubmitProp) onSubmitProp(event, value);
   };
@@ -334,7 +353,7 @@ const InputDropdown = (props)=>{
   useEffect(()=>{
     const checkIfClickedOrFocusedOutsideOfDropdown = event=>{
       //If we click outside of the dropdown or its children, close it
-      if (!event.target.closest(".input-dropdown")) onOutsideClick();
+      if (!isDescendantOf(event.target, inputDropdownRef.current)) onOutsideClick();
     };
 
     const addOnOutsideClick = ()=>{
@@ -360,12 +379,12 @@ const InputDropdown = (props)=>{
   //useEffect(()=>console.log(`value: ${value}\r\nsearchFilter: ${searchFilter}\r\nselectedListItem: ${selectedListItem}\r\nfilteredListItems`, filteredListItems), [value, searchFilter, selectedListItem, filteredListItems])
 
   return (
-    <div className={`input-dropdown ${className} ${isInputDropdownOpen ? "open" : ""}`} onClick={onClick} onKeyDown={onKeyDown} >
-      <input className="input-dropdown-input" name={name} value={value} placeholder={placeholder} ref={inputRef} autoComplete="off" onChange={onInputDropdownInputChange} {...inputDropdownInputListeners}/>
+    <div className={`input-dropdown ${className} ${isInputDropdownOpen ? "open" : ""}`} onClick={onClick} onKeyDown={onKeyDown} ref={inputDropdownRef} onBlur={onBlur} >
+      <input className="input-dropdown-input" name={name} value={value} placeholder={placeholder} tabIndex={tabIndex} ref={inputDropdownInputRef} autoComplete="off" onChange={onInputDropdownInputChange} onFocus={onInputDropdownInputFocus} {...inputDropdownInputListeners}/>
       <div className="input-dropdown-chevron-container">
         <i className="input-dropdown-chevron"></i>
       </div>
-      <ul className="input-dropdown-list" ref={inputDropdownList} onMouseLeave={onInputDropdownListMouseLeave} >
+      <ul className="input-dropdown-list" ref={inputDropdownListRef} onMouseLeave={onInputDropdownListMouseLeave} >
         {filteredListItems.map(item=>
           <li key={item} className={`input-dropdown-list-item ${addInputDropdownListItemSelection(item, selectedListItem)}`} onClick={onInputDropdownListItemClick} onMouseMove={onInputDropdownListItemMouseMove} dangerouslySetInnerHTML={{__html: getInputDropdownListItemFilteredText(item, searchFilter)}}></li>
         )}

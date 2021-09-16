@@ -4,17 +4,22 @@ import Modal from 'react-bootstrap/Modal';
 
 import TransactionsImportDuplicatesModalDuplicateCheckbox from './../TransactionsImportDuplicatesModalDuplicateCheckbox';
 import {isTransactionDuplicate} from './../../utilities';
+import {useConsoleLog} from './../../hooks';
 
 import './index.scss';
 
 const TransactionsImportDuplicatesModal = ({ newTransactions, duplicates, isOpen, onClose, onSubmit:onSubmitProp })=>{
-  const [duplicatesData, setDuplicatesData] = useState(duplicates.map(duplicate=>({duplicate, confirmed: true})));
+  const getDuplicatesDataFromDuplicates = duplicates=>{
+    return duplicates.map(duplicate=>({duplicate, confirmed: true}))
+  };
 
-  useEffect(()=>{
-    if(!duplicatesData.length) return;
+  const [duplicatesData, setDuplicatesData] = useState(getDuplicatesDataFromDuplicates(duplicates));
 
-    console.log("Duplicates data: ", duplicatesData);
-  }, [duplicatesData]);
+  useEffect(()=>
+    setDuplicatesData(getDuplicatesDataFromDuplicates(duplicates))
+  , [duplicates]);
+
+  useConsoleLog(duplicatesData, "Duplicates data: ");
 
   const onSubmit = event=>{
     //Prevent the form from submitting
