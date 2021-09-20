@@ -21,7 +21,7 @@ const DashboardView = ({ signedInUser, transactions, accountsData, accountData, 
     <div className="view dashboard-view d-flex flex-column">
       <main className="main flex-grow-1">
         <DashboardTop transactions={transactions} accountsData={accountsData} accountData={accountData} budgetCycle={budgetCycle} allBudgetCycles={allBudgetCycles} onBudgetCycleChange={onBudgetCycleChange} />
-        <DashboardContent budgetCycleTransactions={budgetCycleTransactions} budgetsData={budgetsData} />
+        <DashboardContent budgetCycle={budgetCycle} budgetCycleTransactions={budgetCycleTransactions} budgetsData={budgetsData} />
       </main>
     </div>
   );

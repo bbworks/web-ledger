@@ -148,8 +148,8 @@ export const convertArrayToA1Notation = (rowsColumnsArray, startingCell="A1")=>{
 };
 
 export const parseGoogleSheetsNumber = value=>{
-  let potentialNumber;
-  return (value && (potentialNumber = Number(value)) && !isNaN(potentialNumber) ? potentialNumber : null);
+  const potentialNumber = Number(value);
+  return (value && !isNaN(potentialNumber) ? potentialNumber : null);
 };
 
 export const parseGoogleSheetsDate = value=>{
