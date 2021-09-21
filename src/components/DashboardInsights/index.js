@@ -36,7 +36,7 @@ const DashboardInsights = ({ budgetCycle, budgetCycleTransactions, budgetsData }
     }
 
     /* Check if the user is over on any budgets */
-    const budgetsOver = budgetsDataWithSpent.filter(budgetDataWithSpent=>budgetDataWithSpent.Amount !== 0 && budgetDataWithSpent.Spent < budgetDataWithSpent.Amount);
+    const budgetsOver = budgetsDataWithSpent.filter(budgetDataWithSpent=>!["income","savings"].includes(budgetDataWithSpent.Type) && budgetDataWithSpent.Amount !== 0 && budgetDataWithSpent.Spent < budgetDataWithSpent.Amount);
     if (budgetsOver.length) {
       const insight = {
         type: "danger",

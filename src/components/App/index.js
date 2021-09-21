@@ -95,19 +95,23 @@ const App = () => {
   ];
 
   const getAllBudgetCycles = transactions=>{
+    if (!transactions.length) return [];
+
     const todayBudgetCycle = getBudgetCycleFromDate(new Date());
 
     return [
       ...new Set([
         todayBudgetCycle, //assure the current month is an option as well
         ...getBudgetCyclesFromTransactions(transactions),
-      ].map(date=>date.toJSON()))
+      ].map(date=>date.getTime()))
     ]
+      .sort((a,b)=>b-a)
       .map(JSON=>new Date(JSON));
   };
 
   const [allBudgetCycles, setAllBudgetCycles] = useState(getAllBudgetCycles(transactions));
 
+  //Check that the list of budget cycles remains updated with transaction data
   useEffect(()=>
     setAllBudgetCycles(getAllBudgetCycles(transactions))
   , [transactions]);

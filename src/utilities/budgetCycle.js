@@ -77,7 +77,9 @@ export const getBudgetCycleFromBudgetCycleString = budgetCycleString=>{
 export const getBudgetCycleDescription = (budgetCycle, todayBudgetCycle=(new Date()))=>{
   const fullYearDifference = todayBudgetCycle.getFullYear() - budgetCycle.getFullYear();
   const monthDifference = (fullYearDifference*12) + (todayBudgetCycle.getMonth() - budgetCycle.getMonth());
-  if (monthDifference < 0) return null;
+  if (monthDifference <= -12) return `${Math.abs(Math.floor(monthDifference/12))} year${Math.abs(Math.floor(monthDifference/12))===1?"":"s"} later`;
+  if (monthDifference < -1) return `${Math.abs(Math.floor(monthDifference))} month${Math.abs(Math.floor(monthDifference))===1?"":"s"} later`;
+  if (monthDifference === -1) return "next month";
   if (monthDifference === 0) return "current";
   if (monthDifference === 1) return "last month";
   if (monthDifference < 12) return `${monthDifference} month${monthDifference===1?"":"s"} ago`;
