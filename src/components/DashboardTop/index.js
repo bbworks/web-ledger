@@ -23,7 +23,7 @@ const DashboardTop = ({ transactions, accountsData, accountData, budgetCycle, al
       <div className="dashboard-account-overview container-fluid py-2 px-3">
         <div className="container-fluid text-end text-muted my-2">
           Last Updated:&nbsp;
-          <span className="dashboard-accounts-total d-inline">{getLastUpdatedDate(transactions) ? getLastUpdatedDate(transactions).toLocaleDateString() : "--"}</span>
+          <span className="dashboard-accounts-total d-inline">{getLastUpdatedDate(transactions) ? getLastUpdatedDate(transactions).toLocaleDateString(/*"en-US", {timeZone: "UTC"}*/) : "--"}</span>
         </div>
         <div className="row">
           <div className="dashboard-accounts-total-container col text-center fw-bold h4 d-flex flex-column border-end border-2">

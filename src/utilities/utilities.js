@@ -138,7 +138,7 @@ export const convertDateStringToDate = (dateString, dateStringFormat)=>{
   const getYearByFormat = (yearString, yearFormat)=>{
     if (Number.isNaN(yearString)) return null;
 
-    if (yearFormat === "yy") return Number((new Date()).getFullYear().toString().substring(0,2)+yearString);
+    if (yearFormat === "yy") return Number((new Date()).getUTCFullYear().toString().substring(0,2)+yearString);
     if (yearFormat === "yyyy") return Number(yearString);
 
     return null;

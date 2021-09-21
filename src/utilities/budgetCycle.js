@@ -1,30 +1,16 @@
 export const getMonthFromNumber = number=>{
-  switch (number) {
-    case 0:
-      return "January";
-    case 1:
-      return "February";
-    case 2:
-      return "March";
-    case 3:
-      return "April";
-    case 4:
-      return "May";
-    case 5:
-      return "June";
-    case 6:
-      return "July";
-    case 7:
-      return "August";
-    case 8:
-      return "September";
-    case 9:
-      return "October";
-    case 10:
-      return "November";
-    case 11:
-      return "December";
-  }
+  if (number === 0) return "January";
+  if (number === 1) return "February";
+  if (number === 2) return "March";
+  if (number === 3) return "April";
+  if (number === 4) return "May";
+  if (number === 5) return "June";
+  if (number === 6) return "July";
+  if (number === 7) return "August";
+  if (number === 8) return "September";
+  if (number === 9) return "October";
+  if (number === 10) return "November";
+  if (number === 11) return "December";
   return null;
 };
 
@@ -59,11 +45,15 @@ export const getNumberFromMonth = month=>{
 };
 
 export const getBudgetCycleFromDate = date=>{
-  return new Date(date.getFullYear(), date.getMonth());
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth()));
 };
 
 export const getBudgetCycleString = budgetCycle=>{
-  return `${getMonthFromNumber(budgetCycle.getMonth())} ${budgetCycle.getFullYear()}`;
+  return `${getMonthFromNumber(budgetCycle.getUTCMonth())} ${budgetCycle.getUTCFullYear()}`;
+};
+
+export const convertDateToFullLocaleDateString = date=>{
+  return `${getMonthFromNumber(date.getUTCMonth())} ${date.getUTCDate()}, ${date.getUTCFullYear()}`;
 };
 
 export const getBudgetCycleFromBudgetCycleString = budgetCycleString=>{
@@ -71,12 +61,12 @@ export const getBudgetCycleFromBudgetCycleString = budgetCycleString=>{
   const year = Number(yearString);
   const month = getNumberFromMonth(monthString);
 
-  return new Date(year, month);
+  return new Date(Date.UTC(year, month));
 };
 
 export const getBudgetCycleDescription = (budgetCycle, todayBudgetCycle=(new Date()))=>{
-  const fullYearDifference = todayBudgetCycle.getFullYear() - budgetCycle.getFullYear();
-  const monthDifference = (fullYearDifference*12) + (todayBudgetCycle.getMonth() - budgetCycle.getMonth());
+  const fullYearDifference = todayBudgetCycle.getUTCFullYear() - budgetCycle.getUTCFullYear();
+  const monthDifference = (fullYearDifference*12) + (todayBudgetCycle.getUTCMonth() - budgetCycle.getUTCMonth());
   if (monthDifference <= -12) return `${Math.abs(Math.floor(monthDifference/12))} year${Math.abs(Math.floor(monthDifference/12))===1?"":"s"} later`;
   if (monthDifference < -1) return `${Math.abs(Math.floor(monthDifference))} month${Math.abs(Math.floor(monthDifference))===1?"":"s"} later`;
   if (monthDifference === -1) return "next month";

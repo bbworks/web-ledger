@@ -106,7 +106,7 @@ const App = () => {
       ].map(date=>date.getTime()))
     ]
       .sort((a,b)=>b-a)
-      .map(JSON=>new Date(JSON));
+      .map(epochTime=>new Date(epochTime));
   };
 
   const [allBudgetCycles, setAllBudgetCycles] = useState(getAllBudgetCycles(transactions));
@@ -124,6 +124,7 @@ const App = () => {
   useConsoleLog(accountsData, "Accounts Data:");
   useConsoleLog(accountData, "Account Data:");
   useConsoleLog(signedInUser, "signedInUser:");
+  useConsoleLog(allBudgetCycles, "allBudgetCycles:");
   useConsoleLog(budgetCycle, "budgetCycle:");
 
   const gapiLoaded = useScript("https://apis.google.com/js/api.js");

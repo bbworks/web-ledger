@@ -152,7 +152,7 @@ export const parseGoogleSheetsNumber = value=>{
   return (value && !isNaN(potentialNumber) ? potentialNumber : null);
 };
 
-export const parseGoogleSheetsDate = value=>{
-  let potentialDate;
-  return (value && (potentialDate = (new Date(value))) && !isNaN(potentialDate.getTime()) ? potentialDate : null);
+export const parseGoogleSheetsDate = JSON=>{
+  const potentialDate = new Date(JSON);
+  return (JSON && !isNaN(potentialDate.getTime()) ? potentialDate : null);
 };

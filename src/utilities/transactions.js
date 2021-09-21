@@ -212,8 +212,8 @@ export const categorizeTransactionByDescription = function(transaction) {
 
   //Income
   // NOTE: Always sets budget cycle values to the next month's budget cycle
-       if (matches = Description.match(/ELECTRONIC\/ACH CREDIT (\w{5} \w{2} , \w{3}\.) PAYROLL \d{10}/i))  categorizedTransactionData = {Category: "Infor payroll", DescriptionDisplay: `${matches[1]}`, Notes: null, /*BudgetCycle: getBudgetCycleFromDate(new Date(TransactionDate.getMonth()+1))*/};
-  else if (matches = Description.match(/INTEREST PAYMENT PAID THIS STATEMENT THRU (\d{2})\/(\d{2})/i))  categorizedTransactionData = {Category: "Other income", DescriptionDisplay: `Interest paid ${matches[1]}/${matches[2]}`, Notes: null, /*BudgetCycle: getBudgetCycleFromDate(new Date(TransactionDate.getMonth()+1))*/};
+       if (matches = Description.match(/ELECTRONIC\/ACH CREDIT (\w{5} \w{2} , \w{3}\.) PAYROLL \d{10}/i))  categorizedTransactionData = {Category: "Infor payroll", DescriptionDisplay: `${matches[1]}`, Notes: null, /*BudgetCycle: getBudgetCycleFromDate(new Date(TransactionDate.getUTCMonth()+1))*/};
+  else if (matches = Description.match(/INTEREST PAYMENT PAID THIS STATEMENT THRU (\d{2})\/(\d{2})/i))  categorizedTransactionData = {Category: "Other income", DescriptionDisplay: `Interest paid ${matches[1]}/${matches[2]}`, Notes: null, /*BudgetCycle: getBudgetCycleFromDate(new Date(TransactionDate.getUTCMonth()+1))*/};
 
   //Deposits
   else if (Description.match(/MOBILE CHECK DEPOSIT/i))  categorizedTransactionData = {Category: null, DescriptionDisplay: "Mobile check deposit", Notes: null};
@@ -346,8 +346,8 @@ export const formatTransactionDisplay = function(transaction) {
   return {
     ...transaction,
     BudgetCycle: (transaction.BudgetCycle ? getBudgetCycleString(transaction.BudgetCycle) : ""),
-    PostedDate: (transaction.PostedDate ? new Date(transaction.PostedDate).toLocaleDateString().toString() : ""),
-    TransactionDate: (transaction.TransactionDate ? new Date(transaction.TransactionDate).toLocaleDateString().toString() : ""),
+    PostedDate: (transaction.PostedDate ? new Date(transaction.PostedDate).toLocaleDateString("en-US", {timeZone: "UTC"}).toString() : ""),
+    TransactionDate: (transaction.TransactionDate ? new Date(transaction.TransactionDate).toLocaleDateString("en-US", {timeZone: "UTC"}).toString() : ""),
     AccountNumber: transaction.AccountNumber || "",
     Type: transaction.Type || "",
     Description: transaction.Description || "",
