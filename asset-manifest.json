@@ -1,8 +1,8 @@
 {
   "files": {
-    "main.css": "/web-ledger/static/css/main.f50c9d50.chunk.css",
-    "main.js": "/web-ledger/static/js/main.03167265.chunk.js",
-    "main.js.map": "/web-ledger/static/js/main.03167265.chunk.js.map",
+    "main.css": "/web-ledger/static/css/main.77586718.chunk.css",
+    "main.js": "/web-ledger/static/js/main.56d3e30b.chunk.js",
+    "main.js.map": "/web-ledger/static/js/main.56d3e30b.chunk.js.map",
     "runtime-main.js": "/web-ledger/static/js/runtime-main.40642d5e.js",
     "runtime-main.js.map": "/web-ledger/static/js/runtime-main.40642d5e.js.map",
     "static/js/2.78530d17.chunk.js": "/web-ledger/static/js/2.78530d17.chunk.js",
@@ -10,13 +10,13 @@
     "static/js/3.3bc8918e.chunk.js": "/web-ledger/static/js/3.3bc8918e.chunk.js",
     "static/js/3.3bc8918e.chunk.js.map": "/web-ledger/static/js/3.3bc8918e.chunk.js.map",
     "index.html": "/web-ledger/index.html",
-    "static/css/main.f50c9d50.chunk.css.map": "/web-ledger/static/css/main.f50c9d50.chunk.css.map",
+    "static/css/main.77586718.chunk.css.map": "/web-ledger/static/css/main.77586718.chunk.css.map",
     "static/js/2.78530d17.chunk.js.LICENSE.txt": "/web-ledger/static/js/2.78530d17.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.40642d5e.js",
     "static/js/2.78530d17.chunk.js",
-    "static/css/main.f50c9d50.chunk.css",
-    "static/js/main.03167265.chunk.js"
+    "static/css/main.77586718.chunk.css",
+    "static/js/main.56d3e30b.chunk.js"
   ]
 }
