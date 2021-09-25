@@ -24,6 +24,9 @@ export const typeCheckTransactions = function (transactions) {
 
 export const importTransactions = function(transactionsData, dataType) {
   try {
+    //Get the current date
+    const importDate = new Date();
+
     //if this is scraped from online app
     if (dataType === "scraped") {
       return transactionsData
@@ -87,9 +90,6 @@ export const importTransactions = function(transactionsData, dataType) {
             [newTransactionDataPart.name]: newTransactionDataPart.value,
           };
 
-          //Get the current date
-          const currentDate = new Date();
-
           //Either build a new transaction object if this is a new transaction's data,
           // or use a previously built one if still on the previous transaction's data
           const transaction = (
@@ -109,8 +109,8 @@ export const importTransactions = function(transactionsData, dataType) {
               BudgetCycle: null,
               IsAutoCategorized: false,
               IsUpdatedByUser: false,
-              DateCreated: currentDate,
-              DateModified: currentDate,
+              DateCreated: importDate,
+              DateModified: importDate,
             }
           );
 
@@ -148,9 +148,6 @@ export const importTransactions = function(transactionsData, dataType) {
       const Debit = (transaction.Debit ? transaction.Debit.trim() : null);
       const Credit = (transaction.Credit ? transaction.Credit.trim() : null);
 
-      //Get the current date
-      const currentDate = new Date();
-
       //Validate calculated values
       const type = (
         Object.keys(transaction).includes("Credit") && Object.keys(transaction).includes("Debit") ?
@@ -179,8 +176,8 @@ export const importTransactions = function(transactionsData, dataType) {
         BudgetCycle: getBudgetCycleFromDate(transactionDate),
         IsAutoCategorized: false,
         IsUpdatedByUser: false,
-        DateCreated: currentDate,
-        DateModified: currentDate,
+        DateCreated: importDate,
+        DateModified: importDate,
       };
     });
   }

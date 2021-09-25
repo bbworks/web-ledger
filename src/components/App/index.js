@@ -150,7 +150,6 @@ const App = () => {
         return openSignInSettingsModal();
         // throw new Error("Failed to get authorization credentials.");
       }
-      console.log("test")
       return throwException(err);
     }
   };
@@ -177,6 +176,7 @@ const App = () => {
     //If there were no duplicates,
     // open the confirmed imported transactions modal
     if (!duplicates.length) {
+      console.log("confirmedTransactions: ", newTransactions);
       setTransactionsImportConfirmedModalTransactions(newTransactions);
       openTransactionsImportConfirmedModal();
       return previousTransactions;

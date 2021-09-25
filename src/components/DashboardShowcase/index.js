@@ -105,14 +105,52 @@ const DashboardShowcase = ({ budgetCycle, budgetCycleTransactions, budgetsData }
           /* Return the inverse (negative is surplus) */
           *-1;
           const remainingFlexibleSpendingMoney = totalIncome + totalExpenses + leftoverPaidBillsMoney + remainingBillsToBePaid + remainingSavingsToBeSaved;
-        return isCurrentBudgetCycle && remainingFlexibleSpendingMoney >= 0;
+        return isCurrentBudgetCycle && remainingFlexibleSpendingMoney < 250;
 			}
     },
     {
       heading: "All good! 💃",
       description: "You are on track for this month.",
       test: (budgetCycle, budgetCycleTransactions, budgetsData)=>{
-				return budgetCycle.getTime() === getBudgetCycleFromDate(new Date()).getTime() && true;
+        const isCurrentBudgetCycle = budgetCycle.getTime() === getBudgetCycleFromDate(new Date()).getTime();
+        const totalIncome = getSumByProp(budgetCycleTransactions.income, "Amount");
+        const totalExpenses = getSumByProp(budgetCycleTransactions.expenses, "Amount");
+        const remainingBillsToBePaid =
+          /* Add a "Spent" key to each budget data */
+          budgetsData.map(b=>({
+            ...b,
+            Spent: getBudgetAmountSpentFromTransactions(b.Name, budgetCycleTransactions.all) || 0,
+          }))
+          /* filter to only bills that have NOT been paid */
+          .filter(b=>b.Type==="bill" && b.Spent===0)
+          /* Get the sum of all the remaining money AFTER paid bills */
+          .reduce((total,b)=>total+=((b.Amount-b.Spent)*-1), 0)
+          /* Return the inverse (negative is surplus) */
+          *-1;
+        const leftoverPaidBillsMoney =
+          /* Add a "Spent" key to each budget data */
+          budgetsData.map(b=>({
+            ...b,
+            Spent: getBudgetAmountSpentFromTransactions(b.Name, budgetCycleTransactions.all) || 0,
+          }))
+          /* filter to only bills that have been paid */
+          .filter(b=>b.Type==="bill" && b.Spent!==0)
+          /* Get the sum of all the remaining money AFTER paid bills */
+          .reduce((total,b)=>total+=((b.Amount-b.Spent)*-1), 0)
+        const remainingSavingsToBeSaved =
+          /* Add a "Spent" key to each budget data */
+          budgetsData.map(b=>({
+            ...b,
+            Spent: getBudgetAmountSpentFromTransactions(b.Name, budgetCycleTransactions.all) || 0,
+          }))
+          /* filter to only savings */
+          .filter(b=>b.Type==="savings")
+          /* Get the sum of all the remaining money AFTER paid bills */
+          .reduce((total,b)=>total+=((b.Amount-b.Spent)*-1), 0)
+          /* Return the inverse (negative is surplus) */
+          *-1;
+          const remainingFlexibleSpendingMoney = totalIncome + totalExpenses + leftoverPaidBillsMoney + remainingBillsToBePaid + remainingSavingsToBeSaved;
+        return isCurrentBudgetCycle && remainingFlexibleSpendingMoney >= 250;
 			}
     },
     //Past statuses

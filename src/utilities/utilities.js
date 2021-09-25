@@ -212,9 +212,11 @@ export const convertDateStringToDate = (dateString, dateStringFormat)=>{
   };
 
   return new Date(
-    getDatePartByFormat(dateString, dateStringFormat, yearFormatRegEx, getYearByFormat),
-    getDatePartByFormat(dateString, dateStringFormat, monthFormatRegEx, getMonthIndexByFormat),
-    getDatePartByFormat(dateString, dateStringFormat, dayFormatRegEx, getDayByFormat)
+    Date.UTC(
+      getDatePartByFormat(dateString, dateStringFormat, yearFormatRegEx, getYearByFormat),
+      getDatePartByFormat(dateString, dateStringFormat, monthFormatRegEx, getMonthIndexByFormat),
+      getDatePartByFormat(dateString, dateStringFormat, dayFormatRegEx, getDayByFormat)
+    )
   );
 };
 
