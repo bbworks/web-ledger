@@ -1,0 +1,25 @@
+.logo-text {
+  transition: width 0.25s ease-out;
+
+  &.hidden {
+    width: 1px;
+    overflow-x: hidden;
+    transition: width 0.25s ease-out;
+  }
+
+  &.scrolled-in {
+    width: 3.75rem;
+    overflow: auto;
+  }
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  &.scrolled-in::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  &.scrolled-in {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+}

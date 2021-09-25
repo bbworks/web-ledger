@@ -17,6 +17,7 @@ import SettingsView from './../SettingsView';
 import FooterNavbar from './../FooterNavbar';
 import SignInSettingsModal from './../SignInSettingsModal';
 import Header from './../Header';
+import Logo from './../Logo';
 
 //Import styles
 import './main.css';
@@ -39,6 +40,7 @@ const App = () => {
   const [isTransactionsImportConfirmedModalOpen, setIsTransactionsImportConfirmedModalOpen] = useState(false);
   const [signedInUser, setSignedInUser] = useState(undefined);
   const [isSignInSettingsModalOpen, setIsSignInSettingsModalOpen] = useState(false);
+  const [isLoadingAnimationComplete, setIsLoadingAnimationComplete] = useState(false);
 
   //Declare settings
   const settings = {
@@ -377,6 +379,10 @@ const App = () => {
     closeTransactionsImportConfirmedModal();
   };
 
+  const onLogoTextScrollIn = ()=>{
+    setIsLoadingAnimationComplete(true);
+  };
+
   const onSignInChange = signInInfo=>{
     setSignedInUser(signInInfo);
   };
@@ -425,9 +431,20 @@ const App = () => {
   }, [transactions]);
 
 
+  //Return a "loading page" while determining if the user is signed in
+  if (!isLoadingAnimationComplete) return (
+    <div className="App">
+      <Router basename={(process.env.NODE_ENV === "production" ? process.env.PUBLIC_URL : null)}>
+        <div className="d-flex justify-content-center align-items-center min-vh-100">
+          <Logo scrollIn={true} onLogoTextScrollIn={onLogoTextScrollIn}/>
+        </div>
+      </Router>
+    </div>
+  );
+
   //If the user has not signed in, send them to the sign in page,
   // and while the Google API is loading, disable the sign in button
-  if (!signedInUser) return (
+  if (isLoadingAnimationComplete && !signedInUser) return (
     <div className="App">
       <Router basename={(process.env.NODE_ENV === "production" ? process.env.PUBLIC_URL : null)}>
         <SignInView isReadyForSignIn={!(signedInUser===undefined)}/>
