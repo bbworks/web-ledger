@@ -1,5 +1,5 @@
 import {getSumByProp} from './utilities.js';
-import {parseGoogleSheetsNumber} from './../googleApi';
+import {parseGoogleSheetsNumber, parseGoogleSheetsDate} from './../googleApi';
 
 export const isCreditCardPaymentTransaction = transaction=>{
   return transaction.Description.match(/PAYMENT - THANK YOU ATLANTA GA/i);
@@ -25,6 +25,7 @@ export const typeCheckBudgetsData = budgetsData=>{
   return budgetsData.map(budgetData=>({
       ...budgetData,
       Amount: parseGoogleSheetsNumber(budgetData.Amount),
+      BudgetCycleStart: parseGoogleSheetsDate(budgetData.BudgetCycleStart),
     })
   );
 };

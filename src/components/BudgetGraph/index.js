@@ -18,7 +18,7 @@ const BudgetGraph = ({ budget })=>{
           {
             color: (!overBudget
               ? "black" //"rgb(245,245,245)"
-              : "red"
+              : "darkred"
             ),
           }
         }>

@@ -181,7 +181,7 @@ const TransactionRow = ({ transaction, onTransactionEditButtonClick:onTransactio
           <span className="transaction-row-category">{transactionDisplay.Category}</span>
         </div>
       </div>
-      <button className={"transaction-row-delete-button"} onClick={onTransactionDeleteButtonClick}>
+      <button className={"transaction-row-delete-button"} onClick={onTransactionDeleteButtonClick} tabIndex={-1}>
         <span className="transaction-row-delete-button-text">Delete</span>
       </button>
     </div>
