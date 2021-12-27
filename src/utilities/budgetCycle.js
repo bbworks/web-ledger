@@ -1,60 +1,10 @@
-export const getMonthFromNumber = number=>{
-  if (number === 0) return "January";
-  if (number === 1) return "February";
-  if (number === 2) return "March";
-  if (number === 3) return "April";
-  if (number === 4) return "May";
-  if (number === 5) return "June";
-  if (number === 6) return "July";
-  if (number === 7) return "August";
-  if (number === 8) return "September";
-  if (number === 9) return "October";
-  if (number === 10) return "November";
-  if (number === 11) return "December";
-  return null;
-};
-
-export const getNumberFromMonth = month=>{
-  switch (month) {
-    case "January":
-      return 0;
-    case "February":
-      return 1;
-    case "March":
-      return 2;
-    case "April":
-      return 3;
-    case "May":
-      return 4;
-    case "June":
-      return 5;
-    case "July":
-      return 6;
-    case "August":
-      return 7;
-    case "September":
-      return 8;
-    case "October":
-      return 9;
-    case "November":
-      return 10;
-    case "December":
-      return 11;
-  }
-  return null;
-};
+import {getMonthFromNumber, getNumberFromMonth, getBudgetCyclesFromTransactions} from './../utilities';
 
 export const getBudgetCycleFromDate = date=>{
   return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth()));
 };
 
-export const getBudgetCycleString = budgetCycle=>{
-  return `${getMonthFromNumber(budgetCycle.getUTCMonth())} ${budgetCycle.getUTCFullYear()}`;
-};
-
-export const convertDateToFullLocaleDateString = date=>{
-  return `${getMonthFromNumber(date.getUTCMonth())} ${date.getUTCDate()}, ${date.getUTCFullYear()}`;
-};
+const ALL_TRANSACTIONS_BUDGET_CYCLE = getBudgetCycleFromDate(new Date(8640000000000000)); //8640000000000000 (8.64e+15, max Date epoch)
 
 export const getBudgetCycleFromBudgetCycleString = budgetCycleString=>{
   const [matches, monthString, yearString] = budgetCycleString.match(/(\w+) (\d{4})/);
@@ -64,7 +14,17 @@ export const getBudgetCycleFromBudgetCycleString = budgetCycleString=>{
   return new Date(Date.UTC(year, month));
 };
 
+export const getBudgetCycleString = budgetCycle=>{
+  //Short-circut for "All Transactions" budget cycle
+  if (isAllTransactionsBudgetCycle(budgetCycle)) return "All Transactions";
+
+  return `${getMonthFromNumber(budgetCycle.getUTCMonth())} ${budgetCycle.getUTCFullYear()}`;
+};
+
 export const getBudgetCycleDescription = (budgetCycle, todayBudgetCycle=(new Date()))=>{
+  //Short-circut for "All Transactions" budget cycle
+  if (isAllTransactionsBudgetCycle(budgetCycle)) return null;
+
   const fullYearDifference = todayBudgetCycle.getUTCFullYear() - budgetCycle.getUTCFullYear();
   const monthDifference = (fullYearDifference*12) + (todayBudgetCycle.getUTCMonth() - budgetCycle.getUTCMonth());
   if (monthDifference <= -12) return `${Math.abs(Math.floor(monthDifference/12))} year${Math.abs(Math.floor(monthDifference/12))===1?"":"s"} later`;
@@ -75,4 +35,24 @@ export const getBudgetCycleDescription = (budgetCycle, todayBudgetCycle=(new Dat
   if (monthDifference < 12) return `${monthDifference} month${monthDifference===1?"":"s"} ago`;
   const yearDifference = Math.floor(monthDifference/12);
   return `${yearDifference} year${yearDifference===1?"":"s"} ago`;
-}
+};
+
+export const getAllBudgetCycles = transactions=>{
+  if (!transactions.length) return [];
+
+  const todayBudgetCycle = getBudgetCycleFromDate(new Date());
+
+  return [
+    ...new Set([
+      ALL_TRANSACTIONS_BUDGET_CYCLE,
+      todayBudgetCycle, //assure the current month is an option as well
+      ...getBudgetCyclesFromTransactions(transactions),
+    ].map(date=>date.getTime()))
+  ]
+    .sort((a,b)=>b-a)
+    .map(epochTime=>new Date(epochTime));
+};
+
+export const isAllTransactionsBudgetCycle = budgetCycle=>{
+  return (!(budgetCycle instanceof Date) ? null : budgetCycle.getTime() === ALL_TRANSACTIONS_BUDGET_CYCLE.getTime());
+};

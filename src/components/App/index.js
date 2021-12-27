@@ -3,7 +3,7 @@ import {useState, useEffect} from 'react';
 import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
 
 //Import source code
-import {getBudgetCycleFromDate, getBudgetCyclesFromTransactions, typeCheckTransactions, isTransactionDuplicate, categorizeTransactionByDescription, importTransactions, typeCheckBudgetsData, typeCheckAccountsData, typeCheckAccountData, throwException} from './../../utilities';
+import {getBudgetCycleFromDate, getBudgetCyclesFromTransactions, getAllBudgetCycles, typeCheckTransactions, isTransactionDuplicate, categorizeTransactionByDescription, importTransactions, typeCheckBudgetsData, typeCheckAccountsData, typeCheckAccountData, throwException} from './../../utilities';
 import {getSpreadsheetId, setSpreadsheetId, getClientId, setClientId, initAuthorization} from './../../googleApi';
 import {getTransactions, updateTransactions, getBudgetsData, getAccountsData, getAccountData} from './../../api';
 import {useScript, useConsoleLog} from './../../hooks';
@@ -95,21 +95,6 @@ const App = () => {
     "Transfer",    //+/-
     "Payment",     //-
   ];
-
-  const getAllBudgetCycles = transactions=>{
-    if (!transactions.length) return [];
-
-    const todayBudgetCycle = getBudgetCycleFromDate(new Date());
-
-    return [
-      ...new Set([
-        todayBudgetCycle, //assure the current month is an option as well
-        ...getBudgetCyclesFromTransactions(transactions),
-      ].map(date=>date.getTime()))
-    ]
-      .sort((a,b)=>b-a)
-      .map(epochTime=>new Date(epochTime));
-  };
 
   const [allBudgetCycles, setAllBudgetCycles] = useState(getAllBudgetCycles(transactions));
 

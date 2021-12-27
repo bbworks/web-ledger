@@ -5,3 +5,4 @@ export * from './accountData.js';
 export * from './budgetCycle.js';
 export * from './utilities.js';
 export * from './errorHandling.js';
+export * from './date.js';

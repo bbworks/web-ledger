@@ -1,4 +1,4 @@
-import {getBudgetCycleFromDate, getBudgetCycleString, getBudgetCycleDescription} from './../../utilities';
+import {getBudgetCycleFromDate, getBudgetCycleString, getBudgetCycleDescription, isAllTransactionsBudgetCycle} from './../../utilities';
 
 import './index.scss';
 
@@ -17,15 +17,30 @@ const DashboardBudgetCycleDropdown = ({ transactions, budgetCycle, allBudgetCycl
         <strong className="dashboard-month-dropdown-month h2 d-block mb-0">
           {getBudgetCycleString(budgetCycle)}
         </strong>
-        <em className="dashboard-month-dropdown-month-description d-block text-muted h6">({getBudgetCycleDescription(budgetCycle)})</em>
+        <em className="dashboard-month-dropdown-month-description d-block text-muted h6">
+          {getBudgetCycleDescription(budgetCycle) ? ` (${getBudgetCycleDescription(budgetCycle)})` : ""}
+        </em>
       </button>
       <ul className="dropdown-menu container-fluid" onClick={onClick}>
         {allBudgetCycles.map(budgetCycle=>(
-          <li key={budgetCycle.getTime()}>
-            <a className="dropdown-item" data-budget-cycle={budgetCycle.getTime()}>
-              {getBudgetCycleString(budgetCycle)} <em className="text-muted">({getBudgetCycleDescription(budgetCycle)})</em>
-            </a>
-          </li>
+          <>
+            <li key={budgetCycle.getTime()}>
+              <a className="dropdown-item" data-budget-cycle={budgetCycle.getTime()}>
+                {getBudgetCycleString(budgetCycle)}
+                <em className="text-muted">
+                {getBudgetCycleDescription(budgetCycle) ? ` (${getBudgetCycleDescription(budgetCycle)})` : ""}
+                </em>
+              </a>
+            </li>
+            {
+              isAllTransactionsBudgetCycle(budgetCycle) &&
+              (
+                <li>
+                  <hr class="dropdown-divider" />
+                </li>
+              )
+            }
+          </>
         ))}
       </ul>
     </div>
