@@ -210,7 +210,7 @@ export const categorizeTransactionByDescription = function(transaction) {
 
   //Income
   // NOTE: Always sets budget cycle values to the next month's budget cycle
-       if (matches = Description.match(/ELECTRONIC\/ACH CREDIT (\w{5} \w{2} , \w{3}\.) PAYROLL \d{10}/i))  categorizedTransactionData = {Category: "Infor payroll", DescriptionDisplay: `${matches[1]}`, Notes: null, /*BudgetCycle: getBudgetCycleFromDate(new Date(TransactionDate.getUTCMonth()+1))*/};
+       if (matches = Description.match(/ELECTRONIC\/ACH CREDIT (.+) PAYROLL \d{10}/i))  categorizedTransactionData = {Category: "Infor payroll", DescriptionDisplay: `${matches[1]}`, Notes: null, /*BudgetCycle: getBudgetCycleFromDate(new Date(TransactionDate.getUTCMonth()+1))*/};
   else if (matches = Description.match(/INTEREST PAYMENT PAID THIS STATEMENT THRU (\d{2})\/(\d{2})/i))  categorizedTransactionData = {Category: "Other income", DescriptionDisplay: `Interest paid ${matches[1]}/${matches[2]}`, Notes: null, /*BudgetCycle: getBudgetCycleFromDate(new Date(TransactionDate.getUTCMonth()+1))*/};
 
   //Deposits
@@ -230,9 +230,12 @@ export const categorizeTransactionByDescription = function(transaction) {
 
   //Bills
   else if (Description.match(/ELECTRONIC\/ACH DEBIT PIEDMONT N\. G\. DRAFT \d{13} \d{10}/i))  categorizedTransactionData = {Category: "Piedmont Natural Gas", DescriptionDisplay: "Piedmont Natural Gas", Notes: null};
-  else if (Description.match(/ELECTRONIC\/ACH DEBIT DUKEENERGY BILL PAY \d{12} \w{10}/i))  categorizedTransactionData = {Category: "Duke Energy", DescriptionDisplay: "Duke Energy", Notes: null};
+  else if (Description.match(/ELECTRONIC\/ACH DEBIT (?:DUKEENERGY BILL PAY \d{12}|DUKE ENERGY SE WEB PAY \d{14}) \w{10}/i))  categorizedTransactionData = {Category: "Duke Energy", DescriptionDisplay: "Duke Energy", Notes: null};
   else if (Description.match(/ELECTRONIC\/ACH DEBIT SHARONVIEW FEDER RE PAYMENT \d{10} \d{10}/i))  categorizedTransactionData = {Category: "Sharonview mortgage & escrow", DescriptionDisplay: "Sharonview mortgage", Notes: null};
+  else if (Description.match(/ELECTRONIC\/ACH DEBIT SHARONVIEW FCU TRANSFER \d{15} \d{10}/i))  categorizedTransactionData = {Category: "Sharonview auto loan ", DescriptionDisplay: "Sharonview loan", Notes: null};
   else if (Description.match(/ELECTRONIC\/ACH DEBIT THOMASEHANNAHYMC PURCHASE \d{10}/i))  categorizedTransactionData = {Category: "YMCA membership", DescriptionDisplay: "YMCA membership", Notes: null};
+  else if (Description.match(/ELECTRONIC\/ACH DEBIT PLANET FIT CLUB FEES \d{13} \d{10}/i))  categorizedTransactionData = {Category: "Planet Fitness membership", DescriptionDisplay: "Planet Fitness membership", Notes: null};
+  else if (Description.match(/ELECTRONIC\/ACH DEBIT DEPT EDUCATION STUDENT LN \w{11} \d{10}/i))  categorizedTransactionData = {Category: "Nelnet student loan", DescriptionDisplay: "Nelnet student loan", Notes: null};
   else if (Description.match(/Simplisafe 888-957-4675 Ma/i))  categorizedTransactionData = {Category: "SimpliSafe (for mom)", DescriptionDisplay: "SimpliSafe", Notes: null};
   else if (Description.match(/SDC\*Laurens Electric C Laurens SC/i))  categorizedTransactionData = {Category: "Laurens Electric ProTec Security", DescriptionDisplay: "Laurens Electric ProTec Security", Notes: null};
   else if (Description.match(/SJWD Water District 8649492805 SC/i))  categorizedTransactionData = {Category: "SJWD Water District", DescriptionDisplay: "SJWD Water", Notes: null};
@@ -252,11 +255,13 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/CIRCLE K # \d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "Circle K", Notes: null};
   else if (Description.match(/7-ELEVEN \d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "7-Eleven", Notes: null};
   else if (Description.match(/SPINX #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "Spinx", Notes: null};
-  else if (Description.match(/LOVE S TRAVEL \d+ [\w ]+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "Love's", Notes: null};
+  else if (Description.match(/(?:LOVE S TRAVEL|LOVES COUNTRY) \d+ [\w ]+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "Love's", Notes: null};
   else if (Description.match(/SHELL OIL [\d\w]+ [\w ]+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "Shell", Notes: null};
   else if (Description.match(/INGLES GAS EXP #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "Ingles Gas", Notes: null};
-  else if (Description.match(/RACETRAC\d+ \d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "RaceTrac", Notes: null};
+  else if (Description.match(/RACETRAC ?\d+ \d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "RaceTrac", Notes: null};
   else if (Description.match(/TA \w+ #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "TA Travel Centers of America", Notes: null};
+  else if (Description.match(/SPEEDWAY \d+ \d+ \w+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "Speedway", Notes: null};
+  else if (Description.match(/BUC-EE'S #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "Buc-ee's", Notes: null};
 
   //Groceies & Necessities
   else if (Description.match(/Walmart(?: Grocery|\.com AA) \d{3}-?\d{3}-?\d{4} AR/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Walmart Supercenter", Notes: "grocery pickup"};
@@ -266,14 +271,19 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/Publix #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Publix", Notes: null};
   else if (Description.match(/Food Lion #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Food Lion", Notes: null};
   else if (Description.match(/(?:Sams ?Club #8142 Spartanburg SC|Sams Club #8142 864-574-3480 SC)/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Sam's Club", Notes: null};
+  else if (Description.match(/SAMS MEMBERSHIP 888-433-7267 AR/i)) categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Sam's Club club membership", Notes: null};
+  else if (Description.match(/Lidl #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Lidl", Notes: null};
+  else if (Description.match(/Earth Fare \w+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Earth Fare", Notes: null};
+
   else if (Description.match(/Kohl's #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Kohl's", Notes: null};
+  else if (Description.match(/Once Upon A Child \w+ \w{2}/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Once Upon A Child", Notes: null};
   else if (Description.match(/Gabriel Bros \d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Gabe's", Notes: null};
   else if (Description.match(/Roses Store #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Roses", Notes: null};
   else if (Description.match(/Dollar ?Tree \w+ \w{2}/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Dollar Tree", Notes: null};
-  else if (Description.match(/Lidl #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Lidl", Notes: null};
   else if (Description.match(/Walgreens #\d+/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Walgreens", Notes: null};
   else if (Description.match(/WWW\.CVS\.COM 800-746-7287 RI/i))  categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "CVS Pharmacy", Notes: null};
   else if (Description.match(/INSTACART\*\w+ SAN FRANCISCOCA/i))  categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Instacart", Notes: null};
+  else if (Description.match(/SHIPT\* ORDER BIRMINGHAM AL/i))  categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Shipt", Notes: null};
 
   //Family Outings
   else if (Description.match(/McDonald's \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "McDonald's", Notes: null};
@@ -283,12 +293,14 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/Wendys #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Wendy's", Notes: null};
   else if (Description.match(/Krystal [\d\w]+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Krystal", Notes: null};
   else if (Description.match(/Checkers (Drive In|\d+) \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Checkers", Notes: null};
+  else if (Description.match(/JACK'S #\d+ \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Jack's", Notes: null};
   else if (Description.match(/Jack in the Box \d+ \w+/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Jack In The Box", Notes: null};
   else if (Description.match(/Wayback Burgers \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Wayback Burgers", Notes: null};
   else if (Description.match(/Steak N Shake \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Steak 'n Shake", Notes: null};
   else if (Description.match(/RED ROBIN NO \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Red Robin", Notes: null};
   else if (Description.match(/Arbys - \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Arby's", Notes: null};
   else if (Description.match(/Jersey Mikes \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Jersey Mike's Subs", Notes: null};
+  else if (Description.match(/CHICKEN SALAD CHICK - \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Chicken Salad Chick", Notes: null};
   else if (Description.match(/PDQ \d+ (OLO )?Greenville SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "PDQ", Notes: null};
   else if (Description.match(/Chick-Fil-A #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Chick-fil-A", Notes: null};
   else if (Description.match(/Bojangles \d+ \w+/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Bojangles", Notes: null};
@@ -305,9 +317,9 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/Sr Salsa Greenville SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Sr Salsa Mexican Restaurant", Notes: null};
   else if (Description.match(/CKE\*Taco Dog Spartanbu Spartanburg SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Taco Dog", Notes: null};
   else if (Description.match(/Tropical Grille \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Tropical Grille", Notes: null};
+  else if (Description.match(/Califas \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Califas", Notes: null};
   else if (Description.match(/Waffle House \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Waffle House", Notes: null};
   else if (Description.match(/Chili's \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Chili's", Notes: null};
-  else if (Description.match(/Paisanos Italian Resta/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Paisanos Italian Restaurant", Notes: null};
   else if (Description.match(/Sweet Basil Thai Cusin Greenville SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Sweet Basil Thai Cusine", Notes: null};
   else if (Description.match(/Taste of Thai Spartanburg SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Taste of Thai", Notes: null};
   else if (Description.match(/Panda Hibachi Duncan SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Panda Hibachi", Notes: null};
@@ -316,11 +328,14 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/Ruby Thai \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Ruby Thai", Notes: null};
   else if (Description.match(/Mandarin Express \d+ \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Mandarin Express", Notes: null};
   else if (Description.match(/Oriental House \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Oriental House", Notes: null};
+  else if (Description.match(/Hibachi Grill And Buff \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Hibachi Grill & Buffet", Notes: null};
   else if (Description.match(/THE OLIVE GARD\d{8} \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Olive Garden", Notes: null};
+  else if (Description.match(/Paisanos Italian Resta/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Paisanos Italian Restaurant", Notes: null};
   else if (Description.match(/Pizza Hut \d+ \d+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Pizza Hut", Notes: null};
   else if (Description.match(/Pizza Inn \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Pizza Inn", Notes: null};
   else if (Description.match(/Antonio Bertolos Pizza \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Antonino Bertolo's Pizza", Notes: null};
   else if (Description.match(/La Taverna Spartanburg SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "La Taverna", Notes: null};
+  else if (Description.match(/Sbarro \d+ \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Sbarro", Notes: null};
   else if (Description.match(/Tutti Frutti \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Tutti Frutti", Notes: null};
   else if (Description.match(/TCBY \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "TCBY", Notes: null};
   else if (Description.match(/SQ \*Twisted Cup \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Twisted Cup", Notes: null};
@@ -356,17 +371,22 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/SQ \*KIDSZONE DROP-IN H GREENVILLE SC/i))  categorizedTransactionData = {Category: "Childcare", DescriptionDisplay: "KidsZone Drop-In Childcare", Notes: null};
 
   //Other
+  else if (matches = Description.match(/ELECTRONIC\/ACH CREDIT IRS TREAS 310 ([\w ]+) \d{10}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: `Internal Revenue Service ${matches[1]}`, Notes: null};
+  else if (matches = Description.match(/ELECTRONIC\/ACH CREDIT SC STATE TREASUR ([\w ]+) \d{10}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: `South Carolina Treasury ${matches[1]}`, Notes: null};
+  else if (Description.match(/ELECTRONIC\/ACH CREDIT SHFECU SV WEBXFR \w{3} \d{10}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Sharonview", Notes: null};
+  else if (Description.match(/HAMPTON INN \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Hampton by Hilton", Notes: null};
+  else if (Description.match(/HOMES TO SUITES BY HIL \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Homes2 Suites by Hilton", Notes: null};
   else if (Description.match(/THE HOME DEPOT #?\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "The Home Depot", Notes: null};
   else if (Description.match(/HARBOR FREIGHT TOOLS \d \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Harbor Freight", Notes: null};
   else if (Description.match(/(?:AMAZON\.COM|AMZN MKTP US)\*\w+(?: A)? AMZN\.COM\/BILLWA/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Amazon", Notes: null};
   else if (Description.match(/Hobby Lobby #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Hobby Lobby", Notes: null};
   else if (Description.match(/BESTBUYCOM806539911409 888BESTBUY MN/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Best Buy", Notes: null};
+  else if (Description.match(/STAPLES \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Staples", Notes: null};
   else if (Description.match(/BIG LOTS STORES - #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Big Lots", Notes: null};
   else if (Description.match(/AT HOME STORE \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "At Home", Notes: null};
   else if (Description.match(/FIVE BELOW \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Five Below", Notes: null};
   else if (Description.match(/2ND AND CHARLES \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "2nd & Charles", Notes: null};
   else if (Description.match(/SPARTANBURGCO TREAS 8645962603 SC/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Spartanburg County Treasury", Notes: null};
-  else if (matches = Description.match(/ELECTRONIC\/ACH CREDIT IRS TREAS 310 ([\w ]+) \d{10}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: `Internal Revenue Service ${matches[1]}`, Notes: null};
   else if (Description.match(/9999 UMG MY CHART PT P 864-4542000 SC/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Prisma Health MyChart", Notes: null};
   else if (Description.match(/Crescent Family Dentis Greer SC/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Crescent Family Dentistry", Notes: null};
   else if (Description.match(/AIRBNB \w+ 4158005959 CA/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Airbnb", Notes: null};
