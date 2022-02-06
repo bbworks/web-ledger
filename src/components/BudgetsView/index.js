@@ -5,7 +5,7 @@ import BudgetGraph from './../BudgetGraph';
 
 import {getBudgetAmountSpentFromTransactions} from './../../utilities';
 
-import {useBudgetCycleTransactions} from './../../hooks';
+import {useBudgetCycleTransactions, useBudgetCycleBudgets} from './../../hooks';
 
 import './index.scss';
 
@@ -17,6 +17,7 @@ const BudgetsView = ({ transactions, budgetsData, budgetCycle, setFooterNavbar }
   }, [route]);
 
   const budgetCycleTransactions = useBudgetCycleTransactions(transactions, budgetCycle);
+  const budgetCycleBudgets = useBudgetCycleBudgets(budgetsData, budgetCycle);
 
   return (
     <div className="view budgets-view">
@@ -25,9 +26,9 @@ const BudgetsView = ({ transactions, budgetsData, budgetCycle, setFooterNavbar }
 
         {
           (
-            !budgetsData ?
+            !budgetCycleBudgets ?
             '' :
-            budgetsData.map(budgetData=>
+            budgetCycleBudgets.map(budgetData=>
               <BudgetGraph key={budgetData.Name} budget={{...budgetData, color: "#2196f3", amountSpent: getBudgetAmountSpentFromTransactions(budgetData.Name, budgetCycleTransactions.all)}}/>
             )
           )

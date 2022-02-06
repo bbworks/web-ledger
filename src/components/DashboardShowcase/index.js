@@ -4,13 +4,13 @@ import {getSumByProp, getBudgetCycleFromDate, getBudgetAmountSpentFromTransactio
 
 import './index.scss';
 
-const DashboardShowcase = ({ budgetCycle, budgetCycleTransactions, budgetsData })=>{
+const DashboardShowcase = ({ budgetCycle, budgetCycleTransactions, budgetCycleBudgets })=>{
   //Current statuses
   const budgetCycleStatuses = [
     {
       heading: "Over-budget 😔",
       description: "You have majorly overspent this month.",
-      test: (budgetCycle, budgetCycleTransactions, budgetsData)=>{
+      test: (budgetCycle, budgetCycleTransactions, budgetCycleBudgets)=>{
         const isCurrentBudgetCycle = budgetCycle.getTime() === getBudgetCycleFromDate(new Date()).getTime();
         const totalIncome = getSumByProp(budgetCycleTransactions.income, "Amount");
         const totalExpenses = getSumByProp(budgetCycleTransactions.expenses, "Amount");
@@ -20,13 +20,13 @@ const DashboardShowcase = ({ budgetCycle, budgetCycleTransactions, budgetsData }
     {
       heading: "Looking bad 😬",
       description: "You are projected to overspend this month.",
-      test: (budgetCycle, budgetCycleTransactions, budgetsData)=>{
+      test: (budgetCycle, budgetCycleTransactions, budgetCycleBudgets)=>{
         const isCurrentBudgetCycle = budgetCycle.getTime() === getBudgetCycleFromDate(new Date()).getTime();
         const totalIncome = getSumByProp(budgetCycleTransactions.income, "Amount");
         const totalExpenses = getSumByProp(budgetCycleTransactions.expenses, "Amount");
         const remainingBillsToBePaid =
           /* Add a "Spent" key to each budget data */
-          budgetsData.map(b=>({
+          budgetCycleBudgets.map(b=>({
             ...b,
             Spent: getBudgetAmountSpentFromTransactions(b.Name, budgetCycleTransactions.all) || 0,
           }))
@@ -38,7 +38,7 @@ const DashboardShowcase = ({ budgetCycle, budgetCycleTransactions, budgetsData }
           *-1;
         const leftoverPaidBillsMoney =
           /* Add a "Spent" key to each budget data */
-          budgetsData.map(b=>({
+          budgetCycleBudgets.map(b=>({
             ...b,
             Spent: getBudgetAmountSpentFromTransactions(b.Name, budgetCycleTransactions.all) || 0,
           }))
@@ -48,7 +48,7 @@ const DashboardShowcase = ({ budgetCycle, budgetCycleTransactions, budgetsData }
           .reduce((total,b)=>total+=((b.Amount-b.Spent)*-1), 0)
         const remainingSavingsToBeSaved =
           /* Add a "Spent" key to each budget data */
-          budgetsData.map(b=>({
+          budgetCycleBudgets.map(b=>({
             ...b,
             Spent: getBudgetAmountSpentFromTransactions(b.Name, budgetCycleTransactions.all) || 0,
           }))
@@ -66,13 +66,13 @@ const DashboardShowcase = ({ budgetCycle, budgetCycleTransactions, budgetsData }
     {
       heading: "Getting tight 😯",
       description: "You are running low on money.",
-      test: (budgetCycle, budgetCycleTransactions, budgetsData)=>{
+      test: (budgetCycle, budgetCycleTransactions, budgetCycleBudgets)=>{
         const isCurrentBudgetCycle = budgetCycle.getTime() === getBudgetCycleFromDate(new Date()).getTime();
         const totalIncome = getSumByProp(budgetCycleTransactions.income, "Amount");
         const totalExpenses = getSumByProp(budgetCycleTransactions.expenses, "Amount");
         const remainingBillsToBePaid =
           /* Add a "Spent" key to each budget data */
-          budgetsData.map(b=>({
+          budgetCycleBudgets.map(b=>({
             ...b,
             Spent: getBudgetAmountSpentFromTransactions(b.Name, budgetCycleTransactions.all) || 0,
           }))
@@ -84,7 +84,7 @@ const DashboardShowcase = ({ budgetCycle, budgetCycleTransactions, budgetsData }
           *-1;
         const leftoverPaidBillsMoney =
           /* Add a "Spent" key to each budget data */
-          budgetsData.map(b=>({
+          budgetCycleBudgets.map(b=>({
             ...b,
             Spent: getBudgetAmountSpentFromTransactions(b.Name, budgetCycleTransactions.all) || 0,
           }))
@@ -94,7 +94,7 @@ const DashboardShowcase = ({ budgetCycle, budgetCycleTransactions, budgetsData }
           .reduce((total,b)=>total+=((b.Amount-b.Spent)*-1), 0)
         const remainingSavingsToBeSaved =
           /* Add a "Spent" key to each budget data */
-          budgetsData.map(b=>({
+          budgetCycleBudgets.map(b=>({
             ...b,
             Spent: getBudgetAmountSpentFromTransactions(b.Name, budgetCycleTransactions.all) || 0,
           }))
@@ -111,13 +111,13 @@ const DashboardShowcase = ({ budgetCycle, budgetCycleTransactions, budgetsData }
     {
       heading: "All good! 💃",
       description: "You are on track for this month.",
-      test: (budgetCycle, budgetCycleTransactions, budgetsData)=>{
+      test: (budgetCycle, budgetCycleTransactions, budgetCycleBudgets)=>{
         const isCurrentBudgetCycle = budgetCycle.getTime() === getBudgetCycleFromDate(new Date()).getTime();
         const totalIncome = getSumByProp(budgetCycleTransactions.income, "Amount");
         const totalExpenses = getSumByProp(budgetCycleTransactions.expenses, "Amount");
         const remainingBillsToBePaid =
           /* Add a "Spent" key to each budget data */
-          budgetsData.map(b=>({
+          budgetCycleBudgets.map(b=>({
             ...b,
             Spent: getBudgetAmountSpentFromTransactions(b.Name, budgetCycleTransactions.all) || 0,
           }))
@@ -129,7 +129,7 @@ const DashboardShowcase = ({ budgetCycle, budgetCycleTransactions, budgetsData }
           *-1;
         const leftoverPaidBillsMoney =
           /* Add a "Spent" key to each budget data */
-          budgetsData.map(b=>({
+          budgetCycleBudgets.map(b=>({
             ...b,
             Spent: getBudgetAmountSpentFromTransactions(b.Name, budgetCycleTransactions.all) || 0,
           }))
@@ -139,7 +139,7 @@ const DashboardShowcase = ({ budgetCycle, budgetCycleTransactions, budgetsData }
           .reduce((total,b)=>total+=((b.Amount-b.Spent)*-1), 0)
         const remainingSavingsToBeSaved =
           /* Add a "Spent" key to each budget data */
-          budgetsData.map(b=>({
+          budgetCycleBudgets.map(b=>({
             ...b,
             Spent: getBudgetAmountSpentFromTransactions(b.Name, budgetCycleTransactions.all) || 0,
           }))
@@ -157,7 +157,7 @@ const DashboardShowcase = ({ budgetCycle, budgetCycleTransactions, budgetsData }
     {
       heading: "Over-budget 😔",
       description: "You overspent this month.",
-      test: (budgetCycle, budgetCycleTransactions, budgetsData)=>{
+      test: (budgetCycle, budgetCycleTransactions, budgetCycleBudgets)=>{
         const isPastBudgetCycle = budgetCycle.getTime() < getBudgetCycleFromDate(new Date()).getTime();
         const totalIncome = getSumByProp(budgetCycleTransactions.income, "Amount");
         const totalExpenses = getSumByProp(budgetCycleTransactions.expenses, "Amount");
@@ -167,7 +167,7 @@ const DashboardShowcase = ({ budgetCycle, budgetCycleTransactions, budgetsData }
     {
       heading: "Done 😌",
       description: "You were on track for this month.",
-      test: (budgetCycle, budgetCycleTransactions, budgetsData)=>{
+      test: (budgetCycle, budgetCycleTransactions, budgetCycleBudgets)=>{
         const isPastBudgetCycle = budgetCycle.getTime() < getBudgetCycleFromDate(new Date()).getTime();
         const totalIncome = getSumByProp(budgetCycleTransactions.income, "Amount");
         const totalExpenses = getSumByProp(budgetCycleTransactions.expenses, "Amount");
@@ -178,7 +178,7 @@ const DashboardShowcase = ({ budgetCycle, budgetCycleTransactions, budgetsData }
     {
       heading: " 😔",
       description: "You're going to overspend this month.",
-      test: (budgetCycle, budgetCycleTransactions, budgetsData)=>{
+      test: (budgetCycle, budgetCycleTransactions, budgetCycleBudgets)=>{
         const isFutureBudgetCycle = budgetCycle.getTime() > getBudgetCycleFromDate(new Date()).getTime();
         const totalIncome = getSumByProp(budgetCycleTransactions.income, "Amount");
         const totalExpenses = getSumByProp(budgetCycleTransactions.expenses, "Amount");
@@ -188,7 +188,7 @@ const DashboardShowcase = ({ budgetCycle, budgetCycleTransactions, budgetsData }
     {
       heading: "Looking good 😌",
       description: "You're going to be on track for this month.",
-      test: (budgetCycle, budgetCycleTransactions, budgetsData)=>{
+      test: (budgetCycle, budgetCycleTransactions, budgetCycleBudgets)=>{
         const isFutureBudgetCycle = budgetCycle.getTime() > getBudgetCycleFromDate(new Date()).getTime();
         const totalIncome = getSumByProp(budgetCycleTransactions.income, "Amount");
         const totalExpenses = getSumByProp(budgetCycleTransactions.expenses, "Amount");
@@ -197,16 +197,16 @@ const DashboardShowcase = ({ budgetCycle, budgetCycleTransactions, budgetsData }
     },
   ];
 
-  const getBudgetCycleStatus = (budgetCycle, budgetCycleTransactions, budgetsData)=>{
-    if (!budgetCycle || !budgetCycleTransactions.all.length || !budgetsData.length) return null;
-    return budgetCycleStatuses.find(status=>status.test(budgetCycle, budgetCycleTransactions, budgetsData));
+  const getBudgetCycleStatus = (budgetCycle, budgetCycleTransactions, budgetCycleBudgets)=>{
+    if (!budgetCycle || !budgetCycleTransactions.all.length || !budgetCycleBudgets.length) return null;
+    return budgetCycleStatuses.find(status=>status.test(budgetCycle, budgetCycleTransactions, budgetCycleBudgets));
   };
 
-  const [budgetCycleStatus, setBudgetCycleStatus] = useState(getBudgetCycleStatus(budgetCycle, budgetCycleTransactions, budgetsData));
+  const [budgetCycleStatus, setBudgetCycleStatus] = useState(getBudgetCycleStatus(budgetCycle, budgetCycleTransactions, budgetCycleBudgets));
 
   useEffect(()=>
-    setBudgetCycleStatus(getBudgetCycleStatus(budgetCycle, budgetCycleTransactions, budgetsData))
-  , [budgetCycle, budgetCycleTransactions, budgetsData]);
+    setBudgetCycleStatus(getBudgetCycleStatus(budgetCycle, budgetCycleTransactions, budgetCycleBudgets))
+  , [budgetCycle, budgetCycleTransactions, budgetCycleBudgets]);
 
   return (
     <div className="dashboard-showcase container d-flex flex-column justify-content-center align-items-center bg-primary text-light my-3 mx-auto">
