@@ -47,18 +47,20 @@ const DashboardInsights = ({ budgetCycle, budgetCycleTransactions, budgetCycleBu
       setInsights(previousInsights=>[...previousInsights, insight]);
     }
 
-    /* Check if there is money left in the "Personal Spending" budget */
-    const personalSpendingBudgetData = budgetCycleBudgets.find(budgetData=>budgetData.Name==="Personal Spending");
-    const personalSpendingBudgetLeft = getBudgetAmountSpentFromTransactions("Personal Spending", budgetCycleTransactions.all) - personalSpendingBudgetData.Amount;
-    if (personalSpendingBudgetLeft > 0) {
-      const insight = {
-        type: "primary",
-        iconClass: "fas fa-chart-pie",
-        title: "Analysis",
-        text: `You have ${convertNumberToCurrency(personalSpendingBudgetLeft)} remaining in "Personal Spending".`
-      };
-      setInsights(previousInsights=>[...previousInsights, insight]);
-    }
+    /* Check if there is money left in the "Personal Spending" or "Bradley" budget */
+    const personalSpendingBudgets = budgetCycleBudgets.filter(budgetData=>["Personal Spending", "Bradley", "Sarah"].includes(budgetData.Name));
+    personalSpendingBudgets.forEach(personalSpendingBudget=>{
+      const personalSpendingBudgetLeft = getBudgetAmountSpentFromTransactions(personalSpendingBudget.Name, budgetCycleTransactions.all) - personalSpendingBudget.Amount;
+      if (personalSpendingBudgetLeft > 0) {
+        const insight = {
+          type: "primary",
+          iconClass: "fas fa-chart-pie",
+          title: "Analysis",
+          text: `You have ${convertNumberToCurrency(personalSpendingBudgetLeft)} remaining in "${personalSpendingBudget.Name}".`
+        };
+        setInsights(previousInsights=>[...previousInsights, insight]);
+      }
+    });
 
     /* Check if we spent more than last month */
     //const currentBudgetSpent = transactions.reduce((total,i)=>total+=i.amount);
