@@ -6,7 +6,8 @@ import {useBudgetCycleTransactions, useBudgetCycleBudgets} from './../../hooks';
 import './index.scss';
 
 import DashboardTop from './../DashboardTop';
-import DashboardContent from './../DashboardContent';
+import DashboardInsights from './../DashboardInsights';
+import DashboardShowcase from './../DashboardShowcase';
 
 const DashboardView = ({ signedInUser, transactions, accountsData, accountData, budgetsData, budgetCycle, allBudgetCycles, onBudgetCycleChange, setFooterNavbar })=>{
   //Send the route to the footer navbar
@@ -22,7 +23,8 @@ const DashboardView = ({ signedInUser, transactions, accountsData, accountData, 
     <div className="view dashboard-view d-flex flex-column">
       <main className="main flex-grow-1">
         <DashboardTop transactions={transactions} accountsData={accountsData} accountData={accountData} budgetCycle={budgetCycle} allBudgetCycles={allBudgetCycles} onBudgetCycleChange={onBudgetCycleChange} />
-        <DashboardContent budgetCycle={budgetCycle} budgetCycleTransactions={budgetCycleTransactions} budgetCycleBudgets={budgetCycleBudgets} />
+        <DashboardShowcase budgetCycle={budgetCycle} budgetCycleTransactions={budgetCycleTransactions} budgetCycleBudgets={budgetCycleBudgets} />
+        <DashboardInsights budgetCycle={budgetCycle} budgetCycleTransactions={budgetCycleTransactions} budgetCycleBudgets={budgetCycleBudgets} />
       </main>
     </div>
   );
