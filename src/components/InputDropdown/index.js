@@ -192,7 +192,11 @@ const InputDropdown = (props)=>{
     if (props.onInputDropdownInputFocus) props.onInputDropdownInputFocus(event);
   };
 
-  const onInputDropdownListItemClick = event=>{
+  const onInputDropdownListItemMouseDown = event=>{
+    //NOTE: Switching from onClick to onMouseDown due to browser issue
+    // where onClick is not registered due to list items disappearing
+    // from component re-render on onBlur
+    // https://github.com/facebook/react/issues/4210
     const newValue = event.target.innerText;
 
     //Set the value
@@ -386,7 +390,7 @@ const InputDropdown = (props)=>{
       </div>
       <ul className="input-dropdown-list" ref={inputDropdownListRef} onMouseLeave={onInputDropdownListMouseLeave} >
         {filteredListItems.map(item=>
-          <li key={item} className={`input-dropdown-list-item ${addInputDropdownListItemSelection(item, selectedListItem)}`} onClick={onInputDropdownListItemClick} onMouseMove={onInputDropdownListItemMouseMove} dangerouslySetInnerHTML={{__html: getInputDropdownListItemFilteredText(item, searchFilter)}}></li>
+          <li key={item} className={`input-dropdown-list-item ${addInputDropdownListItemSelection(item, selectedListItem)}`} onMouseDown={onInputDropdownListItemMouseDown} onMouseMove={onInputDropdownListItemMouseMove} dangerouslySetInnerHTML={{__html: getInputDropdownListItemFilteredText(item, searchFilter)}}></li>
         )}
       </ul>
     </div>
