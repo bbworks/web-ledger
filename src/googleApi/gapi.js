@@ -101,7 +101,8 @@ export const getSheetsSpreadsheet = async ()=>{
 };
 
 export const getSheetsSpreadsheetValues = async (sheetName, range)=>{
-  if (!range) range = convertArrayToA1Notation([1000,26]); //A1:AA1000
+  const {rowCount, columnCount} = (await getSheetsSpreadsheet()).result.sheets.find(s=>s.properties.title === sheetName).properties.gridProperties;
+  if (!range) range = convertArrayToA1Notation([rowCount, columnCount]);
   if (typeof range === "string") range = [range]; //convert to an array of ranges if only one specified
   range = range.map(r=>`'${sheetName}'!${range}`); //Add the sheet name to the range
 
@@ -109,7 +110,10 @@ export const getSheetsSpreadsheetValues = async (sheetName, range)=>{
 };
 
 export const updateSheetsSpreadsheetValues = async (sheetName, valuesJSON, range)=>{
-  if (!range) range = convertArrayToA1Notation([1000,26]); //A1:Z1000
+  const values = convertJSONToSheetsArray(valuesJSON);
+  const neededRowCount = values.length;
+  const neededColumnCount = values.reduce((maxCol,row)=>maxCol = Math.max(maxCol,row.length), 0);
+  if (!range) range = convertArrayToA1Notation([neededRowCount, neededColumnCount]);
   if (typeof range === "string") range = [range]; //convert to an array of ranges if only one specified
   range = range.map(r=>`'${sheetName}'!${range}`); //Add the sheet name to the range
 
@@ -120,7 +124,7 @@ export const updateSheetsSpreadsheetValues = async (sheetName, valuesJSON, range
       includeValuesInResponse: true,
       responseValueRenderOption: "FORMATTED_VALUE",
       resource: {
-        values: convertJSONToSheetsArray(valuesJSON),
+        values: values,
       }
     });
 };
