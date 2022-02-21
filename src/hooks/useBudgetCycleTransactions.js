@@ -19,8 +19,8 @@ const useBudgetCycleTransactions = (transactions, budgetCycle)=>{
       transactions.find(transaction2=>
         transaction.TransactionDate.getTime()===transaction2.TransactionDate.getTime() &&
         transaction.Amount===-transaction2.Amount &&
-        transaction.DescriptionDisplay && transaction.DescriptionDisplay.match(/\*(\d{4})/)[1]===transaction2.AccountNumber && transaction2.AccountNumber.match(/\*(\d{4})/)[1] &&
-        transaction.AccountNumber && transaction.AccountNumber.match(/\*(\d{4})/)[1]===transaction2.DescriptionDisplay && transaction2.DescriptionDisplay.match(/\*(\d{4})/)[1]
+        (transaction.DescriptionDisplay && transaction.DescriptionDisplay.match(/\*(\d{4})/)[1]) === (transaction2.AccountNumber && transaction2.AccountNumber.match(/\*(\d{4})/)[1]) &&
+        (transaction.AccountNumber && transaction.AccountNumber.match(/\*(\d{4})/)[1]) === (transaction2.DescriptionDisplay && transaction2.DescriptionDisplay.match(/\*(\d{4})/)[1])
       )
     )
   };
