@@ -6,7 +6,7 @@ import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
 import {getBudgetCycleFromDate, getBudgetCyclesFromTransactions, getAllBudgetCycles, typeCheckTransactions, isTransactionDuplicate, categorizeTransactionByDescription, importTransactions, typeCheckBudgetsData, typeCheckAccountsData, typeCheckAccountData, throwException} from './../../utilities';
 import {getSpreadsheetId, setSpreadsheetId, getClientId, setClientId, initAuthorization} from './../../googleApi';
 import {getTransactions, updateTransactions, getBudgetsData, getAccountsData, getAccountData} from './../../api';
-import {useScript, useConsoleLog} from './../../hooks';
+import {useScript, useConsoleLog, useBudgetCycleBudgets} from './../../hooks';
 
 //Import custom components
 import SignInView from './../SignInView';
@@ -54,33 +54,6 @@ const App = () => {
     }
   };
 
-  const transactionCategories = [
-    null,
-    "Savings",
-    "Gas",
-    "Church",
-    "Groceries/Necessities",
-    "LoveInAction",
-    "Family Outings",
-    "Personal Spending",
-    "Miscellaneous",
-    "Sharonview mortgage & escrow",
-    "HOA dues",
-    "Duke Energy",
-    "SJWD Water District",
-    "Piedmont Natural Gas",
-    "Kirby Sanitation",
-    "Laurens Electric ProTec Security",
-    "SimpliSafe (for mom)",
-    "AT&T Internet",
-    "State Farm auto insurance",
-    "AT&T phone bill",
-    "Spotify Premium subscription",
-    "Netflix Premium subscription",
-    "Discovery Plus subscription",
-    "YMCA membership",
-  ];
-
   const transactionTypes = [
     null,
     //Credit card
@@ -97,6 +70,8 @@ const App = () => {
   ];
 
   const [allBudgetCycles, setAllBudgetCycles] = useState(getAllBudgetCycles(transactions));
+  const budgetCycleBudgets = useBudgetCycleBudgets(budgetsData, budgetCycle);
+  const transactionCategories = [null, ...budgetCycleBudgets.map(b=>b.Name)];
 
   //Check that the list of budget cycles remains updated with transaction data
   useEffect(()=>
