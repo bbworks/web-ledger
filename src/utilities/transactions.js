@@ -8,18 +8,24 @@ const toPascalCase = phrase=>{
 
 //Declare public functions
 export const typeCheckTransactions = function (transactions) {
-  return transactions.map(transaction=>(
-    {
-      ...transaction,
-      PostedDate: parseGoogleSheetsDate(transaction.PostedDate),
-      TransactionDate: parseGoogleSheetsDate(transaction.TransactionDate),
-      Amount: parseGoogleSheetsNumber(isNaN(transaction.Amount) ? transaction.Amount.replace(/(\$|,)/g, "") : transaction.Amount),
-      Tags: !isFalsy(transaction.Tags) ? transaction.Tags : [],
-      BudgetCycle: parseGoogleSheetsDate(transaction.BudgetCycle),
-      DateCreated: parseGoogleSheetsDate(transaction.DateCreated),
-      DateModified: parseGoogleSheetsDate(transaction.DateModified),
+  return transactions.map(transaction=>{
+    try {
+      return {
+        ...transaction,
+        PostedDate: parseGoogleSheetsDate(transaction.PostedDate),
+        TransactionDate: parseGoogleSheetsDate(transaction.TransactionDate),
+        Amount: parseGoogleSheetsNumber(isNaN(transaction.Amount) ? transaction.Amount.replace(/(\$|,)/g, "") : transaction.Amount),
+        Tags: !isFalsy(transaction.Tags) ? transaction.Tags : [],
+        BudgetCycle: parseGoogleSheetsDate(transaction.BudgetCycle),
+        DateCreated: parseGoogleSheetsDate(transaction.DateCreated),
+        DateModified: parseGoogleSheetsDate(transaction.DateModified),
+      };
     }
-  ));
+    catch (err) {
+      console.error(transaction);
+      throw err;
+    }
+  });
 };
 
 export const importTransactions = function(transactionsData, dataType) {
@@ -142,26 +148,38 @@ export const importTransactions = function(transactionsData, dataType) {
       const PostedDate = (transaction.PostedDate ? transaction.PostedDate.trim() : null);
       const TransactionDate = (transaction.TransactionDate ? transaction.TransactionDate.trim() : null);
       const AccountNumber = (transaction["Card No."] ? transaction["Card No."].trim() : null);
-      const Type = (transaction.Type ? transaction.Type.trim() : null);
+      const TransactionType = (transaction["Transaction Type"] ? transaction["Transaction Type"].trim() : null);
       const Description = (transaction.Description ? transaction.Description.trim() : null);
+      const Amount = (transaction.Amount ? transaction.Amount.trim() : null);
       const Charges = (transaction.Charges ? transaction.Charges.trim() : null);
       const Payments = (transaction.Payments ? transaction.Payments.trim() : null);
       const Debit = (transaction.Debit ? transaction.Debit.trim() : null);
       const Credit = (transaction.Credit ? transaction.Credit.trim() : null);
 
       //Validate calculated values
-      const type = (
-        Object.keys(transaction).includes("Credit") && Object.keys(transaction).includes("Debit") ?
-          //Checking/Savings account
-          nullCoalesce(Type, (Credit && (Number(Credit) || Credit !== "0") ? "Credit" : (Debit && (Number(Debit) || Debit !== "0") ? "Debit" : null))) : (
-          Object.keys(transaction).includes("Charges") && Object.keys(transaction).includes("Payments") ?
-          //Credit Card account
-          nullCoalesce(Type, (Charges && (Number(Charges) || Charges !== "0") ? "Charges" : (Payments && (Number(Payments) || Payments !== "0") ? "Payments" : null))) :
-          null
-        )
-      );
+      const amountRegEx = Amount.match(/(\()?\$\+?(\d+(?:\.\d{1,2})?)(\))?/);
+      const amountIsNegative = amountRegEx[1] && amountRegEx[3];
+      let amount = Number(amountIsNegative ? `-${amountRegEx[2]}` : amountRegEx[2]);
+
+      let type = TransactionType;
+
+      //If this is a credit card transaction,
+      // negate the amount and change the transaction type
+      if (
+        !amountIsNegative && type === "Debit" ||
+        amountIsNegative && type === "Credit"
+      )
+      {
+        amount *= -1;
+        type = (type==="Debit" ? "Charges" : (type==="Credit" ? "Payments" : null));
+      }
+
       const transactionDate = convertDateStringToDate(nullCoalesce(TransactionDate, _Date), "MM/dd/yyyy");
-      if (isFalsy(type) || isFalsy(transactionDate)) throw new Error(`Unable to read transaction.\r\n${transaction}`);
+      if (isFalsy(type) || isFalsy(transactionDate)) {
+        console.error(transaction);
+        throw new Error(`Unable to read transaction.\r\n${Object.entries(transaction).map(([key,value])=>`${key}:${value}`).join(", ")}`);
+      }
+
 
       return {
         PostedDate: (PostedDate ? convertDateStringToDate(PostedDate, "MM/dd/yyyy") : null),
@@ -170,7 +188,7 @@ export const importTransactions = function(transactionsData, dataType) {
         Type: type,
         Description,
         DescriptionDisplay: null,
-        Amount: Number(`${(["Charges","Debit"].includes(type) ? "-" : "")}${transaction[type]}`),
+        Amount: amount,
         Category: null,
         Notes: null,
         Tags: [],
@@ -210,8 +228,8 @@ export const categorizeTransactionByDescription = function(transaction) {
 
   //Income
   // NOTE: Always sets budget cycle values to the next month's budget cycle
-       if (matches = Description.match(/ELECTRONIC\/ACH CREDIT (.+) PAYROLL \d{10}/i))  categorizedTransactionData = {Category: "Infor payroll", DescriptionDisplay: `${matches[1]}`, Notes: null, /*BudgetCycle: getBudgetCycleFromDate(new Date(TransactionDate.getUTCMonth()+1))*/};
-  else if (matches = Description.match(/INTEREST PAYMENT PAID THIS STATEMENT THRU (\d{2})\/(\d{2})/i))  categorizedTransactionData = {Category: "Other income", DescriptionDisplay: `Interest paid ${matches[1]}/${matches[2]}`, Notes: null, /*BudgetCycle: getBudgetCycleFromDate(new Date(TransactionDate.getUTCMonth()+1))*/};
+       if (matches = Description.match(/(?:ELECTRONIC\/ACH CREDIT (.+) PAYROLL \d{10}|PAYROLL (.+) \d+ [\w ]+ ACH CREDIT)/i))  categorizedTransactionData = {Category: "Infor payroll", DescriptionDisplay: `${matches[1] ?? matches[2]}`, Notes: null, /*BudgetCycle: getBudgetCycleFromDate(new Date(TransactionDate.getUTCMonth()+1))*/};
+  else if (matches = Description.match(/INTEREST(?: PAYMENT)?(?: INTEREST)?(?: PAID THIS STATEMENT THRU (\d{2})\/(\d{2}))?/i))  categorizedTransactionData = {Category: "Other income", DescriptionDisplay: `Interest paid${(matches[1] && matches[2] ? ` ${matches[1]}/${matches[2]}` : "")}`, Notes: null, /*BudgetCycle: getBudgetCycleFromDate(new Date(TransactionDate.getUTCMonth()+1))*/};
 
   //Deposits
   else if (Description.match(/MOBILE CHECK DEPOSIT/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Mobile check deposit", Notes: null};
@@ -220,29 +238,30 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/ATM CASH WITHDRAWAL (?:\d{4} \w{4} \d{12}|[\w ]+)/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "ATM withdrawal", Notes: null};
 
   //Transfers
-  else if (matches = Description.match(/ONLINE BANKING TRANSFER (?:CREDIT )?(?:MOBILE APP TRANSFER )?(To|From) (?:\d{4} )?\d{9}(\d{4})/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: `Transfer ${matches[1].toLowerCase()} *${matches[2]}`, Notes: null};
-  else if (matches = Description.match(/AUTOMATIC TRANSFER DEBIT \w+ \w+ TRANSFER \d{9}(\d{4})-\d \d{10}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: `Automatic transfer to *${matches[1]}`, Notes: null};
-  else if (matches = Description.match(/ZELLE TRANSFER (TO|FROM) ([\w ]+) \d{2}\/\d{2} \w+/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: `Zelle transfer ${matches[1].toLowerCase()} ${toPascalCase(matches[2])}`, Notes: null};
+  else if (matches = Description.match(/ONLINE (?:BANKING TRANSFER (?:CREDIT )?(?:MOBILE APP TRANSFER )?)?(TO|FROM) (?:(?:\d{4} )?\d{9}|\*{14})(\d{4})(?: DEPOSIT TRANSFER)?/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: `Transfer ${matches[1].toLowerCase()} *${matches[2]}`, Notes: null};
+  else if (matches = Description.match(/(?:AUTOMATIC TRANSFER DEBIT \w+ \w+ TRANSFER \d{9}(\d{4})-\d \d{10}|ACCOUNT NUMBER \d{5}(\d{4}) PREAUTHORIZED TRANSFER)/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: `Automatic transfer to *${matches[1] ?? matches[2]}`, Notes: null};
+  else if (matches = Description.match(/ZELLE TRANSFER (TO|FROM) ([\w ]+) \d{2}\/\d{2} ?\w+/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: `Zelle transfer ${matches[1].toLowerCase()} ${toPascalCase(matches[2])}`, Notes: null};
 
   //Payments
-  else if (matches = Description.match(/CREDIT CARD PAYMENT (?:MOBILE APP PAYMENT|ONLINE BANKING TRANSFER) TO \d{4} \d{6}\*{6}(\d{4})/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: `Payment for CCD *${matches[1]}`, Notes: null};
+  else if (matches = Description.match(/(?:MOBILE TO \*{12}(\d{4}) )?CREDIT CARD PAYMENT(?: (?:MOBILE APP PAYMENT|ONLINE BANKING TRANSFER) TO \d{4} \d{6}\*{6}(\d{4}))?/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: `Payment for CCD *${matches[1] ?? matches[2]}`, Notes: null};
   else if (matches = Description.match(/PAYMENT - \w{5} \w{3} \w{7} \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: `Credit card payment`, Notes: null};
 
   //Bills
-  else if (Description.match(/ELECTRONIC\/ACH DEBIT PIEDMONT N\. G\. DRAFT \d{13} \d{10}/i))  categorizedTransactionData = {Category: "Piedmont Natural Gas", DescriptionDisplay: "Piedmont Natural Gas", Notes: null};
-  else if (Description.match(/ELECTRONIC\/ACH DEBIT (?:DUKEENERGY BILL PAY \d{12}|DUKE ENERGY SE WEB PAY \d{14}) \w{10}/i))  categorizedTransactionData = {Category: "Duke Energy", DescriptionDisplay: "Duke Energy", Notes: null};
-  else if (Description.match(/ELECTRONIC\/ACH DEBIT SHARONVIEW FEDER RE PAYMENT \d{10} \d{10}/i))  categorizedTransactionData = {Category: "Sharonview mortgage & escrow", DescriptionDisplay: "Sharonview mortgage", Notes: null};
-  else if (Description.match(/ELECTRONIC\/ACH DEBIT SHARONVIEW FCU TRANSFER \d{15} \d{10}/i))  categorizedTransactionData = {Category: "Sharonview auto loan ", DescriptionDisplay: "Sharonview loan", Notes: null};
-  else if (Description.match(/ELECTRONIC\/ACH DEBIT THOMASEHANNAHYMC PURCHASE \d{10}/i))  categorizedTransactionData = {Category: "YMCA membership", DescriptionDisplay: "YMCA membership", Notes: null};
-  else if (Description.match(/ELECTRONIC\/ACH DEBIT PLANET FIT CLUB FEES \d{13} \d{10}/i))  categorizedTransactionData = {Category: "Planet Fitness membership", DescriptionDisplay: "Planet Fitness membership", Notes: null};
-  else if (Description.match(/ELECTRONIC\/ACH DEBIT DEPT EDUCATION STUDENT LN \w{11} \d{10}/i))  categorizedTransactionData = {Category: "Nelnet student loan", DescriptionDisplay: "Nelnet student loan", Notes: null};
+  else if (Description.match(/(?:ELECTRONIC\/ACH DEBIT )?PIEDMONT N\. G\.(?: DRAFT \d{13} \d{10})?/i))  categorizedTransactionData = {Category: "Piedmont Natural Gas", DescriptionDisplay: "Piedmont Natural Gas", Notes: null};
+  else if (Description.match(/(?:ELECTRONIC\/ACH DEBIT )?(?:BILL PAY )?DUKE ?ENERGY(?:(?: BILL PAY \d{12}| SE WEB PAY \d{14}) \w{10})?/i))  categorizedTransactionData = {Category: "Duke Energy", DescriptionDisplay: "Duke Energy", Notes: null};
+  else if (Description.match(/(?:ELECTRONIC\/ACH DEBIT )?(?:RE PAYMENT )?SHARONVIEW FEDER(?: RE PAYMENT \d{10} \d{10})?/i))  categorizedTransactionData = {Category: "Sharonview mortgage & escrow", DescriptionDisplay: "Sharonview mortgage", Notes: null};
+  else if (Description.match(/(?:ELECTRONIC\/ACH DEBIT )?SHARONVIEW FCU TRANSFER \d{15} \d{10}/i))  categorizedTransactionData = {Category: "Sharonview auto loan ", DescriptionDisplay: "Sharonview loan", Notes: null};
+  else if (Description.match(/(?:ELECTRONIC\/ACH DEBIT )?(?:PURCHASE )?THOMASEHANNAHYMC(?: PURCHASE \d{10})?/i))  categorizedTransactionData = {Category: "YMCA membership", DescriptionDisplay: "YMCA membership", Notes: null};
+  else if (Description.match(/(?:ELECTRONIC\/ACH DEBIT )?PLANET FIT CLUB FEES \d{13} \d{10}/i))  categorizedTransactionData = {Category: "Planet Fitness membership", DescriptionDisplay: "Planet Fitness membership", Notes: null};
+  else if (Description.match(/(?:ELECTRONIC\/ACH DEBIT )?DEPT EDUCATION STUDENT LN \w{11} \d{10}/i))  categorizedTransactionData = {Category: "Nelnet student loan", DescriptionDisplay: "Nelnet student loan", Notes: null};
   else if (Description.match(/Simplisafe 888-957-4675 Ma/i))  categorizedTransactionData = {Category: "SimpliSafe (for mom)", DescriptionDisplay: "SimpliSafe", Notes: null};
   else if (Description.match(/SDC\*Laurens Electric C Laurens SC/i))  categorizedTransactionData = {Category: "Laurens Electric ProTec Security", DescriptionDisplay: "Laurens Electric ProTec Security", Notes: null};
   else if (Description.match(/SJWD Water District 8649492805 SC/i))  categorizedTransactionData = {Category: "SJWD Water District", DescriptionDisplay: "SJWD Water", Notes: null};
-  else if (Description.match(/State Farm Insurance 8009566310 Il/i))  categorizedTransactionData = {Category: "State Farm auto insurance", DescriptionDisplay: "State Farm", Notes: null};
+  else if (Description.match(/State Farm  ?Insurance 8009566310 Il/i))  categorizedTransactionData = {Category: "State Farm auto insurance", DescriptionDisplay: "State Farm", Notes: null};
   else if (Description.match(/Spotify USA(?: New York NY)?/i))  categorizedTransactionData = {Category: "Spotify Premium subscription", DescriptionDisplay: "Spotify Premium", Notes: null};
   else if (Description.match(/Netflix.Com Netflix.Com Ca/i))  categorizedTransactionData = {Category: "Netflix Premium subscription", DescriptionDisplay: "Netflix Premium", Notes: null};
   else if (Description.match(/Ddv \*Discoveryplus 0123456789 TN/i))  categorizedTransactionData = {Category: "Discovery Plus subscription", DescriptionDisplay: "Discovery Plus", Notes: null};
+  else if (Description.match(/Peacock 1D10D Premium New York NY/i))  categorizedTransactionData = {Category: "Peacock Premium subscription", DescriptionDisplay: "Peacock", Notes: null};
   else if (Description.match(/Spectrum 855-707-7328 \w{2}/i))  categorizedTransactionData = {Category: "Spectrum Internet", DescriptionDisplay: "Spectrum Internet", Notes: null};
   else if (Description.match(/(?:AT&T \*Payment|ATT\*BILL PAYMENT) 800-288-2020 TX/i))  categorizedTransactionData = {Category: "AT&T Internet", DescriptionDisplay: "AT&T Internet", Notes: null};
   else if (Description.match(/KIRBY SANITATION (?:\/C&J E )?8648778887 SC/i))  categorizedTransactionData = {Category: "Kirby Sanitation", DescriptionDisplay: "Kirby Sanitation", Notes: null};
@@ -280,15 +299,16 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/Gabriel Bros \d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Gabe's", Notes: null};
   else if (Description.match(/Roses Store #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Roses", Notes: null};
   else if (Description.match(/Dollar ?Tree \w+ \w{2}/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Dollar Tree", Notes: null};
+  else if (Description.match(/Dollar General #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Dollar General", Notes: null};
   else if (Description.match(/Walgreens #\d+/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Walgreens", Notes: null};
   else if (Description.match(/WWW\.CVS\.COM 800-746-7287 RI/i))  categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "CVS Pharmacy", Notes: null};
   else if (Description.match(/INSTACART\*\w+ SAN FRANCISCOCA/i))  categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Instacart", Notes: null};
   else if (Description.match(/SHIPT\* ORDER BIRMINGHAM AL/i))  categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Shipt", Notes: null};
 
   //Family Outings
-  else if (Description.match(/McDonald's \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "McDonald's", Notes: null};
+  else if (Description.match(/McDonald[' ]s (?:S )?\w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "McDonald's", Notes: null};
   else if (Description.match(/Burger King #\d+(?: \w+ \w+ \w{2})?/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Burger King", Notes: null};
-  else if (Description.match(/Sonic Drive-?In #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Sonic Drive-In", Notes: null};
+  else if (Description.match(/Sonic Drive[- ]?In #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Sonic Drive-In", Notes: null};
   else if (Description.match(/Cook Out [\w ]+(?: \w+ \w{2})?/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Cook Out", Notes: null};
   else if (Description.match(/Wendys #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Wendy's", Notes: null};
   else if (Description.match(/Krystal [\d\w]+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Krystal", Notes: null};
@@ -318,6 +338,7 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/CKE\*Taco Dog Spartanbu Spartanburg SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Taco Dog", Notes: null};
   else if (Description.match(/Tropical Grille \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Tropical Grille", Notes: null};
   else if (Description.match(/Califas \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Califas", Notes: null};
+  else if (Description.match(/TIPSY TACO \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Tipsy Taco", Notes: null};
   else if (Description.match(/Waffle House \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Waffle House", Notes: null};
   else if (Description.match(/Chili's \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Chili's", Notes: null};
   else if (Description.match(/Sweet Basil Thai Cusin Greenville SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Sweet Basil Thai Cusine", Notes: null};
@@ -336,18 +357,20 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/Antonio Bertolos Pizza \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Antonino Bertolo's Pizza", Notes: null};
   else if (Description.match(/La Taverna Spartanburg SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "La Taverna", Notes: null};
   else if (Description.match(/Sbarro \d+ \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Sbarro", Notes: null};
+  else if (Description.match(/Boston Pizzeria \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Boston Pizzeria", Notes: null};
   else if (Description.match(/Tutti Frutti \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Tutti Frutti", Notes: null};
   else if (Description.match(/TCBY \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "TCBY", Notes: null};
   else if (Description.match(/SQ \*Twisted Cup \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Twisted Cup", Notes: null};
   else if (Description.match(/Ritas # \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Rita's Italian Ice", Notes: null};
   else if (Description.match(/Krispy Kreme \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Krispy Kreme", Notes: null};
+  else if (Description.match(/INSOMNIA COOKIES- \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Insomnia Cookies", Notes: null};
   else if (Description.match(/Spill the Beans - \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Spill the Beans", Notes: null};
   else if (Description.match(/Starbucks Store \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Starbucks", Notes: null};
   else if (Description.match(/PP\*Liquid Highway Greenville SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Liquid Highway", Notes: null};
   else if (Description.match(/Bella Latte Duncan SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Bella Latte", Notes: null};
   else if (Description.match(/Panera Bread #\d+ P \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Panera Bread", Notes: null};
   else if (Description.match(/IHOP \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "IHOP", Notes: null};
-  else if (Description.match(/Denny's Inc 18007336 \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Denny's", Notes: null};
+  else if (Description.match(/Denny[' ]s Inc 18007336 \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Denny's", Notes: null};
   else if (Description.match(/Applebees \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Applebee's", Notes: null};
   else if (Description.match(/Dunkin #\d+ \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Dunkin", Notes: null};
   else if (Description.match(/Shipwreck Cove Duncan SC/i))  categorizedTransactionData = {Category: "Family Outings", DescriptionDisplay: "Shipwreck Cove", Notes: null};

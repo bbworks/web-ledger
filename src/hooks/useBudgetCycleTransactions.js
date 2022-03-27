@@ -7,7 +7,7 @@ const useBudgetCycleTransactions = (transactions, budgetCycle)=>{
   const isPaymentTransaction = transaction=>{
     return (
       transaction.Type === "Payment" ||
-      transaction.Description.match(/CREDIT CARD PAYMENT (?:MOBILE APP PAYMENT|ONLINE BANKING TRANSFER) TO \d{4} \d{6}\*{6}(\d{4})/i) ||
+      transaction.Description.match(/(?:MOBILE TO \*{12}(\d{4}) )?CREDIT CARD PAYMENT(?: (?:MOBILE APP PAYMENT|ONLINE BANKING TRANSFER) TO \d{4} \d{6}\*{6}(\d{4}))?/i) ||
       transaction.Description.match(/PAYMENT - \w{5} \w{3} \w{7} \w{2}/i)
     )
   };
@@ -15,7 +15,7 @@ const useBudgetCycleTransactions = (transactions, budgetCycle)=>{
   const isCorrespondingTransferTransaction = transaction=>{
     //Removes transactions that are transfers with corresponding credit/debit transfers in a different account
     return (
-      transaction.Type==="Transfer" &&
+      ["Transfer", "Deposit"].includes(transaction.Type) &&
       transactions.find(transaction2=>
         transaction.TransactionDate.getTime()===transaction2.TransactionDate.getTime() &&
         transaction.Amount===-transaction2.Amount &&

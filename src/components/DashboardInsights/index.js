@@ -62,19 +62,20 @@ const DashboardInsights = ({ budgetCycle, budgetCycleTransactions, budgetCycleBu
       }
     });
 
-    /* Check if we spent more than last month */
-    //const currentBudgetSpent = transactions.reduce((total,i)=>total+=i.amount);
-    //const lastBudgetSpent = transactions.reduce((total,i)=>total+=i.amount);
-    //const budgetCycleDifference = lastBudgetSpent-currentBudgetSpent;
-    // if (budgetCycleDifference > 0) {
-    //   const insight = {
-    //     type: "danger",
-    //     iconClass: "fas fa-sliders-h",
-    //     title: "Insights",
-    //     text: `You've spent ${convertNumberToCurrency(budgetCycleDifference)} more than last month.`
-    //   };
-    //   setInsights([...insights, insight]);
-    // }
+    /* Check if any bills were overpaid */
+    const overspentBillsWithSpent = budgetCycleBudgetsWithSpent.filter(budgetWithSpent=>budgetWithSpent.Type === "bill" && budgetWithSpent.Spent < budgetWithSpent.Amount);
+    if (overspentBillsWithSpent.length) {
+      overspentBillsWithSpent.forEach(overspentBillWithSpent=>{
+        const insight = {
+          type: "danger",
+          iconClass: "fas fa-exclamation",
+          title: "Higher Bill",
+          text: `You overpaid bill ${overspentBillWithSpent.Name} by ${convertNumberToCurrency(Math.abs(overspentBillWithSpent.Spent)-Math.abs(overspentBillWithSpent.Amount))}.`
+        };
+        console.log(overspentBillWithSpent)
+        setInsights(previousInsights=>[...previousInsights, insight]);
+      });
+    }
 
     /* Check if a bill has gone up */
     const bills = budgetCycleBudgets.filter(budgetData=>budgetData.type==="bill");
