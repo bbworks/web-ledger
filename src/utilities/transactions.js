@@ -238,7 +238,7 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/ATM CASH WITHDRAWAL (?:\d{4} \w{4} \d{12}|[\w ]+)/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "ATM withdrawal", Notes: null};
 
   //Transfers
-  else if (matches = Description.match(/ONLINE (?:BANKING TRANSFER (?:CREDIT )?(?:MOBILE APP TRANSFER )?)?(TO|FROM) (?:(?:\d{4} )?\d{9}|\*{14})(\d{4})(?: DEPOSIT TRANSFER)?/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: `Transfer ${matches[1].toLowerCase()} *${matches[2]}`, Notes: null};
+  else if (matches = Description.match(/(?:ONLINE (?:BANKING TRANSFER (?:CREDIT )?(?:MOBILE APP TRANSFER )?)?|MOBILE )(TO|FROM) (?:(?:\d{4} )?\d{9}|\*{14})(\d{4})(?: DEPOSIT TRANSFER)?/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: `Transfer ${matches[1].toLowerCase()} *${matches[2]}`, Notes: null};
   else if (matches = Description.match(/(?:AUTOMATIC TRANSFER DEBIT \w+ \w+ TRANSFER \d{9}(\d{4})-\d \d{10}|ACCOUNT NUMBER \d{5}(\d{4}) PREAUTHORIZED TRANSFER)/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: `Automatic transfer to *${matches[1] ?? matches[2]}`, Notes: null};
   else if (matches = Description.match(/ZELLE TRANSFER (TO|FROM) ([\w ]+) \d{2}\/\d{2} ?\w+/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: `Zelle transfer ${matches[1].toLowerCase()} ${toPascalCase(matches[2])}`, Notes: null};
 
@@ -281,6 +281,7 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/TA \w+ #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "TA Travel Centers of America", Notes: null};
   else if (Description.match(/SPEEDWAY \d+ \d+ \w+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "Speedway", Notes: null};
   else if (Description.match(/BUC-EE'S #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "Buc-ee's", Notes: null};
+  else if (Description.match(/V GO #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "V-Go", Notes: null};
 
   //Groceies & Necessities
   else if (Description.match(/Walmart(?: Grocery|\.com AA) \d{3}-?\d{3}-?\d{4} AR/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Walmart Supercenter", Notes: "grocery pickup"};
@@ -302,7 +303,7 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/Dollar General #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Dollar General", Notes: null};
   else if (Description.match(/Walgreens #\d+/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Walgreens", Notes: null};
   else if (Description.match(/WWW\.CVS\.COM 800-746-7287 RI/i))  categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "CVS Pharmacy", Notes: null};
-  else if (Description.match(/INSTACART\*\w+ SAN FRANCISCOCA/i))  categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Instacart", Notes: null};
+  else if (Description.match(/(?:PP\*)?INSTACART(?:\*\w+)? (?:SAN FRANCISCO ?CA|4029357733 CA)/i))  categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Instacart", Notes: null};
   else if (Description.match(/SHIPT\* ORDER BIRMINGHAM AL/i))  categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Shipt", Notes: null};
 
   //Family Outings

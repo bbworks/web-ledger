@@ -2,6 +2,10 @@ import {useState, useEffect} from 'react';
 
 import {getBudgetCycleFromDate, isAllTransactionsBudgetCycle} from './../utilities';
 
+const isTransactionWithinBudgetCycle = (transaction, budgetCycle)=>{
+  return getBudgetCycleFromDate(transaction.BudgetCycle || transaction.TransactionDate).getTime() === budgetCycle.getTime();
+};
+
 const useBudgetCycleTransactions = (transactions, budgetCycle)=>{
   //Declare functions
   const isPaymentTransaction = transaction=>{
@@ -12,15 +16,15 @@ const useBudgetCycleTransactions = (transactions, budgetCycle)=>{
     )
   };
 
-  const isCorrespondingTransferTransaction = transaction=>{
+  const isTransferWithCorrespondingNegativeTransfer = transaction=>{
     //Removes transactions that are transfers with corresponding credit/debit transfers in a different account
     return (
       ["Transfer", "Deposit"].includes(transaction.Type) &&
       transactions.find(transaction2=>
         transaction.TransactionDate.getTime()===transaction2.TransactionDate.getTime() &&
         transaction.Amount===-transaction2.Amount &&
-        (transaction.DescriptionDisplay && transaction.DescriptionDisplay.match(/\*(\d{4})/)[1]) === (transaction2.AccountNumber && transaction2.AccountNumber.match(/\*(\d{4})/)[1]) &&
-        (transaction.AccountNumber && transaction.AccountNumber.match(/\*(\d{4})/)[1]) === (transaction2.DescriptionDisplay && transaction2.DescriptionDisplay.match(/\*(\d{4})/)[1])
+        (typeof transaction.DescriptionDisplay === "string" && transaction.DescriptionDisplay.match(/\*(\d{4})/)[1]) === (transaction2.AccountNumber && transaction2.AccountNumber.match(/\*(\d{4})/)[1]) &&
+        (typeof transaction.AccountNumber === "string" && transaction.AccountNumber.match(/\*(\d{4})/)[1]) === (transaction2.DescriptionDisplay && transaction2.DescriptionDisplay.match(/\*(\d{4})/)[1])
       )
     )
   };
@@ -66,30 +70,27 @@ const useBudgetCycleTransactions = (transactions, budgetCycle)=>{
       isAllTransactionsBudgetCycle(budgetCycle) ?
       transactions.filter(transaction=>
         //Remove corresponding credit/debit transfers
-        !isCorrespondingTransferTransaction(transaction)
+        !isTransferWithCorrespondingNegativeTransfer(transaction)
       ) :
       transactions.filter(transaction=>
         //Transactions with this budget cycle
-        getBudgetCycleFromDate(transaction.BudgetCycle || transaction.TransactionDate).getTime() === budgetCycle.getTime()
+        isTransactionWithinBudgetCycle(transaction, budgetCycle)
         &&
         //Remove corresponding credit/debit transfers
-        !isCorrespondingTransferTransaction(transaction)
+        !isTransferWithCorrespondingNegativeTransfer(transaction)
       )
     );
 
     console.log(
       "useBudgetCycleTransactions filtered corresponding credit/debit transfers",
-      transactions.filter(transaction=>getBudgetCycleFromDate(transaction.BudgetCycle || transaction.TransactionDate).getTime() === budgetCycle.getTime()
-      &&
-      //Remove payment transactions
-      !(transaction.Type === "Payment")
-      &&
-      transaction.Type==="Transfer" && transactions.find(transaction2=>
-        transaction.TransactionDate.getTime()===transaction2.TransactionDate.getTime() &&
-        transaction.Amount===-transaction2.Amount &&
-        transaction.DescriptionDisplay.match(/\*(\d{4})/)[1]===transaction2.AccountNumber.match(/\*(\d{4})/)[1] &&
-        transaction.AccountNumber.match(/\*(\d{4})/)[1]===transaction2.DescriptionDisplay.match(/\*(\d{4})/)[1]
-      ))
+      transactions.filter(transaction=>
+        isTransactionWithinBudgetCycle(transaction, budgetCycle)
+        &&
+        //Remove payment transactions
+        !(transaction.Type === "Payment")
+        &&
+        isTransferWithCorrespondingNegativeTransfer(transaction)
+      )
     );
 
     //Get last budget cycle's income
