@@ -1,5 +1,10 @@
 .view.signin-view {
+  //Full screen view (no margin)
   min-height: 100vh;
   margin-top: 0;
   margin-bottom: 0;
+}
+
+.signin-view-container {
+  min-height: calc(100vh - 4rem);
 }
