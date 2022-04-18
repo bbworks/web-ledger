@@ -1,0 +1,15 @@
+.dashboard-month-dropdown-container {
+  display: flex;
+
+}
+
+.dashboard-month-dropdown {
+  flex-grow: 1;
+}
+
+.dashboard-month-dropdown-arrow {
+  display: block;
+  border: none;
+  background: white;
+  padding: 1rem;
+}
