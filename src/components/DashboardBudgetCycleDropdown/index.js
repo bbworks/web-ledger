@@ -2,7 +2,7 @@ import {getBudgetCycleFromDate, getBudgetCycleString, getBudgetCycleDescription,
 
 import './index.scss';
 
-const DashboardBudgetCycleDropdown = ({ transactions, budgetCycle, allBudgetCycles, onChange:onChangeProp })=>{
+const DashboardBudgetCycleDropdown = ({ transactions, budgetCycle, allBudgetCycles, onChange:onChangeProp, squashed })=>{
   const onClick = event=>{
     const epochTimeAttribute = event.target.getAttribute("data-budget-cycle");
     if (!epochTimeAttribute || isNaN(epochTimeAttribute)) return;
@@ -29,16 +29,16 @@ const DashboardBudgetCycleDropdown = ({ transactions, budgetCycle, allBudgetCycl
   };
 
   return (
-    <div className="dashboard-month-dropdown-container">
+    <div className={`dashboard-month-dropdown ${squashed ? "squashed" : ""}`}>
       <button className="dashboard-month-dropdown-arrow dashboard-month-dropdown-arrow-left" type="button" onClick={decrementBudgetCycle}>
         <i className="fas fa-chevron-left"></i>
       </button>
-      <div className="dashboard-month-dropdown dropdown">
-        <button id="dashboardMonthDropdown" className="btn dropdown-toggle container-fluid" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-          <strong className="dashboard-month-dropdown-month h2 d-block mb-0">
+      <div className="dashboard-month-dropdown-container dropdown">
+        <button id="dashboardMonthDropdown" className="dashboard-month-dropdown-toggle btn dropdown-toggle container-fluid" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <strong className="dashboard-month-dropdown-month h2 mb-0">
             {getBudgetCycleString(budgetCycle)}
           </strong>
-          <em className="dashboard-month-dropdown-month-description d-block text-muted h6">
+          <em className="dashboard-month-dropdown-month-description text-muted">
             {getBudgetCycleDescription(budgetCycle) ? ` (${getBudgetCycleDescription(budgetCycle)})` : ""}
           </em>
         </button>

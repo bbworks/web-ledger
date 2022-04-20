@@ -1,15 +1,50 @@
-.dashboard-month-dropdown-container {
-  display: flex;
-
-}
-
 .dashboard-month-dropdown {
-  flex-grow: 1;
-}
+  display: flex;
+  background-color: white;
 
-.dashboard-month-dropdown-arrow {
-  display: block;
-  border: none;
-  background: white;
-  padding: 1rem;
+  .dashboard-month-dropdown-container {
+    flex-grow: 1;
+  }
+
+  .dashboard-month-dropdown-toggle {
+    height: 100%;
+  }
+
+  .dashboard-month-dropdown-month,
+  .dashboard-month-dropdown-month-description {
+    display: block;
+  }
+
+  .dashboard-month-dropdown-arrow {
+    display: block;
+    border: none;
+    background: none;
+    padding: 1rem;
+  }
+
+  &.squashed {
+    .dropdown-toggle::after {
+      display: none;
+    }
+
+    .dashboard-month-dropdown-arrow {
+      padding: 0.5rem 1rem;
+      padding-top: 1rem;
+    }
+
+    .dashboard-month-dropdown-toggle {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .dashboard-month-dropdown-month {
+      font-size: 1rem;
+    }
+
+    .dashboard-month-dropdown-month-description {
+      font-size: 0.75rem;
+      margin-left: 0.5rem;
+    }
+  }
 }

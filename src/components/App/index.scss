@@ -7,10 +7,11 @@
   animation: spin 1s linear infinite normal both;
 }
 
+$header-height: 5rem;
+$footer-height: 4rem;
 .view {
   background-color: #e3f2fd;
-  min-height: calc(100vh - 4rem - 4rem);
-  margin-top: 4rem;
-  margin-bottom: 4rem;
-  padding: 1rem;
+  min-height: calc(100vh - #{$header-height} - #{$footer-height});
+  margin-top: $header-height;
+  margin-bottom: $footer-height;
 }
