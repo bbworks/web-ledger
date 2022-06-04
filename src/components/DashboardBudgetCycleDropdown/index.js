@@ -48,7 +48,7 @@ const DashboardBudgetCycleDropdown = ({ transactions, budgetCycle, allBudgetCycl
             {getBudgetCycleDescription(budgetCycle) ? ` (${getBudgetCycleDescription(budgetCycle)})` : ""}
           </em>
         </button>
-        <MonthPicker value={getBudgetCycleString(budgetCycle)} onChange={onMonthPickerChange} />
+        <MonthPicker value={budgetCycle} onChange={onMonthPickerChange} />
         <ul className="dropdown-menu container-fluid" onClick={onClick}>
           {allBudgetCycles.map(budgetCycle=>(
             <>

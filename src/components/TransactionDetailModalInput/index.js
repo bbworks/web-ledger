@@ -2,7 +2,7 @@ import TagBadge from './../TagBadge';
 import InputDropdown from './../InputDropdown';
 import MonthPicker from './../MonthPicker';
 
-import {getBudgetCycleString} from './../../utilities';
+import {getBudgetCycleString, getBudgetCycleFromBudgetCycleString} from './../../utilities';
 
 import './index.scss';
 
@@ -29,7 +29,7 @@ const TransactionDetailModalInput = ({ transactionDetail, tabIndex, onChange:onC
     return (
       <div className="position-relative d-flex align-items-stretch">
         <InputDropdown name={transactionDetail.name} value={transactionDetail.value} items={transactionDetail.items} placeholder={transactionDetail.placeholder} {...(transactionDetail.disabled && {disabled: true})} tabIndex={tabIndex} onInputDropdownInputChange={event=>onChange(event.target.value)} onInputDropdownInputKeyPress={onKeyPress}/>
-        <MonthPicker value={transactionDetail.value} onChange={value=>onChange(getBudgetCycleString(value))}/>
+        <MonthPicker value={getBudgetCycleFromBudgetCycleString(transactionDetail.value)} onChange={value=>onChange(getBudgetCycleString(value))}/>
       </div>
     );
 

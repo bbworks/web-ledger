@@ -7,15 +7,24 @@
 
 import {useState, useEffect} from 'react';
 
-import {getBudgetCycleFromDate, getBudgetCycleString, getBudgetCycleFromBudgetCycleString} from './../../utilities';
+import {getBudgetCycleFromDate, getBudgetCycleFromBudgetCycleString} from './../../utilities';
 
 import './index.scss';
 
 const MonthPicker = ({value:initialValue, onChange:onChangeProp, onToggle:onToggleProp})=>{
+  //Create helper functions
+  const convertYearMonthToMonthDate = (year, month)=>{
+    return getBudgetCycleFromDate(new Date(year, month));
+  };
+
+  const convertMonthStringToMonthDate = date=>{
+    return getBudgetCycleFromDate(date);
+  };
+
   const isValidInitialDate = initialValue instanceof Date && !isNaN(initialValue.getTime());
 
-  const MIN_DATE = new Date(-8640000000000000);
-  const MAX_DATE = new Date(8640000000000000);
+  const MIN_DATE = convertMonthStringToMonthDate(new Date(new Date(-8640000000000000).setUTCMonth(new Date(-8640000000000000).getUTCMonth()+1))); //as we can't go lower than the min date, increment 1 month
+  const MAX_DATE = convertMonthStringToMonthDate(new Date(8640000000000000));
 
   const getYearRangeMin = year=>{
     return Math.floor(year/10)*10;
@@ -24,7 +33,7 @@ const MonthPicker = ({value:initialValue, onChange:onChangeProp, onToggle:onTogg
   const currentDate = new Date();
   const startingValue = (isValidInitialDate ? initialValue : currentDate);
 
-  const [value, setValue] = useState(getBudgetCycleFromDate(startingValue));
+  const [value, setValue] = useState(convertYearMonthToMonthDate(startingValue));
   const [selectedYear, setSelectedYear] = useState(startingValue.getUTCFullYear());
   const [selectedMonth, setSelectedMonth] = useState(startingValue.getUTCMonth());
   const [isInYearView, setIsInYearView] = useState(false);
@@ -51,8 +60,8 @@ const MonthPicker = ({value:initialValue, onChange:onChangeProp, onToggle:onTogg
   ];
 
   //Create helper functions
-  const getMonthAsDate = (year, month)=>{
-    return getBudgetCycleFromDate(new Date(year, month));
+  const setValueWrapper = value=>{
+    return setValue(new Date(Math.max(Math.min(value, MAX_DATE), MIN_DATE)));
   };
 
   const setSelectedYearWrapper = value=>{
@@ -62,16 +71,16 @@ const MonthPicker = ({value:initialValue, onChange:onChangeProp, onToggle:onTogg
     });
   };
 
-  const isGrayedYear = selectedYear=>{
-    return selectedYear === yearRangeMin-1 || selectedYear === yearRangeMin+10;
-  };
-
   const setYearRangeMinWrapper = value=>{
     setYearRangeMin(previousYearRangeMin=>{
       if(typeof value === "function") value = value(previousYearRangeMin);
       return Math.max(Math.min(value, MAX_DATE.getUTCFullYear()), MIN_DATE.getUTCFullYear());
     });
   }
+
+  const isGrayedYear = selectedYear=>{
+    return selectedYear === yearRangeMin-1 || selectedYear === yearRangeMin+10;
+  };
 
 
   //Create event listeners
@@ -115,7 +124,7 @@ const MonthPicker = ({value:initialValue, onChange:onChangeProp, onToggle:onTogg
       setIsOpen(false);
 
       //Also, update the current value in state
-      const newValue = getMonthAsDate(datePart === "year" ? newSelection : selectedYear, datePart === "month" ? newSelection : selectedMonth);
+      const newValue = convertYearMonthToMonthDate(datePart === "year" ? newSelection : selectedYear, datePart === "month" ? newSelection : selectedMonth);
       setValue(newValue);
       //console.log(newValue.toJSON());
 
@@ -142,9 +151,9 @@ const MonthPicker = ({value:initialValue, onChange:onChangeProp, onToggle:onTogg
   //WHen the inital value passed in changes, update the value in state
   useEffect(()=>{
     if(!initialValue) return;
-    const value = getBudgetCycleFromBudgetCycleString(initialValue);
-    if(!value) return;
-    setValue(value);
+    setValueWrapper(initialValue);
+    setSelectedYear(initialValue.getUTCFullYear());
+    setSelectedMonth(initialValue.getUTCMonth());
   }, [initialValue]);
 
   return (

@@ -4,9 +4,14 @@ export const getBudgetCycleFromDate = date=>{
   return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth()));
 };
 
-const ALL_TRANSACTIONS_BUDGET_CYCLE = getBudgetCycleFromDate(new Date(8640000000000000)); //8640000000000000 (8.64e+15, max Date epoch)
+const ALL_TRANSACTIONS_BUDGET_CYCLE = {
+  string: "All Transactions",
+  date: getBudgetCycleFromDate(new Date(8640000000000000))
+}; //8640000000000000 (8.64e+15, max Date epoch)
 
 export const getBudgetCycleFromBudgetCycleString = budgetCycleString=>{
+  if (isAllTransactionsBudgetCycle(budgetCycleString)) return ALL_TRANSACTIONS_BUDGET_CYCLE.date;
+
   const [matches, monthString, yearString] = budgetCycleString.match(/(\w+) (\d{4})/);
   const year = Number(yearString);
   const month = getNumberFromMonth(monthString);
@@ -16,7 +21,7 @@ export const getBudgetCycleFromBudgetCycleString = budgetCycleString=>{
 
 export const getBudgetCycleString = budgetCycle=>{
   //Short-circut for "All Transactions" budget cycle
-  if (isAllTransactionsBudgetCycle(budgetCycle)) return "All Transactions";
+  if (isAllTransactionsBudgetCycle(budgetCycle)) return ALL_TRANSACTIONS_BUDGET_CYCLE.string;
 
   return `${getMonthFromNumber(budgetCycle.getUTCMonth())} ${budgetCycle.getUTCFullYear()}`;
 };
@@ -44,7 +49,7 @@ export const getAllBudgetCycles = transactions=>{
 
   return [
     ...new Set([
-      ALL_TRANSACTIONS_BUDGET_CYCLE,
+      ALL_TRANSACTIONS_BUDGET_CYCLE.date,
       todayBudgetCycle, //assure the current month is an option as well
       ...getBudgetCyclesFromTransactions(transactions),
     ].map(date=>date.getTime()))
@@ -54,5 +59,7 @@ export const getAllBudgetCycles = transactions=>{
 };
 
 export const isAllTransactionsBudgetCycle = budgetCycle=>{
-  return (!(budgetCycle instanceof Date) ? null : budgetCycle.getTime() === ALL_TRANSACTIONS_BUDGET_CYCLE.getTime());
+  if (typeof budgetCycle === "string") return budgetCycle === ALL_TRANSACTIONS_BUDGET_CYCLE.string;
+
+  return (!(budgetCycle instanceof Date) ? null : budgetCycle.getTime() === ALL_TRANSACTIONS_BUDGET_CYCLE.date.getTime());
 };
