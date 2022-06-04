@@ -17,7 +17,7 @@ const TransactionDetailModal = ({ transaction, isOpen, onClose, onSubmit:onSubmi
       </Modal.Header>
       <form className="transaction-modal-form" onSubmit={onSubmit}>
         <Modal.Body>
-          <p class="text-center">Are you sure?</p>
+          <p className="text-center">Are you sure?</p>
         </Modal.Body>
         <Modal.Footer>
           <button className="btn btn-secondary" type="button" tabIndex="1" onClick={onClose}>Cancel</button>

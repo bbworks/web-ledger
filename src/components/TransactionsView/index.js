@@ -87,7 +87,7 @@ const TransactionsView = ({ transactions, budgetCycle, allBudgetCycles, transact
   return (
     <div className="view transactions-view">
       <DashboardBudgetCycleDropdown transactions={transactions} budgetCycle={budgetCycle} allBudgetCycles={allBudgetCycles} onChange={onBudgetCycleChange} squashed/>
-      <div class="container-fluid p-0">
+      <div className="container-fluid p-0">
         <h1 className="page-title display-3">Transactions</h1>
         <TransactionsImportForm isOpen={isTransactionImportFormOpen} onSubmit={onTransactionsImportFormSubmit} onFileInputChange={onTransactionsImportFormFileInputChange} />
         <TransactionsData budgetCycleTransactions={budgetCycleTransactions} onTransactionEditButtonClick={onTransactionEditButtonClick} onTransactionDeleteButtonClick={onTransactionDeleteButtonClick} />

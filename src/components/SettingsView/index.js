@@ -14,7 +14,7 @@ const SettingsView = ({ setFooterNavbar, settings, onSubmit })=>{
 
   return (
     <div className="view settings-view">
-      <div class="container">
+      <div className="container">
         <h1 className="page-title display-3">Settings</h1>
         <SettingsForm settings={settings} onSubmit={onSubmit} />
       </div>

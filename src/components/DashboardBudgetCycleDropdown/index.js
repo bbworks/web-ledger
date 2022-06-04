@@ -64,7 +64,7 @@ const DashboardBudgetCycleDropdown = ({ transactions, budgetCycle, allBudgetCycl
                 isAllTransactionsBudgetCycle(budgetCycle) &&
                 (
                   <li>
-                    <hr class="dropdown-divider" />
+                    <hr className="dropdown-divider" />
                   </li>
                 )
               }

@@ -130,7 +130,7 @@ const InputDropdown = (props)=>{
 
     const match = matchValueAgainstValue(text, searchFilter);
     if (!match) return text;
-    return text.replace(match[1], `<mark class="input-dropdown-list-item-highlight">$&</mark>`);
+    return text.replace(match[1], `<mark className="input-dropdown-list-item-highlight">$&</mark>`);
   };
 
   const openInputDropdown = ()=>{

@@ -23,7 +23,7 @@ const BudgetsView = ({ transactions, budgetsData, budgetCycle, allBudgetCycles, 
   return (
     <div className="view budgets-view">
       <DashboardBudgetCycleDropdown transactions={transactions} budgetCycle={budgetCycle} allBudgetCycles={allBudgetCycles} onChange={onBudgetCycleChange} squashed />
-      <div class="container">
+      <div className="container">
         <h1 className="page-title display-3">Month Overview</h1>
         <div className="budget-graphs">
 
