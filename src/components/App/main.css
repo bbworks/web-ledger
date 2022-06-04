@@ -68,3 +68,9 @@ a {
   text-decoration: none;
   color: unset;
 }
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
