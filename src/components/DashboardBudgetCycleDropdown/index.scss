@@ -22,6 +22,12 @@
     padding: 1rem;
   }
 
+  .month-picker-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+
   &.squashed {
     .dropdown-toggle::after {
       display: none;

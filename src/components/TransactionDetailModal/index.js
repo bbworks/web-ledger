@@ -55,9 +55,8 @@ const TransactionDetailModal = ({ transaction, allBudgetCycles, categories, type
     console.log("Updating TransactionDetailModal state based on updated prop \"transaction\".", transaction, PostedDate, TransactionDate, AccountNumber, Amount, Description, Category, Notes, Type, Tags)
   }, [transaction, isOpen]);
 
-  const onTransactionDetailInputChange = (event, transactionDetail)=>{
-    const newValue = event.target.value;
-    transactionDetail.setState(newValue);
+  const onTransactionDetailInputChange = (value, transactionDetail)=>{
+    return transactionDetail.setState(value);
   };
 
   const onTransactionDetailInputKeyPress = event=>{
@@ -136,7 +135,7 @@ const TransactionDetailModal = ({ transaction, allBudgetCycles, categories, type
       <form className="transaction-detail-modal-form" onSubmit={transactionModalFormOnSubmit}>
         <Modal.Body>
           {transactionDetails.map((transactionDetail, i)=>(
-            <TransactionDetailModalInput key={transactionDetail.name} transactionDetail={transactionDetail} tabIndex={i+1} onChange={(event)=>onTransactionDetailInputChange(event, transactionDetail)} onKeyPress={onTransactionDetailInputKeyPress} onTagBadgeClick={onTagBadgeClick} />
+            <TransactionDetailModalInput key={transactionDetail.name} transactionDetail={transactionDetail} tabIndex={i+1} onChange={(value)=>onTransactionDetailInputChange(value, transactionDetail)} onKeyPress={onTransactionDetailInputKeyPress} onTagBadgeClick={onTagBadgeClick} />
           ))}
         </Modal.Body>
         <Modal.Footer>

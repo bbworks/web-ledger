@@ -1,5 +1,7 @@
 import {getBudgetCycleFromDate, getBudgetCycleString, getBudgetCycleDescription, isAllTransactionsBudgetCycle} from './../../utilities';
 
+import MonthPicker from './../MonthPicker';
+
 import './index.scss';
 
 const DashboardBudgetCycleDropdown = ({ transactions, budgetCycle, allBudgetCycles, onChange:onChangeProp, squashed })=>{
@@ -28,6 +30,10 @@ const DashboardBudgetCycleDropdown = ({ transactions, budgetCycle, allBudgetCycl
     return arrowOnClick(-1);
   };
 
+  const onMonthPickerChange = value=>{
+    onChangeProp(value);
+  };
+
   return (
     <div className={`dashboard-month-dropdown ${squashed ? "squashed" : ""}`}>
       <button className="dashboard-month-dropdown-arrow dashboard-month-dropdown-arrow-left" type="button" onClick={decrementBudgetCycle}>
@@ -42,6 +48,7 @@ const DashboardBudgetCycleDropdown = ({ transactions, budgetCycle, allBudgetCycl
             {getBudgetCycleDescription(budgetCycle) ? ` (${getBudgetCycleDescription(budgetCycle)})` : ""}
           </em>
         </button>
+        <MonthPicker value={getBudgetCycleString(budgetCycle)} onChange={onMonthPickerChange} />
         <ul className="dropdown-menu container-fluid" onClick={onClick}>
           {allBudgetCycles.map(budgetCycle=>(
             <>
