@@ -1,0 +1,21 @@
+.view.budgets-view {
+  display: flex;
+  flex-direction: column;
+
+  .new-budget-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+  }
+
+  .new-budget-paragraph {
+    max-width: 40ch;
+    text-align: center;
+  }
+
+  .new-budget-button {
+    margin-bottom: 1rem;
+  }
+}

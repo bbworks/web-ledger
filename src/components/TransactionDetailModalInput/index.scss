@@ -1,8 +1,16 @@
 .transaction-detail-modal-input {
   background: none;
-  border: none;
   outline: none;
   transition: color 0.2s, background-color 0.2s;
+}
+
+.transaction-detail-modal-input-text,
+.transaction-detail-modal-textarea {
+  border: none;
+}
+
+.transaction-detail-modal-input-checkbox {
+  margin: 0.375rem 0.75rem;
 }
 
 .transaction-detail-modal-input[disabled]:hover {

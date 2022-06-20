@@ -10,9 +10,14 @@ const ALL_TRANSACTIONS_BUDGET_CYCLE = {
 }; //8640000000000000 (8.64e+15, max Date epoch)
 
 export const getBudgetCycleFromBudgetCycleString = budgetCycleString=>{
+  if(!budgetCycleString) return "";
+
   if (isAllTransactionsBudgetCycle(budgetCycleString)) return ALL_TRANSACTIONS_BUDGET_CYCLE.date;
 
   const [matches, monthString, yearString] = budgetCycleString.match(/(\w+) (\d{4})/);
+
+  if (!matches) return "";
+
   const year = Number(yearString);
   const month = getNumberFromMonth(monthString);
 

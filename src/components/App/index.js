@@ -5,7 +5,7 @@ import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
 //Import source code
 import {getBudgetCycleFromDate, getBudgetCyclesFromTransactions, getAllBudgetCycles, typeCheckTransactions, isTransactionDuplicate, categorizeTransactionByDescription, importTransactions, typeCheckBudgetsData, typeCheckAccountsData, typeCheckAccountData, throwException} from './../../utilities';
 import {getSpreadsheetId, setSpreadsheetId, getClientId, setClientId, initAuthorization} from './../../googleApi';
-import {getTransactions, updateTransactions, getBudgetsData, getAccountsData, getAccountData} from './../../api';
+import {getTransactions, updateTransactions, getBudgetsData, updateBudgetsData, getAccountsData, getAccountData} from './../../api';
 import {useScript, useConsoleLog, useBudgetCycleBudgets} from './../../hooks';
 
 //Import custom components
@@ -56,6 +56,7 @@ const App = () => {
 
   const transactionTypes = [
     null,
+
     //Credit card
     "Charges",     //-
     "Payments",    //+
@@ -67,6 +68,30 @@ const App = () => {
     "Deposit",     //+
     "Transfer",    //+/-
     "Payment",     //-
+  ];
+
+  const budgetTypes = [
+    null,
+    "income",   //+
+    "expense",  //-
+    "savings",  //+
+    "bill",     //-
+  ];
+
+  const budgetGroups = [
+    null,
+    "Income",
+    "Housing",
+    "Auto & Transportation",
+    "Utilities & Services",
+    "Subscriptions & Memberships",
+    "Giving",
+    "Savings",
+    "Food & Dining",
+    "Children",
+    "Personal",
+    "Miscellaneous",
+    "Loans",
   ];
 
   const [allBudgetCycles, setAllBudgetCycles] = useState(getAllBudgetCycles(transactions));
@@ -250,13 +275,47 @@ const App = () => {
     });
   };
 
+  const setBudgetsDataHandler = (previousBudgets, newBudgets, callback)=>{
+    //If there are no new budgets, short-circuit
+    if ((Array.isArray(newBudgets) ? !newBudgets.length : newBudgets !== false && !newBudgets)) return previousBudgets;
+
+    //If there are new budgets, massage them
+    let budgets;
+    if (newBudgets) {
+      //Check that we have an array of budgets
+      let budgetsArray = newBudgets;
+      if (!(newBudgets instanceof Array)) budgetsArray = [newBudgets];
+
+      //Type check budgets data to convert from strings to the correct type
+      budgets = typeCheckBudgetsData(budgetsArray);
+    }
+
+    //Return the data manipulation callback result, sorted
+    if (callback) return callback(previousBudgets, budgets)
+      .sort((a,b)=>b.BudgetCycle-a.BudgetCycle);
+
+    //Otherwise, just return the budgets, sorted
+    return budgets.sort((a,b)=>b.BudgetCycle-a.BudgetCycle);
+  };
+
   const setBudgetsDataWrapper = newBudgetsData=>{
     //Import new data
     setBudgetsData(previousBudgetsData=>{
-      if (!newBudgetsData) return [];
+      //Run through budget normalization
+      return setBudgetsDataHandler(previousBudgetsData, newBudgetsData);
+    });
+  };
 
-      const typeCheckedData = typeCheckBudgetsData(newBudgetsData);
-      return typeCheckedData;
+  const createBudgetWrapper = newBudget=>{
+    //Add new budget
+    setBudgetsData(previousBudgets=>{
+      const callback = (previousBudgets, newBudget)=>{
+        //Append the new budget
+        return [...previousBudgets, ...newBudget];
+      };
+
+      //Run through budget normalization
+      return setBudgetsDataHandler(previousBudgets, newBudget, callback);
     });
   };
 
@@ -339,6 +398,10 @@ const App = () => {
     closeTransactionsImportConfirmedModal();
   };
 
+  const onNewBudgetModalSubmit = (newBudget)=>{
+    createBudgetWrapper(newBudget);
+  };
+
   const onLogoTextScrollIn = ()=>{
     setIsLoadingAnimationComplete(true);
   };
@@ -391,6 +454,13 @@ const App = () => {
   }, [transactions]);
 
 
+  //Whenever the budgets are updated, save them off as well
+  useEffect(()=>{
+    if (!budgetsData.length) return;
+    updateBudgetsData(budgetsData);
+  }, [budgetsData]);
+
+
   //Return a "loading page" while determining if the user is signed in
   if (!isLoadingAnimationComplete) return (
     <div className="App">
@@ -422,10 +492,10 @@ const App = () => {
             <DashboardView signedInUser={signedInUser} transactions={transactions} accountsData={accountsData} accountData={accountData} budgetsData={budgetsData} budgetCycle={budgetCycle} allBudgetCycles={allBudgetCycles} onBudgetCycleChange={onBudgetCycleChange} setFooterNavbar={setFooterNavbar} />
           </Route>
           <Route path="/budgets" exact>
-            <BudgetsView transactions={transactions} budgetsData={budgetsData} budgetCycle={budgetCycle} allBudgetCycles={allBudgetCycles} onBudgetCycleChange={onBudgetCycleChange} setFooterNavbar={setFooterNavbar} />
+            <BudgetsView transactions={transactions} budgetsData={budgetsData} budgetCycle={budgetCycle} allBudgetCycles={allBudgetCycles} onBudgetCycleChange={onBudgetCycleChange} setFooterNavbar={setFooterNavbar} budgetTypes={budgetTypes} budgetGroups={budgetGroups} onNewBudgetModalSubmit={onNewBudgetModalSubmit} />
           </Route>
           <Route path="/transactions" exact>
-            <TransactionsView transactions={transactions} budgetCycle={budgetCycle} allBudgetCycles={allBudgetCycles} transactionsImportDuplicatesModalNewTransactions={transactionsImportDuplicatesModalNewTransactions} transactionsImportDuplicatesModalDuplicates={transactionsImportDuplicatesModalDuplicates} isTransactionsImportDuplicatesModalOpen={isTransactionsImportDuplicatesModalOpen} onTransactionsImportDuplicatesModalClose={closeTransactionsImportDuplicatesModal} onTransactionsImportDuplicatesModalSubmit={onTransactionsImportDuplicatesModalSubmit} onTransactionsImportFormSubmit={onTransactionsImportFormSubmit} onTransactionsImportFormFileInputChange={onTransactionsImportFormFileInputChange} onTransactionDetailModalSubmit={onTransactionDetailModalSubmit} onTransactionDeleteModalSubmit={onTransactionDeleteModalSubmit} transactionsImportConfirmedModalTransactions={transactionsImportConfirmedModalTransactions} isTransactionsImportConfirmedModalOpen={isTransactionsImportConfirmedModalOpen} closeTransactionsImportConfirmedModal={closeTransactionsImportConfirmedModal} onTransactionsImportConfirmedModalSubmit={onTransactionsImportConfirmedModalSubmit} onBudgetCycleChange={onBudgetCycleChange} setFooterNavbar={setFooterNavbar} transactionCategories={transactionCategories} transactionTypes={transactionTypes}/>
+            <TransactionsView transactions={transactions} budgetCycle={budgetCycle} allBudgetCycles={allBudgetCycles} transactionsImportDuplicatesModalNewTransactions={transactionsImportDuplicatesModalNewTransactions} transactionsImportDuplicatesModalDuplicates={transactionsImportDuplicatesModalDuplicates} isTransactionsImportDuplicatesModalOpen={isTransactionsImportDuplicatesModalOpen} onTransactionsImportDuplicatesModalClose={closeTransactionsImportDuplicatesModal} onTransactionsImportDuplicatesModalSubmit={onTransactionsImportDuplicatesModalSubmit} onTransactionsImportFormSubmit={onTransactionsImportFormSubmit} onTransactionsImportFormFileInputChange={onTransactionsImportFormFileInputChange} onTransactionDetailModalSubmit={onTransactionDetailModalSubmit} onTransactionDeleteModalSubmit={onTransactionDeleteModalSubmit} transactionsImportConfirmedModalTransactions={transactionsImportConfirmedModalTransactions} isTransactionsImportConfirmedModalOpen={isTransactionsImportConfirmedModalOpen} closeTransactionsImportConfirmedModal={closeTransactionsImportConfirmedModal} onTransactionsImportConfirmedModalSubmit={onTransactionsImportConfirmedModalSubmit} onNewBudgetModalSubmit={onNewBudgetModalSubmit} onBudgetCycleChange={onBudgetCycleChange} setFooterNavbar={setFooterNavbar} transactionCategories={transactionCategories} transactionTypes={transactionTypes}/>
           </Route>
           <Route path="/settings" exact>
             <SettingsView setFooterNavbar={setFooterNavbar} settings={settings} onSubmit={onSettingsViewSubmit}/>

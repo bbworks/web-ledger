@@ -15,7 +15,7 @@
   --light-accent-color: rgb(235,235,235);
   --muted-color: gray;
   /* default theme colors */
-  --primary-color: #586A6A;
+  --primary-color: #0D6EFD;
   --secondary-color: #B9A394;
   --text-primary-color: var(--dark-color);
   --text-secondary-color: var(--light-color);
@@ -73,4 +73,9 @@ button {
   background: none;
   border: none;
   cursor: pointer;
+}
+
+.hyperlink {
+  text-decoration: underline;
+  color: var(--primary-color);
 }

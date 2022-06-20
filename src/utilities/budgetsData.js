@@ -26,6 +26,8 @@ export const typeCheckBudgetsData = budgetsData=>{
       ...budgetData,
       Amount: parseGoogleSheetsNumber(budgetData.Amount),
       BudgetCycle: parseGoogleSheetsDate(budgetData.BudgetCycle),
+      DateCreated: parseGoogleSheetsDate(budgetData.DateCreated),
+      DateModified: parseGoogleSheetsDate(budgetData.DateModified),
     })
   );
 };
