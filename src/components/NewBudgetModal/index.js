@@ -32,6 +32,10 @@ const NewBudgetModal = ({ budgetCycle, allBudgetCycles, types, groups, isOpen, o
     return budgetDetail.setState(value);
   };
 
+  const onInputDropdownSubmit = (value, budgetDetail)=>{
+    return budgetDetail.setState(value);
+  };
+
   const onSubmit = event=>{
     const now = new Date();
 
@@ -76,10 +80,6 @@ const NewBudgetModal = ({ budgetCycle, allBudgetCycles, types, groups, isOpen, o
     onSubmitProp(finalValue);
   };
 
-  const onInputDropdownSubmit = (value, budgetDetail)=>{
-    return budgetDetail.setState(value);
-  };
-
   //Set default budget groups for each selected budget type
   useEffect(()=>{
     if(!Type) return setGroup("");
@@ -121,7 +121,7 @@ const NewBudgetModal = ({ budgetCycle, allBudgetCycles, types, groups, isOpen, o
           {budgetDetails.map((budgetDetail, i)=>(
             !isBillOptionsOpen && ["DueDate", "IsPaidByCreditCardNotAccount"].includes(budgetDetail.name) ?
             null :
-            <TransactionDetailModalInput key={budgetDetail.name} transactionDetail={budgetDetail} tabIndex={i+1} onChange={(value)=>onTransactionDetailInputChange(value, budgetDetail)} onInputDropdownSubmit={(event, value)=>onInputDropdownSubmit(value, budgetDetail)} />
+            <TransactionDetailModalInput key={budgetDetail.name} transactionDetail={budgetDetail} tabIndex={i+1} onChange={(value)=>onTransactionDetailInputChange(value, budgetDetail)} onInputDropdownSubmit={(value)=>onInputDropdownSubmit(value, budgetDetail)} />
           ))}
         </Modal.Body>
         <Modal.Footer>

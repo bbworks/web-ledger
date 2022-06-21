@@ -205,10 +205,7 @@ const InputDropdown = (props)=>{
     //Close the input dropdown
     closeInputDropdown();
 
-    onSubmit({
-      ...event,
-      isSelectedListItem: true,
-    }, newValue);
+    onSubmit(newValue);
   };
 
   const onInputDropdownListItemMouseMove = event=>{
@@ -307,10 +304,7 @@ const InputDropdown = (props)=>{
       closeInputDropdown();
 
       //Act as though a form was submitted with a given value
-      onSubmit({
-        ...event,
-        isSelectedListItem: (selectedListItem ? true : false),
-      }, newValue);
+      onSubmit(newValue);
 
       return;
     }
@@ -321,8 +315,8 @@ const InputDropdown = (props)=>{
     window.setTimeout(()=>closeInputDropdown(), 100);
   };
 
-  const onSubmit = (event, value)=>{
-    if (onSubmitProp) onSubmitProp(event, value);
+  const onSubmit = (value)=>{
+    if (onSubmitProp) onSubmitProp(value);
   };
 
   //Update the dropdown value whenever a new value or items are passed
