@@ -306,16 +306,16 @@ const App = () => {
     });
   };
 
-  const createBudgetWrapper = newBudget=>{
+  const createBudgetsWrapper = newBudgets=>{
     //Add new budget
     setBudgetsData(previousBudgets=>{
-      const callback = (previousBudgets, newBudget)=>{
+      const callback = (previousBudgets, newBudgets)=>{
         //Append the new budget
-        return [...previousBudgets, ...newBudget];
+        return [...previousBudgets, ...newBudgets];
       };
 
       //Run through budget normalization
-      return setBudgetsDataHandler(previousBudgets, newBudget, callback);
+      return setBudgetsDataHandler(previousBudgets, newBudgets, callback);
     });
   };
 
@@ -399,7 +399,11 @@ const App = () => {
   };
 
   const onNewBudgetModalSubmit = (newBudget)=>{
-    createBudgetWrapper(newBudget);
+    createBudgetsWrapper(newBudget);
+  };
+
+  const onCloneBudgetModalSubmit = (newBudgets)=>{
+    createBudgetsWrapper(newBudgets);
   };
 
   const onLogoTextScrollIn = ()=>{
@@ -492,7 +496,7 @@ const App = () => {
             <DashboardView signedInUser={signedInUser} transactions={transactions} accountsData={accountsData} accountData={accountData} budgetsData={budgetsData} budgetCycle={budgetCycle} allBudgetCycles={allBudgetCycles} onBudgetCycleChange={onBudgetCycleChange} setFooterNavbar={setFooterNavbar} />
           </Route>
           <Route path="/budgets" exact>
-            <BudgetsView transactions={transactions} budgetsData={budgetsData} budgetCycle={budgetCycle} allBudgetCycles={allBudgetCycles} onBudgetCycleChange={onBudgetCycleChange} setFooterNavbar={setFooterNavbar} budgetTypes={budgetTypes} budgetGroups={budgetGroups} onNewBudgetModalSubmit={onNewBudgetModalSubmit} />
+            <BudgetsView transactions={transactions} budgetsData={budgetsData} budgetCycle={budgetCycle} allBudgetCycles={allBudgetCycles} onBudgetCycleChange={onBudgetCycleChange} setFooterNavbar={setFooterNavbar} budgetTypes={budgetTypes} budgetGroups={budgetGroups} onNewBudgetModalSubmit={onNewBudgetModalSubmit} onCloneBudgetModalSubmit={onCloneBudgetModalSubmit} />
           </Route>
           <Route path="/transactions" exact>
             <TransactionsView transactions={transactions} budgetCycle={budgetCycle} allBudgetCycles={allBudgetCycles} transactionsImportDuplicatesModalNewTransactions={transactionsImportDuplicatesModalNewTransactions} transactionsImportDuplicatesModalDuplicates={transactionsImportDuplicatesModalDuplicates} isTransactionsImportDuplicatesModalOpen={isTransactionsImportDuplicatesModalOpen} onTransactionsImportDuplicatesModalClose={closeTransactionsImportDuplicatesModal} onTransactionsImportDuplicatesModalSubmit={onTransactionsImportDuplicatesModalSubmit} onTransactionsImportFormSubmit={onTransactionsImportFormSubmit} onTransactionsImportFormFileInputChange={onTransactionsImportFormFileInputChange} onTransactionDetailModalSubmit={onTransactionDetailModalSubmit} onTransactionDeleteModalSubmit={onTransactionDeleteModalSubmit} transactionsImportConfirmedModalTransactions={transactionsImportConfirmedModalTransactions} isTransactionsImportConfirmedModalOpen={isTransactionsImportConfirmedModalOpen} closeTransactionsImportConfirmedModal={closeTransactionsImportConfirmedModal} onTransactionsImportConfirmedModalSubmit={onTransactionsImportConfirmedModalSubmit} onNewBudgetModalSubmit={onNewBudgetModalSubmit} onBudgetCycleChange={onBudgetCycleChange} setFooterNavbar={setFooterNavbar} transactionCategories={transactionCategories} transactionTypes={transactionTypes}/>

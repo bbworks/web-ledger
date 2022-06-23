@@ -7,13 +7,24 @@ export const nullCoalesce = function(value) {
   return [...arguments].reduce((accumulator, value)=>accumulator = (isFalsy(accumulator) && !isFalsy(value) ? value : accumulator), null);
 };
 
-export const convertNumberToCurrency = function(value) {
+export const parseNumber = value=>{
+  const potentialNumber = Number(value);
+  return (value !== null && value !== undefined && !isNaN(potentialNumber) ? potentialNumber : null);
+};
+
+export const convertNumberToCurrency = value=>{
   if (isNaN(value)) return null;
   return Number(value)
     .toFixed(2)
     .toString()
     .replace(/\d{4,}/, (p0)=>p0.split('').reverse().join('').replace(/(\d{3})(?=\d)/g, "$1,").split('').reverse().join('')) //add commas
     .replace(/(\d)/, "$$$1") //add $
+};
+
+export const convertCurrencyToNumber = value=>{
+  if(value === null || value === undefined) return NaN;
+  if (isNaN(value) && typeof value === "string") value = value.replace(/(\$|,)/g, "");
+  return parseNumber(value) ?? NaN;
 };
 
 export const convertCSVToJSON = function(csv, delimiter = ",") {

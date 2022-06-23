@@ -1,3 +1,5 @@
+import {parseNumber} from './../utilities';
+
 //Private Functions
 const getHeadersFromJSON = JSON=>{
   if (!JSON instanceof Array) JSON = [JSON];
@@ -148,8 +150,7 @@ export const convertArrayToA1Notation = (rowsColumnsArray, startingCell="A1")=>{
 };
 
 export const parseGoogleSheetsNumber = value=>{
-  const potentialNumber = Number(value);
-  return (value && !isNaN(potentialNumber) ? potentialNumber : null);
+  return parseNumber(value);
 };
 
 export const parseGoogleSheetsDate = JSON=>{

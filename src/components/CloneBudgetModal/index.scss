@@ -1,0 +1,22 @@
+.clone-budget-modal {
+  .clone-budget-modal-form-input-group {
+    display: flex;
+    width: 100%;
+    padding: 0.37rem 0.75rem;
+  }
+
+  .clone-budget-modal-form-input-text {
+    border: none;
+    width: 100%;
+  }
+
+  .clone-budget-modal-form-input-text-name {
+    flex: 1 0 0;
+  }
+
+  .clone-budget-modal-form-input-text-amount,
+  .clone-budget-modal-form-input-text-type,
+  .clone-budget-modal-form-input-text-group {
+    flex: 0 1 5rem;
+  }
+}

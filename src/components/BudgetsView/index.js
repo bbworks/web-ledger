@@ -5,6 +5,7 @@ import BudgetGraph from './../BudgetGraph';
 import DashboardBudgetCycleDropdown from './../DashboardBudgetCycleDropdown';
 import TransactionsImportFormToggle from './../TransactionsImportFormToggle';
 import NewBudgetModal from './../NewBudgetModal';
+import CloneBudgetModal from './../CloneBudgetModal';
 
 import {getBudgetAmountSpentFromTransactions} from './../../utilities';
 
@@ -12,7 +13,7 @@ import {useBudgetCycleTransactions, useBudgetCycleBudgets} from './../../hooks';
 
 import './index.scss';
 
-const BudgetsView = ({ transactions, budgetsData, budgetCycle, allBudgetCycles, onBudgetCycleChange, budgetTypes, budgetGroups, onNewBudgetModalSubmit:onNewBudgetModalSubmitProp, setFooterNavbar })=>{
+const BudgetsView = ({ transactions, budgetsData, budgetCycle, allBudgetCycles, onBudgetCycleChange, budgetTypes, budgetGroups, onNewBudgetModalSubmit:onNewBudgetModalSubmitProp, onCloneBudgetModalSubmit:onCloneBudgetModalSubmitProp, setFooterNavbar })=>{
   //Send the route to the footer navbar
   const route = useLocation().pathname;
   useEffect(()=>{
@@ -20,6 +21,7 @@ const BudgetsView = ({ transactions, budgetsData, budgetCycle, allBudgetCycles, 
   }, [route]);
 
   const [isNewBudgetModalOpen, setIsNewBudgetModalOpen] = useState(false);
+  const [isCloneBudgetModalOpen, setIsCloneBudgetModalOpen] = useState(false);
 
   const budgetCycleTransactions = useBudgetCycleTransactions(transactions, budgetCycle);
   const budgetCycleBudgets = useBudgetCycleBudgets(budgetsData, budgetCycle);
@@ -30,7 +32,7 @@ const BudgetsView = ({ transactions, budgetsData, budgetCycle, allBudgetCycles, 
 
   const onCloneBudgetCycleBudgetLinkClick = event=>{
     event.preventDefault();
-    console.log("onCloneBudgetCycleBudgetLinkClick");
+    openCloneBudgetModal();
   };
 
   const openNewBudgetModal = ()=>{
@@ -41,10 +43,22 @@ const BudgetsView = ({ transactions, budgetsData, budgetCycle, allBudgetCycles, 
     setIsNewBudgetModalOpen(false);
   };
 
+  const openCloneBudgetModal = ()=>{
+    setIsCloneBudgetModalOpen(true);
+  };
+
+  const closeCloneBudgetModal = ()=>{
+    setIsCloneBudgetModalOpen(false);
+  };
+
   const onNewBudgetModalSubmit = newBudget=>{
-    console.log(newBudget);
     onNewBudgetModalSubmitProp(newBudget);
     closeNewBudgetModal();
+  };
+
+  const onCloneBudgetModalSubmit = budgets=>{
+    onCloneBudgetModalSubmitProp(budgets);
+    closeCloneBudgetModal();
   };
 
   const onTransactionImportFormToggleClick = event=>{
@@ -84,6 +98,7 @@ const BudgetsView = ({ transactions, budgetsData, budgetCycle, allBudgetCycles, 
           <TransactionsImportFormToggle onClick={onTransactionImportFormToggleClick} />
         }
       <NewBudgetModal budgetCycle={budgetCycle} allBudgetCycles={allBudgetCycles} types={budgetTypes} groups={budgetGroups} isOpen={isNewBudgetModalOpen} onClose={closeNewBudgetModal} onSubmit={onNewBudgetModalSubmit} />
+      <CloneBudgetModal budgetCycle={budgetCycle} allBudgetCycles={allBudgetCycles} budgetsData={budgetsData} types={budgetTypes} groups={budgetGroups} isOpen={isCloneBudgetModalOpen} onClose={closeCloneBudgetModal} onSubmit={onCloneBudgetModalSubmit} />
     </div>
   );
 };
