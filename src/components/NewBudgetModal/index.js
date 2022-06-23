@@ -126,7 +126,7 @@ const NewBudgetModal = ({ budgetCycle, allBudgetCycles, types, groups, isOpen, o
         </Modal.Body>
         <Modal.Footer>
           <button className="btn btn-secondary" type="button" onClick={onClose}>Cancel</button>
-          <button className="btn btn-primary" type="submit">Save</button>
+          <button className="btn btn-primary" type="submit">Create</button>
         </Modal.Footer>
       </form>
     </Modal>
