@@ -5,6 +5,8 @@ import {getBudgetCycleFromDate} from './../utilities';
 const useBudgetCycleBudgets = (budgetsData, budgetCycle)=>{
   //Declare functions
   const getBudgetCycleBudgets = (budgetsData, budgetCycle)=>{
+    if (!(budgetCycle instanceof Date)) return [];
+
     const filteredBudgets = budgetsData.filter(b=>b.BudgetCycle.getTime() === budgetCycle.getTime());
     console.log("budgetCycleBudgets", filteredBudgets);
     return filteredBudgets;
