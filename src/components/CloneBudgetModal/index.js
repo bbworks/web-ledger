@@ -20,13 +20,13 @@ const CloneBudgetModal = ({ budgetCycle, budgetsData, types, groups, allBudgetCy
 
   const previousBudgetCycle = getPreviousBudgetCycleWithBudgets(allBudgetCycles, budgetCycle);
 
-  const [BudgetCycle, setBudgetCycle] = useState(previousBudgetCycle); //empty string, as initial value for input[type="text"]
+  const [BudgetCycle, setBudgetCycle] = useState(previousBudgetCycle);
 
   const budgetCycleBudgets = useBudgetCycleBudgets(budgetsData, BudgetCycle);
 
-  const [clonedBudgetCycleBudgets, setClonedBudgetCycleBudgets] = useState(budgetCycleBudgets); //empty string, as initial value for input[type="text"]
+  const [clonedBudgetCycleBudgets, setClonedBudgetCycleBudgets] = useState(budgetCycleBudgets);
 
-  const [isBillOptionsOpen, setIsBillOptionsOpen] = useState(false); //empty string, as initial value for input[type="text"]
+  const [isBillOptionsOpen, setIsBillOptionsOpen] = useState(false);
 
   const inputOptions = [
     {name: "BudgetCycle", placeholder: "Select a budget cycle", value: getBudgetCycleString(BudgetCycle), items: allBudgetCycles.map(b=>getBudgetCycleString(b)), tag: "input", tagType: "text", setState: setBudgetCycle, disabled: false},
@@ -73,6 +73,14 @@ const CloneBudgetModal = ({ budgetCycle, budgetsData, types, groups, allBudgetCy
     onSubmitProp(value);
   };
 
+  const onInputGroupMouseDeleteButtonClick = index=>{
+    setClonedBudgetCycleBudgets(previousClonedBudgetCycleBudgets=>[
+      ...previousClonedBudgetCycleBudgets.slice(0, index),
+      ...previousClonedBudgetCycleBudgets.slice(index+1),
+    ]);
+  };
+
+
   //Whenever budgetCycleBudgets gets updated,
   // update the clonedBudgetCycleBudgets
   useEffect(()=>{
@@ -95,19 +103,26 @@ const CloneBudgetModal = ({ budgetCycle, budgetsData, types, groups, allBudgetCy
       <form className="clone-budget-modal-form" onSubmit={onSubmit}>
         <Modal.Body>
           {
-            inputOptions.map((inputOption, i)=><TransactionDetailModalInput key={inputOption.name} transactionDetail={inputOption} tabIndex={i+1} onChange={(value)=>onClonedBudgetCycleChange(value, inputOption)} onInputDropdownSubmit={(value)=>onClonedBudgetCycleSubmit(value, inputOption)} />)
+            inputOptions.map((inputOption, i)=>(
+              <TransactionDetailModalInput key={inputOption.name} transactionDetail={inputOption} tabIndex={i+1} onChange={(value)=>onClonedBudgetCycleChange(value, inputOption)} onInputDropdownSubmit={(value)=>onClonedBudgetCycleSubmit(value, inputOption)} />
+            ))
           }
-          {clonedBudgetCycleBudgets.map((budgetCycleBudget, i)=>(
-            <div className="clone-budget-modal-form-input-group">
-              <input className="clone-budget-modal-form-input-text clone-budget-modal-form-input-text-name" type="text" name={`clone-budget-${i+1}-name`} value={budgetCycleBudget.Name || ""} onChange={(event)=>onInputChange("Name", event.target.value, i)} />
-              <input className="clone-budget-modal-form-input-text clone-budget-modal-form-input-text-amount" type="text" name={`clone-budget-${i+1}-amount`} value={(!isNaN(Number(budgetCycleBudget.Amount)) ? convertNumberToCurrency(budgetCycleBudget.Amount) : budgetCycleBudget.Amount) || ""} onChange={(event)=>onInputChange("Amount", event.target.value, i)} />
-              <InputDropdown className="clone-budget-modal-form-input-text clone-budget-modal-form-input-text-type" type="text" name={`clone-budget-${i+1}-type`} value={budgetCycleBudget.Type || ""} items={types} onChange={(value)=>onInputChange("Type", value, i)} />
-              <InputDropdown className="clone-budget-modal-form-input-text clone-budget-modal-form-input-text-group" type="text" name={`clone-budget-${i+1}-group`} value={budgetCycleBudget.Group || ""} items={groups} onChange={(value)=>onInputChange("Group", value, i)} />
-              <input className="clone-budget-modal-form-input-text clone-budget-modal-form-input-text-duedate" type="hidden" name={`clone-budget-${i+1}-duedate`} value={budgetCycleBudget.DueDate || ""} onChange={(event)=>onInputChange("DueDate", event.target.value, i)} />
-              <input className="clone-budget-modal-form-input-text clone-budget-modal-form-input-text-Ispaidbycreditcardnotaccount" type="hidden" name={`clone-budget-${i+1}-Ispaidbycreditcardnotaccount`} value={!(budgetCycleBudget.IsPaidByCreditCardNotAccount === null || budgetCycleBudget.IsPaidByCreditCardNotAccount === undefined) && budgetCycleBudget.IsPaidByCreditCardNotAccount.toString() || ""} onChange={(event)=>onInputChange("IsPaidByCreditCardNotAccount", event.target.value, i)} />
-              <input className="clone-budget-modal-form-input-text clone-budget-modal-form-input-text-budgetcycle" type="hidden" name={`clone-budget-${i+1}-budgetcycle`} value={budgetCycle || ""} />
-            </div>
-          ))}
+          <div>
+            {clonedBudgetCycleBudgets.map((budgetCycleBudget, i)=>(
+              <div key={i} className="clone-budget-modal-form-input-group">
+                <input className="clone-budget-modal-form-input-text clone-budget-modal-form-input-text-name" type="text" name={`clone-budget-${i+1}-name`} value={budgetCycleBudget.Name || ""} onChange={(event)=>onInputChange("Name", event.target.value, i)} />
+                <input className="clone-budget-modal-form-input-text clone-budget-modal-form-input-text-amount" type="text" name={`clone-budget-${i+1}-amount`} value={(!isNaN(Number(budgetCycleBudget.Amount)) ? convertNumberToCurrency(budgetCycleBudget.Amount) : budgetCycleBudget.Amount) || ""} onChange={(event)=>onInputChange("Amount", event.target.value, i)} />
+                <InputDropdown className="clone-budget-modal-form-input-text clone-budget-modal-form-input-text-type" type="text" name={`clone-budget-${i+1}-type`} value={budgetCycleBudget.Type || ""} items={types} onChange={(value)=>onInputChange("Type", value, i)} />
+                <InputDropdown className="clone-budget-modal-form-input-text clone-budget-modal-form-input-text-group" type="text" name={`clone-budget-${i+1}-group`} value={budgetCycleBudget.Group || ""} items={groups} onChange={(value)=>onInputChange("Group", value, i)} />
+                <input className="clone-budget-modal-form-input-text clone-budget-modal-form-input-text-duedate" type="hidden" name={`clone-budget-${i+1}-duedate`} value={budgetCycleBudget.DueDate || ""} onChange={(event)=>onInputChange("DueDate", event.target.value, i)} />
+                <input className="clone-budget-modal-form-input-text clone-budget-modal-form-input-text-Ispaidbycreditcardnotaccount" type="hidden" name={`clone-budget-${i+1}-Ispaidbycreditcardnotaccount`} value={!(budgetCycleBudget.IsPaidByCreditCardNotAccount === null || budgetCycleBudget.IsPaidByCreditCardNotAccount === undefined) && budgetCycleBudget.IsPaidByCreditCardNotAccount.toString() || ""} onChange={(event)=>onInputChange("IsPaidByCreditCardNotAccount", event.target.value, i)} />
+                <input className="clone-budget-modal-form-input-text clone-budget-modal-form-input-text-budgetcycle" type="hidden" name={`clone-budget-${i+1}-budgetcycle`} value={budgetCycle || ""} />
+                <button className="clone-budget-modal-form-delete-button" type="button" onClick={event=>onInputGroupMouseDeleteButtonClick(i)}>
+                  <i className="clone-budget-modal-form-delete-button-icon fas fa-times"></i>
+                </button>
+              </div>
+            ))}
+          </div>
         </Modal.Body>
         <Modal.Footer>
           <button className="btn btn-secondary" type="button" onClick={onClose}>Cancel</button>
