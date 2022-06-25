@@ -19,4 +19,13 @@
   .clone-budget-modal-form-input-text-group {
     flex: 0 1 5rem;
   }
+
+  .clone-budget-modal-form-delete-button {
+    visibility: hidden;
+
+  }
+
+  .clone-budget-modal-form-input-group:hover .clone-budget-modal-form-delete-button {
+    visibility: visible;
+  }
 }
