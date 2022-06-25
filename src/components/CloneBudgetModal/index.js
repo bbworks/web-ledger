@@ -77,6 +77,12 @@ const CloneBudgetModal = ({ budgetCycle, budgetsData, types, groups, allBudgetCy
     setClonedBudgetCycleBudgets(budgetCycleBudgets);
   }, [budgetCycleBudgets]);
 
+  //Whenever budgetCycle gets updated,
+  // update the previousBudgetCycle
+  useEffect(()=>{
+    setBudgetCycle(previousBudgetCycle);
+  }, [budgetCycle]);
+
 
   return (
     <Modal id="clone-budget-modal" className="clone-budget-modal" show={isOpen} onHide={onClose}>
