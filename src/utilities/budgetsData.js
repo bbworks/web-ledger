@@ -24,6 +24,7 @@ export const getBudgetAmountSpentFromTransactions = (budgetName, transactions)=>
 export const typeCheckBudgetsData = budgetsData=>{
   return budgetsData.map(budgetData=>({
       ...budgetData,
+      BudgetId: parseGoogleSheetsNumber(budgetData.BudgetId),
       Amount: parseGoogleSheetsNumber(budgetData.Amount),
       BudgetCycle: parseGoogleSheetsDate(budgetData.BudgetCycle),
       DateCreated: parseGoogleSheetsDate(budgetData.DateCreated),

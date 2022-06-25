@@ -12,6 +12,7 @@ export const typeCheckTransactions = function (transactions) {
     try {
       return {
         ...transaction,
+        TransactionId: parseGoogleSheetsNumber(transaction.TransactionId),
         PostedDate: parseGoogleSheetsDate(transaction.PostedDate),
         TransactionDate: parseGoogleSheetsDate(transaction.TransactionDate),
         Amount: parseGoogleSheetsNumber(isNaN(transaction.Amount) ? transaction.Amount.replace(/(\$|,)/g, "") : transaction.Amount),
