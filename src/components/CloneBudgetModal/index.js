@@ -13,7 +13,9 @@ const CloneBudgetModal = ({ budgetCycle, budgetsData, types, groups, allBudgetCy
   const getPreviousBudgetCycleWithBudgets = (allBudgetCycles, budgetCycle)=>{
     if (!budgetCycle) return;
     const allBudgetCyclesSorted = allBudgetCycles.sort((a,b)=>b.getTime()-a.getTime());
-    return allBudgetCyclesSorted.find((b, i)=>(i===0 ? false : allBudgetCyclesSorted[i-1].getTime() === budgetCycle.getTime()));
+    const previousBudgetCycle = allBudgetCyclesSorted.find((b, i)=>(i===0 ? false : allBudgetCyclesSorted[i-1].getTime() === budgetCycle.getTime()));
+    if (previousBudgetCycle) return previousBudgetCycle;
+    return allBudgetCyclesSorted.find(b=>b.getTime() < budgetCycle.getTime());
   };
 
   const previousBudgetCycle = getPreviousBudgetCycleWithBudgets(allBudgetCycles, budgetCycle);
