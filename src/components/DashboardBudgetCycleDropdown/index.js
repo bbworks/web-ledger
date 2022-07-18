@@ -15,10 +15,10 @@ const DashboardBudgetCycleDropdown = ({ transactions, budgetCycle, allBudgetCycl
 
   const arrowOnClick = increment=>{
     const allBudgetCyclesSorted = [...allBudgetCycles].sort((a,b)=>(a.getTime() === b.getTime() ? 0 : (a.getTime() < b.getTime() ? -1 : 1))); //sort() is in-place--create a new array using [...]
-    console.log("test1: ", allBudgetCyclesSorted)
-    console.log("test2: ", budgetCycle, allBudgetCyclesSorted.indexOf(budgetCycle), increment)
+//    console.log("test1: ", allBudgetCyclesSorted)
+//    console.log("test2: ", budgetCycle, allBudgetCyclesSorted.indexOf(budgetCycle), increment)
     const newBudgetCycle = allBudgetCyclesSorted[(allBudgetCyclesSorted.indexOf(allBudgetCyclesSorted.find(b=>b.getTime() === budgetCycle.getTime()))+increment+allBudgetCyclesSorted.length)%allBudgetCyclesSorted.length];
-    console.log("test3: ", newBudgetCycle)
+//    console.log("test3: ", newBudgetCycle)
     onChangeProp(newBudgetCycle);
   };
 
