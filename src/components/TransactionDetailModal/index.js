@@ -7,7 +7,7 @@ import {nullCoalesce, formatTransactionDisplay, getBudgetCycleString, getBudgetC
 
 import './index.scss';
 
-const TransactionDetailModal = ({ transaction, allBudgetCycles, categories, types, buttonsOptions, isOpen, onClose, onSubmit })=>{
+const TransactionDetailModal = ({ transaction, allBudgetCycles, categories, types, isOpen, onClose, onSubmit })=>{
   const [BudgetCycle, setBudgetCycle] = useState(""); //empty string, as initial value for input[type="text"]
   const [PostedDate, setPostedDate] = useState(""); //empty string, as initial value for input[type="text"]
   const [TransactionDate, setTransactionDate] = useState(""); //empty string, as initial value for input[type="text"]
