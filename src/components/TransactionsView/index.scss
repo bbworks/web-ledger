@@ -1,7 +1,26 @@
 .view.transactions-view {
+  display: flex;
+  flex-direction: column;
   background-color: whitesmoke;
 
   .page-title {
     padding: 0 1rem;
+  }
+
+  .new-transaction-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+  }
+
+  .new-transaction-paragraph {
+    max-width: 40ch;
+    text-align: center;
+  }
+
+  .new-transaction-button {
+    margin-bottom: 1rem;
   }
 }

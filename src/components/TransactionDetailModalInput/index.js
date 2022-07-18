@@ -33,7 +33,7 @@ const TransactionDetailModalInput = ({ transactionDetail, tabIndex, onChange:onC
       </div>
     );
 
-  if (["Category", "Type", "BudgetCycle", "Group"].includes(transactionDetail.name))
+  if (transactionDetail.tag === "InputDropdown" || ["Category", "Type", "BudgetCycle", "Group"].includes(transactionDetail.name))
     return (
       <div>
         <InputDropdown name={transactionDetail.name} value={transactionDetail.value} items={transactionDetail.items} placeholder={transactionDetail.placeholder} {...(transactionDetail.disabled && {disabled: true})} tabIndex={tabIndex} onInputDropdownInputChange={event=>onChange(event.target.value)} onInputDropdownInputKeyPress={onKeyPress} onSubmit={onInputDropdownSubmit} />

@@ -96,7 +96,7 @@ const App = () => {
 
   const [allBudgetCycles, setAllBudgetCycles] = useState(getAllBudgetCycles(transactions));
   const budgetCycleBudgets = useBudgetCycleBudgets(budgetsData, budgetCycle);
-  const transactionCategories = [null, ...budgetCycleBudgets.map(b=>b.Name)];
+  const transactionCategories = [null, ...new Set(budgetsData.map(b=>b.Name).sort())];
 
   //Check that the list of budget cycles remains updated with transaction data
   useEffect(()=>
@@ -406,6 +406,10 @@ const App = () => {
     createBudgetsWrapper(newBudgets);
   };
 
+  const onNewTransactionModalSubmit =(newTransaction)=>{
+    insertTransactionsWrapper(newTransaction);
+  };
+
   const onLogoTextScrollIn = ()=>{
     setIsLoadingAnimationComplete(true);
   };
@@ -499,7 +503,7 @@ const App = () => {
             <BudgetsView transactions={transactions} budgetsData={budgetsData} budgetCycle={budgetCycle} allBudgetCycles={allBudgetCycles} onBudgetCycleChange={onBudgetCycleChange} setFooterNavbar={setFooterNavbar} budgetTypes={budgetTypes} budgetGroups={budgetGroups} onNewBudgetModalSubmit={onNewBudgetModalSubmit} onCloneBudgetModalSubmit={onCloneBudgetModalSubmit} />
           </Route>
           <Route path="/transactions" exact>
-            <TransactionsView transactions={transactions} budgetCycle={budgetCycle} allBudgetCycles={allBudgetCycles} transactionsImportDuplicatesModalNewTransactions={transactionsImportDuplicatesModalNewTransactions} transactionsImportDuplicatesModalDuplicates={transactionsImportDuplicatesModalDuplicates} isTransactionsImportDuplicatesModalOpen={isTransactionsImportDuplicatesModalOpen} onTransactionsImportDuplicatesModalClose={closeTransactionsImportDuplicatesModal} onTransactionsImportDuplicatesModalSubmit={onTransactionsImportDuplicatesModalSubmit} onTransactionsImportFormSubmit={onTransactionsImportFormSubmit} onTransactionsImportFormFileInputChange={onTransactionsImportFormFileInputChange} onTransactionDetailModalSubmit={onTransactionDetailModalSubmit} onTransactionDeleteModalSubmit={onTransactionDeleteModalSubmit} transactionsImportConfirmedModalTransactions={transactionsImportConfirmedModalTransactions} isTransactionsImportConfirmedModalOpen={isTransactionsImportConfirmedModalOpen} closeTransactionsImportConfirmedModal={closeTransactionsImportConfirmedModal} onTransactionsImportConfirmedModalSubmit={onTransactionsImportConfirmedModalSubmit} onNewBudgetModalSubmit={onNewBudgetModalSubmit} onBudgetCycleChange={onBudgetCycleChange} setFooterNavbar={setFooterNavbar} transactionCategories={transactionCategories} transactionTypes={transactionTypes}/>
+            <TransactionsView transactions={transactions} budgetCycle={budgetCycle} allBudgetCycles={allBudgetCycles} transactionsImportDuplicatesModalNewTransactions={transactionsImportDuplicatesModalNewTransactions} transactionsImportDuplicatesModalDuplicates={transactionsImportDuplicatesModalDuplicates} isTransactionsImportDuplicatesModalOpen={isTransactionsImportDuplicatesModalOpen} onTransactionsImportDuplicatesModalClose={closeTransactionsImportDuplicatesModal} onTransactionsImportDuplicatesModalSubmit={onTransactionsImportDuplicatesModalSubmit} onTransactionsImportFormSubmit={onTransactionsImportFormSubmit} onTransactionsImportFormFileInputChange={onTransactionsImportFormFileInputChange} onTransactionDetailModalSubmit={onTransactionDetailModalSubmit} onTransactionDeleteModalSubmit={onTransactionDeleteModalSubmit} transactionsImportConfirmedModalTransactions={transactionsImportConfirmedModalTransactions} isTransactionsImportConfirmedModalOpen={isTransactionsImportConfirmedModalOpen} closeTransactionsImportConfirmedModal={closeTransactionsImportConfirmedModal} onTransactionsImportConfirmedModalSubmit={onTransactionsImportConfirmedModalSubmit} onNewBudgetModalSubmit={onNewBudgetModalSubmit} onBudgetCycleChange={onBudgetCycleChange} setFooterNavbar={setFooterNavbar} transactionCategories={transactionCategories} transactionTypes={transactionTypes} onNewTransactionModalSubmit={onNewTransactionModalSubmit} />
           </Route>
           <Route path="/settings" exact>
             <SettingsView setFooterNavbar={setFooterNavbar} settings={settings} onSubmit={onSettingsViewSubmit}/>
