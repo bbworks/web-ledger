@@ -62,6 +62,7 @@ const CloneBudgetModal = ({ budgetCycle, budgetsData, types, groups, allBudgetCy
     // with updated DateCreated, DateModified values
     const value = clonedBudgetCycleBudgets.map(e=>({
       ...e,
+      BudgetId: "",
       BudgetCycle: budgetCycle,
       Amount: convertCurrencyToNumber(e.Amount),
       DateCreated: now,
