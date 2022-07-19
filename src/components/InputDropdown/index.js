@@ -205,7 +205,7 @@ const InputDropdown = (props)=>{
     //Close the input dropdown
     closeInputDropdown();
 
-    onSubmit(newValue);
+    onSubmit(newValue, {...event, isSelectedListItem: true,});
   };
 
   const onInputDropdownListItemMouseMove = event=>{
@@ -295,7 +295,13 @@ const InputDropdown = (props)=>{
       //Set the value if we selected one
       const newValue = (selectedListItem ? selectedListItem : value);
 
-      if (selectedListItem) setValue(selectedListItem);
+      if (selectedListItem) {
+        setValue(selectedListItem);
+        event = {
+          ...event,
+          isSelectedListItem: true,
+        };
+      }
 
       //Reset the search filter
       setSearchFilter(null);
@@ -304,7 +310,7 @@ const InputDropdown = (props)=>{
       closeInputDropdown();
 
       //Act as though a form was submitted with a given value
-      onSubmit(newValue);
+      onSubmit(newValue, event);
 
       return;
     }
@@ -315,8 +321,8 @@ const InputDropdown = (props)=>{
     window.setTimeout(()=>closeInputDropdown(), 100);
   };
 
-  const onSubmit = (value)=>{
-    if (onSubmitProp) onSubmitProp(value);
+  const onSubmit = (value, event)=>{
+    if (onSubmitProp) onSubmitProp(value, event);
   };
 
   //Update the dropdown value whenever a new value or items are passed

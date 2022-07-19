@@ -49,7 +49,7 @@ const TransactionsDataSearchForm = ({ budgetCycleTransactions, transactionProper
     }
   };
 
-  const onTransactionsDataSearchFormInputDropdownSubmit = (event, newSearch)=>{
+  const onTransactionsDataSearchFormInputDropdownSubmit = (newSearch, event)=>{
     //If an active search filter has not yet been applied,
     // and a list item was selected, apply a search filter
     if (!activeSearchSuggestion && event.isSelectedListItem) {
