@@ -1,6 +1,7 @@
 {
   "name": "web-ledger",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "proxy": "http://localhost:3001/",
   "private": true,
   "homepage": "https://bbworks.github.io/web-ledger",
   "dependencies": {

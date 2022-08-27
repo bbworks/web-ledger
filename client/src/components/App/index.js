@@ -129,7 +129,9 @@ const App = () => {
 
     //Try to initialize the Google API
     try {
-      initAuthorization(onSignInChange, onSignInChange);
+      //initAuthorization(onSignInChange, onSignInChange);
+      const results = await fetch("/api/v1/login", {method: "post"}).then(response=>response.json());
+      onSignInChange(results);
     }
     catch (err) {
       //If credentials weren't found, prompt the user for the credentials

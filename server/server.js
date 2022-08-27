@@ -1,13 +1,27 @@
 //Import modules
 const express = require("express");
 const path = require("path");
+const cors = require("cors");
 
+const TransactionsRouter = require("./routes/transactions")
+const BudgetsRouter = require("./routes/budgets")
+const AccountsRouter = require("./routes/accounts")
+const AccountRouter = require("./routes/account")
+const AuthRouter = require("./routes/auth")
 
 class Server {
   constructor() {
     //Declare properties
     this.server = express();
     this.port = process.env.PORT;
+    this.basePath = "/api/v1"
+    this.paths = {
+      transactions: `${this.basePath}/transactions`,
+      budgets: `${this.basePath}/budgets`,
+      accounts: `${this.basePath}/accounts`,
+      account: `${this.basePath}/account`,
+      auth: `${this.basePath}/login`,
+    };
 
     //Set up server middleware
     this.initMiddleware();
@@ -23,9 +37,17 @@ class Server {
     //  establishing routers to use for certain routes
     this.server.use(express.json());
     this.server.use(express.urlencoded({ extended: true }));
+    this.server.use(cors());
   }
 
   initRoutes() {
+    //Set up server routes
+    this.server.use(this.paths.transactions, TransactionsRouter);
+    this.server.use(this.paths.budgets, BudgetsRouter);
+    this.server.use(this.paths.accounts, AccountsRouter);
+    this.server.use(this.paths.account, AccountRouter);
+    this.server.use(this.paths.auth, AuthRouter);
+
     //Set up 404 handling and forward to error handler
     // (HTTP 404 does not constitute an error)
     this.server.use((req, res, next) => {

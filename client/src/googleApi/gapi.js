@@ -90,7 +90,7 @@ export const callGoogleApiFunction = (googleApi, resourceType, method, optionsPa
       return resolve(response);
     }
     catch (errResponse) {
-      return reject(errResponse.result.error);
+      return reject(errResponse);
     }
   });
 };

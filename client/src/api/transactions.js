@@ -3,7 +3,7 @@ import {throwException} from './../utilities';
 
 export const getTransactions = async ()=>{
   try {
-    return await getSheetsSpreadsheetValues("Transactions Data");
+    return await fetch("/api/v1/transactions").then(response=>response.json()).then(data=>data.data);
   }
   catch (err) {
     throwException(err, false);
@@ -13,7 +13,7 @@ export const getTransactions = async ()=>{
 
 export const updateTransactions = async transactions=>{
   try {
-    return await updateSheetsSpreadsheetValues("Transactions Data", transactions);
+    return await fetch("/api/v1/transactions", {method: "post", body: {transactions}}).then(response=>response.json());
   }
   catch (err) {
     throwException(err, false);
