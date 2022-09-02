@@ -3,7 +3,10 @@ import {throwException} from './../utilities';
 
 export const getTransactions = async ()=>{
   try {
-    return await fetch("/api/v1/transactions").then(response=>response.json()).then(data=>data.data);
+    return await fetch("/api/v1/transactions")
+      .then(response=>{if(!response.ok) throw response; return response;})
+      .then(response=>response.json())
+      .then(data=>data.data);
   }
   catch (err) {
     throwException(err, false);
@@ -13,7 +16,10 @@ export const getTransactions = async ()=>{
 
 export const updateTransactions = async transactions=>{
   try {
-    return await fetch("/api/v1/transactions", {method: "post", body: {transactions}}).then(response=>response.json());
+    return await fetch("/api/v1/transactions", {method: "post", headers: {'Content-Type': 'application/json'}, body: JSON.stringify({transactions})})
+      .then(response=>{if(!response.ok) throw response; return response;})
+      .then(response=>response.json())
+      .then(data=>data.data);
   }
   catch (err) {
     throwException(err, false);

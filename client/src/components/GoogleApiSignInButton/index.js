@@ -1,10 +1,10 @@
-import {signIn} from './../../googleApi'
-
 import './index.scss';
 
-const GoogleApiSigninButton = ({ isReadyForSignIn })=>{
+const GoogleApiSigninButton = ()=>{
   return (
-    <button className="btn btn-primary" type="button" onClick={signIn} disabled={!isReadyForSignIn}>Sign in with Google</button>
+    <a className="btn btn-primary" href={`${process.env.REACT_APP_API_ENDPOINT || ""}/api/v1/authorize`}>
+      Sign in with Google
+    </a>
   );
 };
 

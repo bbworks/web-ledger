@@ -1,18 +1,20 @@
 require("dotenv").config();
-const {google: googleapis} = require("googleapis");
+const {google} = require("googleapis");
 const fsPromises = require('fs').promises;
 const readline = require('readline');
 
 let REFRESH_TOKEN = process.env.REFRESH_TOKEN;
 let ACCESS_TOKEN = process.env.ACCESS_TOKEN;
-const TOKEN_PATH = process.env.TOKEN_PATH;
-
-const scopes = [
+const SCOPES = [
   //"https://www.googleapis.com/auth/drive",  //See, edit, create, and delete all or your drive files
   //"https://www.googleapis.com/auth/drive.file",  //See, edit, create, and delete only the specific Google Drive files you use with this app
   "https://www.googleapis.com/auth/spreadsheets",  //See, edit, create, all your Google sheets spreadsheets
+  "https://www.googleapis.com/auth/userinfo.profile",
 ];
-const discoveryDocs = ["https://sheets.googleapis.com/$discovery/rest?version=v4"];
+
+
+let oAuth2Client;
+
 
 //create helper function to retrieve authorization credentials stored outside of version control
 const fetchAuthCredentials = ()=>{
@@ -69,8 +71,8 @@ const initializeGoogleApis = async (creds, loginCallback, logoutCallback)=>{
   //Attempt to initialize the Google API
   window.gapi.client.init({
     clientId: clientId,
-    scope: scopes.join(" "), //space delimited
-    discoveryDocs: discoveryDocs,
+    scope: SCOPES.join(" "), //space delimited
+    discoveryDocs: DISCOVERY_DOCS,
   })
   .then(()=>{
     console.info("Initialized Google Client API.");
@@ -174,12 +176,12 @@ const fetchAuthCreds = ()=>{
   }
 };
 
-const getAuthConsentCode = async (oAuth2Client)=>{
+const getAuthConsentCode = async ()=>{
   try {
     //Generate an authorization consent URL
     const authUrl = oAuth2Client.generateAuthUrl({
       access_type: 'offline',  // 'online' (default) or 'offline' (gets refresh_token)
-      scope: scopes.join(" "),
+      scope: SCOPES.join(" "),
     });
 
     //Prompt to navigate to the authorization conset URL and provide the code
@@ -207,20 +209,38 @@ const getAuthConsentCode = async (oAuth2Client)=>{
   }
 };
 
-const getAuthTokensFromAuthCode = async (oAuth2Client, code)=>{
+const redirectForAuthConsentCode = async ()=>{
+  try {
+    //Generate an authorization consent URL
+    const authUrl = oAuth2Client.generateAuthUrl({
+      access_type: 'offline',  // 'online' (default) or 'offline' (gets refresh_token)
+      scope: SCOPES.join(" "),
+    });
+
+    //Prompt to navigate to the authorization conset URL and provide the code
+    /* DEBUG */ console.log(`>[${new Date().toJSON()}] [INFO] Redirecting to "${authUrl}" for authorization...`);
+    return {redirectUrl: authUrl};
+  }
+  catch (err) {
+    /* DEBUG */ console.error(`>[${new Date().toJSON()}] [ERROR] Failed to redirect to "${authUrl}" for authorization: ${err}`);
+    throw err;
+  }
+};
+
+const getAuthTokensFromAuthCode = async (code)=>{
   //Request an OAuth2 access and refresh token
   const {tokens} = await oAuth2Client.getToken(code);
 
   try {
     // Store the OAuth2 auth tokens to disk for later program executions
-    try {
-      await fsPromises.writeFile(TOKEN_PATH, JSON.stringify(tokens));
-      /* DEBUG */ console.log(`>[${new Date().toJSON()}] [INFO] OAuth2 auth tokens written to "${TOKEN_PATH}".`);
-    }
-    catch (err) {
-      /* DEBUG */ console.error(`>[${new Date().toJSON()}] [ERROR] Failed to write OAuth2 auth tokens to "${TOKEN_PATH}": ${err}`);
-      throw err;
-    }
+    // try {
+    //   await fsPromises.writeFile(TOKEN_PATH, JSON.stringify(tokens));
+    //   /* DEBUG */ console.log(`>[${new Date().toJSON()}] [INFO] OAuth2 auth tokens written to "${TOKEN_PATH}".`);
+    // }
+    // catch (err) {
+    //   /* DEBUG */ console.error(`>[${new Date().toJSON()}] [ERROR] Failed to write OAuth2 auth tokens to "${TOKEN_PATH}": ${err}`);
+    //   throw err;
+    // }
 
     return tokens;
   }
@@ -230,12 +250,12 @@ const getAuthTokensFromAuthCode = async (oAuth2Client, code)=>{
   }
 };
 
-const getNewAuthTokens = async (oAuth2Client)=>{
+const getNewAuthTokens = async ()=>{
   //Get an OAuth2 authorization consent code
-  const code = await getAuthConsentCode(oAuth2Client);
+  const code = await getAuthConsentCode();
 
   //Generate OAuth2 auth tokens using the auth consent code
-  const tokens = await getAuthTokensFromAuthCode(oAuth2Client, code);
+  const tokens = await getAuthTokensFromAuthCode(code);
 
   //Return the OAuth2 auth tokens
   return tokens;
@@ -249,7 +269,7 @@ const getOAuth2Authorization = async ()=>{
   try {
     //Get the OAuth2 credentials
     /* DEBUG */ console.info(`>[${new Date().toJSON()}] [INFO] Initializing OAuth2 client...`);
-    const oAuth2Client = new googleapis.auth.OAuth2(
+    oAuth2Client = new google.auth.OAuth2(
       creds.clientId,
       creds.clientSecret,
       creds.redirectUrl,
@@ -263,6 +283,9 @@ const getOAuth2Authorization = async ()=>{
       ACCESS_TOKEN = tokens.access_token;
     });
     /* DEBUG */ console.info(`>[${new Date().toJSON()}] [INFO] OAuth2 client initialized.`);
+
+    // Configure googleapis with the created OAuth2 client
+    google.options({auth: oAuth2Client});
 
     //If an OAuth2 refresh token is already provided, use it
     // Otherwise, generate refresh and access tokens
@@ -289,7 +312,8 @@ const getOAuth2Authorization = async ()=>{
     else {
       try {
         /* DEBUG */ console.info(`>[${new Date().toJSON()}] [INFO] No Outh2 refresh token found. Getting new OAuth2 auth tokens...`);
-        tokens = await getNewAuthTokens(oAuth2Client);
+        // tokens = await getNewAuthTokens(oAuth2Client);
+        return await redirectForAuthConsentCode();
         /* DEBUG */ console.info(`>[${new Date().toJSON()}] [INFO] Obtained new OAuth2 auth tokens.`);
       }
       catch (err) {
@@ -311,8 +335,7 @@ const getOAuth2Authorization = async ()=>{
 
     /* DEBUG */ console.info(`>[${new Date().toJSON()}] [INFO] Authorized with Google APIs.`);
 
-    //Return the OAuth2 client
-    return oAuth2Client;
+    return;
   }
   catch (err) {
     /* DEBUG */ console.error(`>[${new Date().toJSON()}] [ERROR] Failed to initialize OAuth2 client: ${err}`);
@@ -320,16 +343,44 @@ const getOAuth2Authorization = async ()=>{
   }
 };
 
+const getOAuth2AuthorizationWithCode = async (code)=>{
+  //Create and configure an OAuth2 client
+  try {
+    //Generate OAuth2 auth tokens using the auth consent code
+    /* DEBUG */ console.info(`>[${new Date().toJSON()}] [INFO] Generating OAuth2 auth tokens using auth consent code...`);
+    const tokens = await getAuthTokensFromAuthCode(code);
+    /* DEBUG */ console.info(`>[${new Date().toJSON()}] [INFO] Generated OAuth2 auth tokens using auth consent code.`);
+
+    //Set the OAuth2 credentials using the OAuth2 auth tokens
+    try {
+      /* DEBUG */ console.info(`>[${new Date().toJSON()}] [INFO] Setting OAuth2 credentials using auth tokens...`);
+      oAuth2Client.setCredentials(tokens);
+      /* DEBUG */ console.info(`>[${new Date().toJSON()}] [INFO] Set OAuth2 credentials using auth tokens.`);
+    }
+    catch (err) {
+      /* DEBUG */ console.error(`>[${new Date().toJSON()}] [ERROR] Failed to set credentials using auth tokens: ${err}`);
+      throw err;
+    }
+
+    /* DEBUG */ console.info(`>[${new Date().toJSON()}] [INFO] Authorized with Google APIs.`);
+
+    return;
+  }
+  catch (err) {
+    /* DEBUG */ console.error(`>[${new Date().toJSON()}] [ERROR] Failed to initialize OAuth2 client: ${err}`);
+    throw err;
+  }
+}
+
 
 //Create functions
 const authorize = async ()=>{
   //Authorize with the Google API
-  const oAuth2Client = await getOAuth2Authorization();
-
-  //Return the OAuth2 authorization client
-  return oAuth2Client;
+  return await getOAuth2Authorization();
 };
 
 module.exports = {
+   google,
    authorize,
+   getOAuth2AuthorizationWithCode,
 };

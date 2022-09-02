@@ -1,12 +1,10 @@
 //Import modules
-const {google: googleapis} = require("googleapis");
-
 const GoogleAPIAuth = require("../googleApi/authorization");
 const {getSpreadsheetId, convertSheetsArraysToJSON, convertJSONToSheetsArray, getDynamicPropertyByArray, convertArrayToA1Notation} = require('./utilities.js');
 
 
 //Create helper functions
-const callGoogleApiFunction = (googleApi, resourceType, method, optionsParam, pageToken)=>{
+const callGoogleApiFunction = (googleApi, googleApiOptions, resourceType, method, optionsParam, pageToken)=>{
   //Declare variables
   let leftoverIds = null;
   const listIdChunkLength = 50;
@@ -59,16 +57,20 @@ const callGoogleApiFunction = (googleApi, resourceType, method, optionsParam, pa
   //Return a Promise to the Google API
   return new Promise(async (resolve,reject)=>{
     try {
-      const auth = await GoogleAPIAuth.authorize();
-
       //Get the resource object
-      /* DEBUG */ console.log(`>[${new Date().toJSON()}] [INFO] Querying Google ${googleApi}.${resourceType} resource...`);
-      const resource = getDynamicPropertyByArray(googleapis[googleApi]({version: "v4", auth,}), resourceType);
-      /* DEBUG */ console.log(`>[${new Date().toJSON()}] [INFO] Queried Google ${googleApi}.${resourceType} resource.`);
+      /* DEBUG */ console.log(`>[${new Date().toJSON()}] [INFO] Querying Google ${googleApi}.${resourceType}.${method} resource...`);
+      const resource = getDynamicPropertyByArray(GoogleAPIAuth.google[googleApi](googleApiOptions), resourceType);
+      /* DEBUG */ console.log(`>[${new Date().toJSON()}] [INFO] Queried Google ${googleApi}.${resourceType}.${method} resource.`);
 
       //Make the resource method call
       const response = await resource[method](options, ...params);
-      /* DEBUG */ console.error(`>[${new Date().toJSON()}] [INFO] Resource: google.${googleApi}.${resourceType}.${method} |`, response);
+
+      //Check for errors
+      if (response.error) {
+        /* DEBUG */ console.error(`>[${new Date().toJSON()}] [ERROR] Resource: google.${googleApi}.${resourceType}.${method} |`, response.error);
+        throw response.error;
+      }
+      /* DEBUG */ console.log(`>[${new Date().toJSON()}] [INFO] Resource: google.${googleApi}.${resourceType}.${method} |`, response);
 
       //If a "list" query was performed
       if (method === "list") {
@@ -88,10 +90,14 @@ const callGoogleApiFunction = (googleApi, resourceType, method, optionsParam, pa
         return resolve([...response.data.items]);
       }
 
-      if (resourceType === "spreadsheets.values" && method === "get") {
-        //Return the values
+      if (method === "get") {
+        if (resourceType === "spreadsheets.values") {
+          //Return the values
 
-        return resolve(convertSheetsArraysToJSON(response.data.values));
+          return resolve(convertSheetsArraysToJSON(response.data.values));
+        }//Return the values
+
+        return resolve(response.data);
       }
 
       //If an "update" or "insert" query was performed
@@ -100,20 +106,29 @@ const callGoogleApiFunction = (googleApi, resourceType, method, optionsParam, pa
       //If a "delete" or some other query was performed
       return resolve(response);
     }
-    catch (errResponse) {
-      console.log(errResponse)
-      // return reject(errResponse.data.error);
-      return reject(errResponse);
+    catch (err) {
+      /* DEBUG */ console.error(`>[${new Date().toJSON()}] [ERROR] Resource: google.${googleApi}.${resourceType}.${method} |`, err);
+      return reject(err);
     }
   });
 };
 
 
 //Create functions
+const getUserInfo = async ()=>{
+  try {
+    return callGoogleApiFunction("oauth2", {version: 'v2',}, "userinfo", "get", {});
+  }
+  catch (err) {
+    /* DEBUG */ console.error(`>[${new Date().toJSON()}] [ERROR] Failed to call google.oauth2.userinfo.get: ${err}`);
+    throw err;
+  }
+};
+
 const getSheetsSpreadsheet = async ()=>{
   try {
     const spreadsheetId = getSpreadsheetId();
-    return callGoogleApiFunction("sheets", "spreadsheets", "get", {spreadsheetId,});
+    return callGoogleApiFunction("sheets", {version: 'v4',}, "spreadsheets", "get", {spreadsheetId,});
   }
   catch (err) {
     /* DEBUG */ console.error(`>[${new Date().toJSON()}] [ERROR] Failed to call google.sheets.spreadsheets.get: ${err}`);
@@ -125,12 +140,12 @@ const getSheetsSpreadsheetValues = async (sheetName, range)=>{
   try {
     const spreadsheetId = getSpreadsheetId();
 
-    const {rowCount, columnCount} = (await getSheetsSpreadsheet()).data.sheets.find(s=>s.properties.title === sheetName).properties.gridProperties;
+    const {rowCount, columnCount} = (await getSheetsSpreadsheet()).sheets.find(s=>s.properties.title === sheetName).properties.gridProperties;
     if (!range) range = convertArrayToA1Notation([rowCount, columnCount]);
     if (typeof range === "string") range = [range]; //convert to an array of ranges if only one specified
     range = range.map(r=>`'${sheetName}'!${range}`); //Add the sheet name to the range
 
-    return callGoogleApiFunction("sheets", "spreadsheets.values", "get", {spreadsheetId, range});
+    return callGoogleApiFunction("sheets", {version: 'v4',}, "spreadsheets.values", "get", {spreadsheetId, range});
   }
   catch (err) {
     /* DEBUG */ console.error(`>[${new Date().toJSON()}] [ERROR] Failed to call google.sheets.spreadsheets.values.get: ${err}`);
@@ -148,7 +163,7 @@ const updateSheetsSpreadsheetValues = async (sheetName, valuesJSON, range)=>{
     if (typeof range === "string") range = [range]; //convert to an array of ranges if only one specified
     range = range.map(r=>`'${sheetName}'!${range}`); //Add the sheet name to the range
 
-    return callGoogleApiFunction("sheets", "spreadsheets.values", "update", {
+    return callGoogleApiFunction("sheets", {version: 'v4',}, "spreadsheets.values", "update", {
         spreadsheetId,
         range,
         valueInputOption: "USER_ENTERED",
@@ -165,7 +180,9 @@ const updateSheetsSpreadsheetValues = async (sheetName, valuesJSON, range)=>{
   }
 };
 
+
 module.exports = {
+  getUserInfo,
   getSheetsSpreadsheet,
   getSheetsSpreadsheetValues,
   updateSheetsSpreadsheetValues,

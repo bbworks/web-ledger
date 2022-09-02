@@ -114,7 +114,6 @@ const App = () => {
   useConsoleLog(allBudgetCycles, "allBudgetCycles:");
   useConsoleLog(budgetCycle, "budgetCycle:");
 
-  const gapiLoaded = useScript("https://apis.google.com/js/api.js");
 
   //Create helper functions
   const saveSettings = savedSettings=>{
@@ -122,25 +121,6 @@ const App = () => {
     Object.entries(savedSettings).forEach(([settingName, settingValue])=>
       settings[settingName].update(settingValue)
     );
-  };
-
-  const connectToGoogleAPI = async ()=>{
-    if(!gapiLoaded) return;
-
-    //Try to initialize the Google API
-    try {
-      //initAuthorization(onSignInChange, onSignInChange);
-      const results = await fetch("/api/v1/login", {method: "post"}).then(response=>response.json());
-      onSignInChange(results);
-    }
-    catch (err) {
-      //If credentials weren't found, prompt the user for the credentials
-      if (err.name === "CredentialsNotFoundError") {
-        return openSignInSettingsModal();
-        // throw new Error("Failed to get authorization credentials.");
-      }
-      return throwException(err);
-    }
   };
 
   const onBudgetCycleChange = budgetCycle=>{
@@ -432,17 +412,29 @@ const App = () => {
     setIsSignInSettingsModalOpen(false);
 
     //Re-attempt to initialize Google API again
-    connectToGoogleAPI();
+    // connectToGoogleAPI();
   };
 
   const onSignInSettingsModalSubmit = submittedSettings=>{
     saveSettings(submittedSettings);
   };
 
-  //When the Google API JS library loads, initialize the Google API
-  useEffect(()=>
-    connectToGoogleAPI()
-    , [gapiLoaded]);
+  //When the app loads, attempt to get the user credential
+  useEffect(async ()=>{
+    //Try to initialize the Google API
+    try {
+      const results = await fetch("/api/v1/authorize/login", {method: "post"}).then(response=>{if(!response.ok) throw response; return response;}).then(response=>response.json());
+      onSignInChange(results);
+    }
+    catch (err) {
+      //If credentials weren't found, prompt the user for the credentials
+      if (err.name === "CredentialsNotFoundError") {
+        return openSignInSettingsModal();
+        // throw new Error("Failed to get authorization credentials.");
+      }
+      // return throwException(err);
+    }
+  }, []);
 
   //Whenever the user gets logged in,
   // attempt to query for data
@@ -453,7 +445,7 @@ const App = () => {
       setTransactionsWrapper(await getTransactions());
       setBudgetsDataWrapper(await getBudgetsData());
       setAccountsDataWrapper(await getAccountsData());
-      setAccountDataWrapper(await getAccountData());
+      setAccountDataWrapper(await getAccountData(signedInUser.id));
     })();
   }, [signedInUser]);
 
@@ -487,7 +479,7 @@ const App = () => {
   if (isLoadingAnimationComplete && !signedInUser) return (
     <div className="App">
       <Router basename={(process.env.NODE_ENV === "production" ? process.env.PUBLIC_URL : null)}>
-        <SignInView isReadyForSignIn={!(signedInUser===undefined)}/>
+        <SignInView />
         <SignInSettingsModal settings={settings} isOpen={isSignInSettingsModalOpen} onClose={closeSignInSettingsModal} onSubmit={onSignInSettingsModalSubmit} />
       </Router>
     </div>

@@ -46,8 +46,7 @@ const save = async (request, response)=>{
     const {body: {budgets}} = request;
 
     //Call the updateBudgets API
-    //const results = await BudgetsApi.updateBudgets(budgets);
-    console.log("await TransactionsApi.updateTransaction(transactionId, transaction)");
+    const results = await BudgetsApi.updateBudgets(budgets);
 
     /* DEBUG */ console.info(`>[${new Date().toJSON()}] >POST /api/v1/budgets`);
     response.json({data: results,});

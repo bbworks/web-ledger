@@ -1,6 +1,6 @@
 //Import modules
 const router = require("express").Router();
-const AccountController = require("../controllers/accounts");
+const AccountController = require("../controllers/account");
 
 
 //Define routes
