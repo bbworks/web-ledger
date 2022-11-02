@@ -1,5 +1,5 @@
 import {getSheetsSpreadsheetValues, updateSheetsSpreadsheetValues} from './../googleApi';
-import {throwException} from './../utilities';
+import {throwError} from './../utilities';
 
 export const getTransactions = async ()=>{
   try {
@@ -9,7 +9,7 @@ export const getTransactions = async ()=>{
       .then(data=>data.data);
   }
   catch (err) {
-    throwException(err, false);
+    throwError("Failed to fetch transactions", err, false);
     return [];
   }
 };
@@ -22,7 +22,7 @@ export const updateTransactions = async transactions=>{
       .then(data=>data.data);
   }
   catch (err) {
-    throwException(err, false);
+    throwError("Failed to update transactions", err, false);
     return [];
   }
 };

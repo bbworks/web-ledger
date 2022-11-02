@@ -1,5 +1,5 @@
 import {getSheetsSpreadsheetValues} from './../googleApi';
-import {throwException} from './../utilities';
+import {throwError} from './../utilities';
 
 export const getAccountsData = async ()=>{
   try {
@@ -9,7 +9,7 @@ export const getAccountsData = async ()=>{
 	.then(data=>data.data);
   }
   catch (err) {
-    throwException(err, false);
+    throwError("Failed to fetch accounts data", err, false);
     return [];
   }
 };

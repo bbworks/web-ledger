@@ -1,5 +1,5 @@
 import {getSheetsSpreadsheetValues, updateSheetsSpreadsheetValues} from './../googleApi';
-import {throwException} from './../utilities';
+import {throwError} from './../utilities';
 
 export const getBudgetsData = async ()=>{
   try {
@@ -9,7 +9,7 @@ export const getBudgetsData = async ()=>{
       .then(data=>data.data);
   }
   catch (err) {
-    throwException(err, false);
+    throwError("Failed to fetch budgets", err, false);
     return [];
   }
 };
@@ -22,7 +22,7 @@ export const updateBudgetsData = async budgetsData=>{
 	.then(data=>data.data);
   }
   catch (err) {
-    throwException(err, false);
+    throwError("Failed to update budgets", err, false);
     return [];
   }
 };

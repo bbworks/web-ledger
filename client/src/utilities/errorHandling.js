@@ -1,42 +1,54 @@
-export const throwException = (err, throwEx=true, alertWindow=true)=>{
-  //Build an exception to throw
-  let exception = {};
-  let errorMsg = null;
+export const throwError = (errorMsg, err, throwError=true, alert=true)=>{
+  let error = {};
 
-  //If this is a Javascript exception
+  //Build an Exception with a prettified version
+  // of the error to the screen
   if (err instanceof Error) {
-    errorMsg = err.message;
+    error.message = err.message;
+    error.name = err.name;
+    if (err.description === 0 || err.description) error.description = err.description;
+    if (err.number === 0 || err.number) error.number = err.number;
+    if (err.fileName === 0 || err.fileName) error.fileName = err.fileName;
+    if (err.lineNumber === 0 || err.lineNumber) error.lineNumber = err.lineNumber;
+    if (err.columnNumber === 0 || err.columnNumber) error.columnNumber = err.columnNumber;
+    if (err.stack === 0 || err.stack) error.stack = err.stack;
 
-    exception.name = err.name
-    if (err.description === 0 || err.description) exception.description = err.description;
-    if (err.number === 0 || err.number) exception.number = err.number;
-    if (err.fileName === 0 || err.fileName) exception.fileName = err.fileName;
-    if (err.lineNumber === 0 || err.lineNumber) exception.lineNumber = err.lineNumber;
-    if (err.columnNumber === 0 || err.columnNumber) exception.columnNumber = err.columnNumber;
-    if (err.stack === 0 || err.stack) exception.stack = err.stack;
+    error.title = `${errorMsg ? errorMsg+": " : ''}${error.message}`;
+    error.text = `${error.title}\r\n${Object.entries(error).length ? Object.entries(error).map(([key, value])=>`  + ${key}: ${value}\r\n`).join('') : ''}`;
+  }
+  else if (err instanceof Response) {
+    error.status = err.status;
+    error.statusText = err.statusText;
+    error.ok = err.ok;
+    error.redirected = err.redirected;
+    error.type = err.type;
+    error.url = err.url;
+
+    error.title = `${errorMsg ? errorMsg+": " : ''}${err.status} ${err.statusText}`;
+    error.text = `${error.title}\r\n${Object.entries(error).length ? Object.entries(error).map(([key, value])=>`  + ${key}: ${value}\r\n`).join('') : ''}`;
   }
   else if (typeof err === "object") {
-    if (err.message) {
-      errorMsg = err.message;
-      delete err.message;
-    }
-    exception = {
-      ...exception,
+    error = {
       ...err,
-    }
+      title: `${errorMsg ? errorMsg+": " : ''}${err.message}`,
+    };
+    error.text = error.title;
   }
   else if (typeof err === "string") {
-    errorMsg = err;
+    error.title = `${errorMsg ? errorMsg+": " : ''}${err}`;
+    error.text = error.title;
+  }
+
+  if (throwError) {
+    error.text += `\r\nThe application failed.`;
   }
 
   //Log the original error, for investigation
-  console.error("throwException()", err);
+  console.error(error.title, error);
 
-  //Send a prettified version of the error to the screen
-  const exceptionMsg = `${errorMsg}\r\n${Object.entries(exception).length ? Object.entries(exception).map(([key, value])=>`  + ${key}: ${value}\r\n`).join("") : ''}\r\nThe application failed.`;
-
-  if (alertWindow) window.alert(exceptionMsg);
+  //Alert the error to the screen
+  if (alert) window.alert(error.text);
 
   //Throw the original error
-  if (throwEx) throw err;
+  if (throwError) throw err;
 }
