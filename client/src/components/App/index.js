@@ -6,7 +6,7 @@ import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
 import {getBudgetCycleFromDate, getBudgetCyclesFromTransactions, getAllBudgetCycles, typeCheckTransactions, isTransactionDuplicate, categorizeTransactionByDescription, importTransactions, typeCheckBudgetsData, typeCheckAccountsData, typeCheckAccountData, throwException} from './../../utilities';
 import {getSpreadsheetId, setSpreadsheetId, getClientId, setClientId, initAuthorization} from './../../googleApi';
 import {getTransactions, updateTransactions, getBudgetsData, updateBudgetsData, getAccountsData, getAccountData} from './../../api';
-import {useScript, useConsoleLog, useBudgetCycleBudgets} from './../../hooks';
+import {useScript, useConsoleLog, useBudgetCycleBudgets, useApi} from './../../hooks';
 
 //Import custom components
 import SignInView from './../SignInView';
@@ -30,6 +30,11 @@ const App = () => {
   const [budgetsData, setBudgetsData] = useState([]);
   const [accountsData, setAccountsData] = useState([]);
   const [accountData, setAccountData] = useState({});
+
+  const {data:transactionsApi, loading:transactionsLoading, error:transactionsError, fetchApi:fetchTransactions} = useApi(getTransactions, []);
+  const {data:budgetsDataApi, loading:budgetsDataLoading, error:budgetsDataError, fetchApi:fetchBudgetsData} = useApi(getBudgetsData, []);
+  const {data:accountsDataApi, loading:accountsDataLoading, error:accountsDataError, fetchApi:fetchAccountsData} = useApi(getAccountsData, []);
+  const {data:accountDataApi, loading:accountDataLoading, error:accountDataError, fetchApi:fetchAccountData} = useApi(async()=>await getAccountData(signedInUser && signedInUser.id), []);
 
   const [footerNavbar, setFooterNavbar] = useState(null);
   const [budgetCycle, setBudgetCycle] = useState(getBudgetCycleFromDate(new Date()));
@@ -114,6 +119,10 @@ const App = () => {
   useConsoleLog(allBudgetCycles, "allBudgetCycles:");
   useConsoleLog(budgetCycle, "budgetCycle:");
 
+  useConsoleLog(transactionsApi, "TransactionsAPI:");
+  useConsoleLog(budgetsDataApi, "BudgetAPI:");
+  useConsoleLog(accountsDataApi, "AccountsAPI:");
+  useConsoleLog(accountDataApi, "AccountAPI:");
 
   //Create helper functions
   const saveSettings = savedSettings=>{
@@ -437,17 +446,34 @@ const App = () => {
   }, []);
 
   //Whenever the user gets logged in,
-  // attempt to query for data
+  // refresh the API data
   useEffect(()=>{
-    //Run async function inside necessary useEffect sync function
-    (async ()=>{
       if (!signedInUser) return;
-      setTransactionsWrapper(await getTransactions());
-      setBudgetsDataWrapper(await getBudgetsData());
-      setAccountsDataWrapper(await getAccountsData());
-      setAccountDataWrapper(await getAccountData(signedInUser.id));
-    })();
+
+      fetchTransactions();
+      fetchBudgetsData();
+      fetchAccountsData();
+      fetchAccountData();
   }, [signedInUser]);
+
+  //Whenever the API data changes,
+  // update the application state
+  useEffect(()=>{
+      if (!transactionsApi.length) return;
+      setTransactionsWrapper(transactionsApi);
+  }, [transactionsApi]);
+  useEffect(()=>{
+      if (!budgetsDataApi.length) return;
+      setBudgetsDataWrapper(budgetsDataApi);
+  }, [budgetsDataApi]);
+  useEffect(()=>{
+      if (!accountsDataApi.length) return;
+      setAccountsDataWrapper(accountsDataApi);
+  }, [accountsDataApi]);
+  useEffect(()=>{
+      if (!accountDataApi.length) return;
+      setAccountDataWrapper(accountDataApi);
+  }, [accountDataApi]);
 
   //Whenever the transactions are updated, save them off as well
   useEffect(()=>{
@@ -461,6 +487,11 @@ const App = () => {
     if (!budgetsData.length) return;
     updateBudgetsData(budgetsData);
   }, [budgetsData]);
+
+  //Note whenever the entire App re-renders
+  useEffect(()=>{
+    console.log("Application re-rendered.")
+  });
 
 
   //Return a "loading page" while determining if the user is signed in
