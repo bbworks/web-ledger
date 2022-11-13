@@ -2,27 +2,29 @@ import {getSheetsSpreadsheetValues, updateSheetsSpreadsheetValues} from './../go
 import {throwError} from './../utilities';
 
 export const getBudgetsData = async ()=>{
-  try {
-    return await fetch("/api/v1/budgets")
-      .then(response=>{if(!response.ok) throw response; return response;})
-      .then(response=>response.json())
-      .then(data=>data.data);
-  }
-  catch (err) {
-    throwError("Failed to fetch budgets", err, false);
-    return [];
-  }
+  return fetch("/api/v1/budgets")
+    .then(response=>{if(!response.ok) throw response; return response;})
+    .then(response=>response.json())
+    .then(data=>data.data)
+    .catch(err=>{
+      throw {
+        message: "Failed to fetch budgets",
+        throw: false,
+        err,
+      };
+    });
 };
 
 export const updateBudgetsData = async budgetsData=>{
-  try {
-    return await fetch("/api/v1/budgets", {method: "post", headers: {'Content-Type': 'application/json'}, body: JSON.stringify({budgetsData})})
-      .then(response=>{if(!response.ok) throw response; return response;})
-      .then(response=>response.json())
-	.then(data=>data.data);
-  }
-  catch (err) {
-    throwError("Failed to update budgets", err, false);
-    return [];
-  }
+  return fetch("/api/v1/budgets", {method: "post", headers: {'Content-Type': 'application/json'}, body: JSON.stringify({budgetsData})})
+    .then(response=>{if(!response.ok) throw response; return response;})
+    .then(response=>response.json())
+    .then(data=>data.data)
+    .catch(err=>{
+      throw {
+        message: "Failed to update budgets",
+        throw: false,
+        err,
+      };
+    });
 };

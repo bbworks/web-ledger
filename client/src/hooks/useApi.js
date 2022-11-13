@@ -1,5 +1,7 @@
 import {useState, useEffect} from 'react';
 
+import {throwError} from './../utilities/errorHandling';
+
 const useApi = (api, initialValue)=>{
   //Initialize state
   const [data, setData] = useState(initialValue);
@@ -16,22 +18,27 @@ const useApi = (api, initialValue)=>{
   // };
 
   //create functions
-  const fetchApi = async ()=>{
+  const fetchApi = async (...rest)=>{
     //Set the loading & cancelled status
     setLoading(true);
+    setError(undefined);
     cancelled = false;
 
     //Attempt to call the api function,
     // and set the data if successful
     try {
       if(!cancelled) {
-        const data = await api();
+        const data = await api(...rest);
         setData(data);
       }
     }
     //Otherwise, set the error
     catch (err) {
-      if(!cancelled) setError(err);
+      if(!cancelled) {
+        setError(err);
+        setData([]);
+        throwError(err.message, err.err, err.throw ?? false);
+      };
     }
     //Either way, reset the loading status
     finally {
