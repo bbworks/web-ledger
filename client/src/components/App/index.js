@@ -25,6 +25,11 @@ import './index.scss';
 
 
 const App = () => {
+  //Note whenever the entire App re-renders
+  useEffect(()=>{
+    console.log(">>Application re-rendered.")
+  });
+
   //Set application state
   const [transactions, setTransactions] = useState([]);
   const [budgetsData, setBudgetsData] = useState([]);
@@ -489,11 +494,6 @@ const App = () => {
     if (!budgetsData.length) return;
     fetchUpdateBudgetsData(budgetsData);
   }, [budgetsData]);
-
-  //Note whenever the entire App re-renders
-  useEffect(()=>{
-    console.log("Application re-rendered.")
-  });
 
 
   //Return a "loading page" while determining if the user is signed in
