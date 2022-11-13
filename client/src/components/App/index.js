@@ -34,7 +34,9 @@ const App = () => {
   const {data:transactionsApi, loading:transactionsLoading, error:transactionsError, fetchApi:fetchTransactions} = useApi(getTransactions, []);
   const {data:budgetsDataApi, loading:budgetsDataLoading, error:budgetsDataError, fetchApi:fetchBudgetsData} = useApi(getBudgetsData, []);
   const {data:accountsDataApi, loading:accountsDataLoading, error:accountsDataError, fetchApi:fetchAccountsData} = useApi(getAccountsData, []);
-  const {data:accountDataApi, loading:accountDataLoading, error:accountDataError, fetchApi:fetchAccountData} = useApi(async()=>await getAccountData(signedInUser && signedInUser.id), []);
+  const {data:accountDataApi, loading:accountDataLoading, error:accountDataError, fetchApi:fetchAccountData} = useApi(async ()=>await getAccountData(signedInUser && signedInUser.id), []);
+  const {data:updateTransactionsApi, loading:updateTransactionsLoading, error:updateTransactionsError, fetchApi:fetchUpdateTransactions} = useApi(updateTransactions, []);
+  const {data:updateBudgetsDataApi, loading:updateBudgetsDataLoading, error:updateBudgetsDataError, fetchApi:fetchUpdateBudgetsData} = useApi(updateBudgetsData, []);
 
   const [footerNavbar, setFooterNavbar] = useState(null);
   const [budgetCycle, setBudgetCycle] = useState(getBudgetCycleFromDate(new Date()));
@@ -478,14 +480,14 @@ const App = () => {
   //Whenever the transactions are updated, save them off as well
   useEffect(()=>{
     if (!transactions.length) return;
-    updateTransactions(transactions);
+    fetchUpdateTransactions(transactions);
   }, [transactions]);
 
 
   //Whenever the budgets are updated, save them off as well
   useEffect(()=>{
     if (!budgetsData.length) return;
-    updateBudgetsData(budgetsData);
+    fetchUpdateBudgetsData(budgetsData);
   }, [budgetsData]);
 
   //Note whenever the entire App re-renders
