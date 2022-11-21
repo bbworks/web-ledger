@@ -1,12 +1,20 @@
+import reportWebVitals from './reportWebVitals';
+
+//Import custom components
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
 import App from './components/App';
-import reportWebVitals from './reportWebVitals';
+
+import {AlertsProvider} from './context/AlertsContext';
+
+//Import styles
+import './index.css';
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <AlertsProvider>
+      <App />
+    </AlertsProvider>
   </React.StrictMode>,
   document.getElementById('root')
 );

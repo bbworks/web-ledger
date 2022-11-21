@@ -18,6 +18,7 @@ import FooterNavbar from './../FooterNavbar';
 import SignInSettingsModal from './../SignInSettingsModal';
 import Header from './../Header';
 import Logo from './../Logo';
+import AlertsContainer from './../AlertsContainer';
 
 //Import styles
 import './main.css';
@@ -53,6 +54,7 @@ const App = () => {
   const [signedInUser, setSignedInUser] = useState(undefined);
   const [isSignInSettingsModalOpen, setIsSignInSettingsModalOpen] = useState(false);
   const [isLoadingAnimationComplete, setIsLoadingAnimationComplete] = useState(false);
+  const [alerts, setAlerts] = useState([]);
 
   //Declare settings
   const settings = {
@@ -536,6 +538,7 @@ const App = () => {
             <SettingsView setFooterNavbar={setFooterNavbar} settings={settings} onSubmit={onSettingsViewSubmit}/>
           </Route>
         </Switch>
+        <AlertsContainer alerts={alerts} />
         <FooterNavbar active={footerNavbar} />
       </Router>
     </div>

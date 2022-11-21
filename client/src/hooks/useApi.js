@@ -1,8 +1,10 @@
 import {useState, useEffect} from 'react';
 
-import {throwError} from './../utilities/errorHandling';
+import {useError} from './../hooks';
 
 const useApi = (api, initialValue)=>{
+  const throwError = useError();
+
   //Initialize state
   const [data, setData] = useState(initialValue);
   const [error, setError] = useState(undefined);

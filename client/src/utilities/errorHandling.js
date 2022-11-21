@@ -1,5 +1,10 @@
+import {useNewAlert} from './../context/AlertsContext';
+
+// import {AlertsContext} from './../context/AlertsContext';
+
 export const throwError = (errorMsg, err, throwError=true, alert=true)=>{
   let error = {};
+  //const newAlert = useNewAlert();
 
   //Build an Exception with a prettified version
   // of the error to the screen

@@ -1,0 +1,14 @@
+.alerts-container {
+  display: flex;
+  flex-direction: column-reverse;
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  padding: 0.5rem 1rem;
+  width: 15rem;
+  max-width: 40%;
+  overflow-y: auto;
+  height: 100%;
+  z-index: 1031; //set higher than bootstrap@5.0.1 .fixed-bottom
+  pointer-events: none;
+}
