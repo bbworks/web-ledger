@@ -10,5 +10,30 @@
   overflow-y: auto;
   height: 100%;
   z-index: 1031; //set higher than bootstrap@5.0.1 .fixed-bottom
-  pointer-events: none;
+  // pointer-events: none;
+  scrollbar-gutter: stable;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+
+    &-track {
+      background: none;
+    }
+
+    &-thumb {
+      background: #aaa;
+      border-radius: 10px;
+      transition: width 0.5s;
+    }
+
+    &:hover {
+      width: 10px;
+      height: 10px;
+    }
+
+    &-thumb:hover {
+      background: #989;
+    }
+  }
 }

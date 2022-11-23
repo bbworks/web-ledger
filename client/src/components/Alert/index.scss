@@ -10,9 +10,37 @@ $alert-error-background-color: rgb(255,186,186);
 
 $alert-transition-duration: 0.25s;
 
+// use Sass variables & CSS variables for simplified, DRY styling
+$alert-foreground-color: var(--alert-foreground-color);
+$alert-background-color: var(--alert-background-color);
+
 .alert {
-  color: $alert-info-foreground-color;
-  background-color: $alert-info-background-color;
+  // default colors
+  --alert-foreground-color: #{$alert-info-foreground-color};
+  --alert-background-color: #{$alert-info-background-color};
+
+  &-info {
+    --alert-foreground-color: #{$alert-info-foreground-color};
+    --alert-background-color: #{$alert-info-background-color};
+  }
+
+  &-success {
+    --alert-foreground-color: #{$alert-success-foreground-color};
+    --alert-background-color: #{$alert-success-background-color};
+  }
+
+  &-warning {
+    --alert-foreground-color: #{$alert-warning-foreground-color};
+    --alert-background-color: #{$alert-warning-background-color};
+  }
+
+  &-error {
+    --alert-foreground-color: #{$alert-error-foreground-color};
+    --alert-background-color: #{$alert-error-background-color};
+  }
+
+  color: $alert-foreground-color;
+  background-color: $alert-background-color;
   padding: 0.5rem;
   border-radius: 0.5rem;
   width: 100%;
@@ -21,6 +49,12 @@ $alert-transition-duration: 0.25s;
   font-size: 14px;
   transition: opacity $alert-transition-duration, transform $alert-transition-duration;
   pointer-events: auto;
+  overflow: hidden;
+
+
+
+
+
 
   &:hover {
     opacity: 1;
@@ -33,43 +67,32 @@ $alert-transition-duration: 0.25s;
 
   &-content {
     padding: 1rem;
-    border: 2px solid $alert-info-foreground-color;
+    border: 2px solid $alert-foreground-color;
     border-radius: 0.25rem;
   }
 
-  &-content-icon-container {
-    display: inline-block;
+  &-content-icon {
     margin-right: 0.25rem;
   }
 
   &-content-text {
-    display: inline;
-  }
+    white-space: pre;
+    overflow: auto;
+    max-height: 10rem;
 
-  &-error {
-    color: $alert-error-foreground-color;
-    background-color: $alert-error-background-color;
-  }
+    &::-webkit-scrollbar {
+      width: 2px;
+      height: 2px;
 
-  &-error &-content {
-    border: 2px solid $alert-error-foreground-color;
-  }
+      &-track {
+        background: none;
+      }
 
-  &-warning {
-    color: $alert-warning-foreground-color;
-    background-color: $alert-warning-background-color;
-  }
-
-  &-warning &-content {
-    border: 2px solid $alert-warning-foreground-color;
-  }
-
-  &-success {
-    color: $alert-success-foreground-color;
-    background-color: $alert-success-background-color;
-  }
-
-  &-success &-content {
-    border: 2px solid $alert-success-foreground-color;
+      &-thumb {
+        background: $alert-foreground-color;
+        border-radius: 10px;
+        transition: width 0.5s;
+      }
+    }
   }
 }
