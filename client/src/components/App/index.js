@@ -498,31 +498,28 @@ const App = () => {
   }, [budgetsData]);
 
 
-  //Return a "loading page" while determining if the user is signed in
-  if (!isLoadingAnimationComplete) return (
-    <div className="App">
-      <Router basename={(process.env.NODE_ENV === "production" ? process.env.PUBLIC_URL : null)}>
+  const renderApplicationUI = ()=>{
+    //Return a "loading page" while determining if the user is signed in
+    if (!isLoadingAnimationComplete) return (
+      <>
         <div className="d-flex justify-content-center align-items-center min-vh-100">
           <Logo scrollIn={true} onLogoTextScrollIn={onLogoTextScrollIn}/>
         </div>
-      </Router>
-    </div>
-  );
+      </>
+    );
 
-  //If the user has not signed in, send them to the sign in page,
-  // and while the Google API is loading, disable the sign in button
-  if (isLoadingAnimationComplete && !signedInUser) return (
-    <div className="App">
-      <Router basename={(process.env.NODE_ENV === "production" ? process.env.PUBLIC_URL : null)}>
+    //If the user has not signed in, send them to the sign in page,
+    // and while the Google API is loading, disable the sign in button
+    if (isLoadingAnimationComplete && !signedInUser) return (
+      <>
         <SignInView />
         <SignInSettingsModal settings={settings} isOpen={isSignInSettingsModalOpen} onClose={closeSignInSettingsModal} onSubmit={onSignInSettingsModalSubmit} />
-      </Router>
-    </div>
-  );
+      </>
+    );
 
-  return (
-    <div className="App">
-      <Router basename={(process.env.NODE_ENV === "production" ? process.env.PUBLIC_URL : null)}>
+    //Otherwise, return the standard application UI
+    return (
+      <>
         <Header signedInUser={signedInUser} />
         <Switch>
           <Route path={["/dashboard", "/"]} exact>
@@ -538,11 +535,19 @@ const App = () => {
             <SettingsView setFooterNavbar={setFooterNavbar} settings={settings} onSubmit={onSettingsViewSubmit}/>
           </Route>
         </Switch>
-        <AlertsContainer alerts={alerts} />
         <FooterNavbar active={footerNavbar} />
+      </>
+    );
+  };
+
+  return (
+    <div className="App">
+      <Router basename={(process.env.NODE_ENV === "production" ? process.env.PUBLIC_URL : null)}>
+        {renderApplicationUI()}
+        <AlertsContainer alerts={alerts} />
       </Router>
     </div>
-  );
+  )
 };
 
 export default App;
