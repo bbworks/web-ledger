@@ -26,14 +26,14 @@ const show = async (request, response)=>{
     const {params: {transaction_id: transactionId}} = request;
 
     //Call the getTransaction API
-    /* DEBUG */ console.info(`>[${new Date().toJSON()}] >GET /api/v1/transactions/:trransaction_id`);
+    /* DEBUG */ console.info(`>[${new Date().toJSON()}] >GET /api/v1/transactions/:transaction_id`);
     const results = await TransactionsApi.getTransaction(transaction_id);
-    /* DEBUG */ console.info(`>[${new Date().toJSON()}] >Response: GET /api/v1/transactions/:trransaction_id |\r\n`, results);
+    /* DEBUG */ console.info(`>[${new Date().toJSON()}] >Response: GET /api/v1/transactions/:transaction_id |\r\n`, results);
 
     response.json({data: results,});
   }
   catch (err) {
-    /* DEBUG */ console.info(`>[${new Date().toJSON()}] >FAILED: GET /api/v1/transactions/:trransaction_id |\r\n`, err);
+    /* DEBUG */ console.info(`>[${new Date().toJSON()}] >FAILED: GET /api/v1/transactions/:transaction_id |\r\n`, err);
     response.status(500).json({
       error: err,
     });
@@ -67,14 +67,14 @@ const update = async (request, response)=>{
     const {params: {transaction_id: transactionId}, body: {transaction}} = request;
 
     //Call the updateTransaction API
-    /* DEBUG */ console.info(`>[${new Date().toJSON()}] >POST /api/v1/transactions/:trransaction_id`);
+    /* DEBUG */ console.info(`>[${new Date().toJSON()}] >POST /api/v1/transactions/:transaction_id`);
     const results = await TransactionsApi.updateTransaction(transactionId, transaction);
-    /* DEBUG */ console.info(`>[${new Date().toJSON()}] >Response: POST /api/v1/transactions/:trransaction_id |\r\n`, results);
+    /* DEBUG */ console.info(`>[${new Date().toJSON()}] >Response: POST /api/v1/transactions/:transaction_id |\r\n`, results);
 
     response.json({data: results,});
   }
   catch (err) {
-    /* DEBUG */ console.info(`>[${new Date().toJSON()}] >FAILED: POST /api/v1/transactions/:trransaction_id |\r\n`, err);
+    /* DEBUG */ console.info(`>[${new Date().toJSON()}] >FAILED: POST /api/v1/transactions/:transaction_id |\r\n`, err);
     response.status(500).json({
       error: err,
     });
