@@ -484,18 +484,18 @@ const App = () => {
       setAccountDataWrapper(accountDataApi);
   }, [accountDataApi]);
 
-  //Whenever the transactions are updated, save them off as well
-  useEffect(()=>{
-    if (!transactions.length) return;
-    fetchUpdateTransactions(transactions);
-  }, [transactions]);
-
-
-  //Whenever the budgets are updated, save them off as well
-  useEffect(()=>{
-    if (!budgetsData.length) return;
-    fetchUpdateBudgetsData(budgetsData);
-  }, [budgetsData]);
+  // //Whenever the transactions are updated, save them off as well
+  // useEffect(()=>{
+  //   if (!transactions.length) return;
+  //   fetchUpdateTransactions(transactions);
+  // }, [transactions]);
+  //
+  //
+  // //Whenever the budgets are updated, save them off as well
+  // useEffect(()=>{
+  //   if (!budgetsData.length) return;
+  //   fetchUpdateBudgetsData(budgetsData);
+  // }, [budgetsData]);
 
 
   const renderApplicationUI = ()=>{
