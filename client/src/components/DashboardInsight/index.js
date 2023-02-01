@@ -18,7 +18,7 @@ const DashboardInsight = ({ insight })=>{
   }
 
   return (
-    <div className={`dashboard-insight alert alert-${insight.type}`}>
+    <div className={`dashboard-insight alert-${insight.type}`}>
       <div>
         <i className={`${insight.iconClass ?? "fas fa-sliders-h"} me-1`}></i>
         <h3 className="d-inline-block">{insight.title}</h3>
