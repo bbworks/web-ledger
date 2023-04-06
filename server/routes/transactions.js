@@ -4,13 +4,17 @@ const TransactionsController = require("../controllers/transactions");
 
 
 //Define routes
-router.get("/", TransactionsController.get);
+router.get("/", TransactionsController.list);
 
-router.get("/:transaction_id", TransactionsController.show);
+router.get("/:transaction_id", TransactionsController.get);
 
-router.post("/", TransactionsController.save);
+router.post("/", TransactionsController.create);
 
-router.post("/:transaction_id", TransactionsController.update);
+router.post("/save", TransactionsController.save);
+
+router.put("/:transaction_id", TransactionsController.update);
+
+router.delete("/:transaction_id", TransactionsController.destroy);
 
 //Export the router
 module.exports = router;

@@ -37,17 +37,18 @@ const authorize = async (request, response)=>{
     const {query: code} = request;
 
     //Authorize with the Google APIs
-    /* DEBUG */ console.info(`>[${new Date().toJSON()}] >GET /api/v1/authoriz`);
+    /* DEBUG */ console.info(`>[${new Date().toJSON()}] >GET /api/v1/authorize`);
     const results = await GoogleAPIAuth.authorize();
     /* DEBUG */ console.info(`>[${new Date().toJSON()}] >Response: GET /api/v1/authorize | `, results);
 
     //If unauthorized, redirect
     if (results.redirectUrl) {
-      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >Response: GET /api/v1/authorize | 303 REDIRECT GET ${results.redirectUrl} \r\n`);
       const redirectUrl = results.redirectUrl;
       const method = "GET";
       const status = 303;
-      return response.redirect(status, redirectUrl);
+      
+      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >Response: GET /api/v1/authorize | UNAUTHORIZED > 303 REDIRECT GET ${results.redirectUrl} \r\n`);
+      return response.status(303).redirect(status, redirectUrl);
     }
   }
   catch (err) {

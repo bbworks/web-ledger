@@ -4,13 +4,17 @@ const BudgetsController = require("../controllers/budgets");
 
 
 //Define routes
-router.get("/", BudgetsController.get);
+router.get("/", BudgetsController.list);
 
-router.get("/:budget_id", BudgetsController.show);
+router.get("/:budget_id", BudgetsController.get);
+
+router.post("/", BudgetsController.create);
 
 router.post("/", BudgetsController.save);
 
-router.post("/:budget_id", BudgetsController.update);
+router.put("/:budget_id", BudgetsController.update);
+
+router.delete("/:budget_id", BudgetsController.destroy);
 
 //Export the router
 module.exports = router;
