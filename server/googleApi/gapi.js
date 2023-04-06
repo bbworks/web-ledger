@@ -58,19 +58,17 @@ const callGoogleApiFunction = (googleApi, googleApiOptions, resourceType, method
   return new Promise(async (resolve,reject)=>{
     try {
       //Get the resource object
-      /* DEBUG */ console.log(`>[${new Date().toJSON()}] [INFO] Querying Google ${googleApi}.${resourceType}.${method} resource...`);
+      // /* DEBUG */ console.log(`>[${new Date().toJSON()}] [INFO] Querying Google ${googleApi}.${resourceType}.${method} resource...`);
       const resource = getDynamicPropertyByArray(GoogleAPIAuth.google[googleApi](googleApiOptions), resourceType);
-      /* DEBUG */ console.log(`>[${new Date().toJSON()}] [INFO] Queried Google ${googleApi}.${resourceType}.${method} resource.`);
+      // /* DEBUG */ console.log(`>[${new Date().toJSON()}] [INFO] Queried Google ${googleApi}.${resourceType}.${method} resource.`);
 
       //Make the resource method call
       const response = await resource[method](options, ...params);
 
       //Check for errors
-      if (response.error) {
-        /* DEBUG */ console.error(`>[${new Date().toJSON()}] [ERROR] Resource: google.${googleApi}.${resourceType}.${method} |`, response.error);
-        throw response.error;
-      }
-      /* DEBUG */ console.log(`>[${new Date().toJSON()}] [INFO] Resource: google.${googleApi}.${resourceType}.${method} |`, response);
+      if (response.error) throw response.error;
+      
+      // /* DEBUG */ console.log(`>[${new Date().toJSON()}] [INFO] Resource: google.${googleApi}.${resourceType}.${method} |`, response);
 
       //If a "list" query was performed
       if (method === "list") {
