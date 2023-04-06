@@ -2,7 +2,7 @@ import {getSheetsSpreadsheetValues, updateSheetsSpreadsheetValues} from './../go
 import {throwError} from './../utilities';
 
 export const getBudgetsData = async ()=>{
-  return fetch("/api/v1/budgets")
+  return fetch(`${process.env.REACT_APP_API_ENDPOINT || ""}/api/v1/budgets`)
     .then(response=>{if(!response.ok) throw response; return response;})
     .then(response=>response.json())
     .then(data=>data.data)
@@ -16,7 +16,7 @@ export const getBudgetsData = async ()=>{
 };
 
 export const updateBudgetsData = async budgetsData=>{
-  return fetch("/api/v1/budgets", {method: "post", headers: {'Content-Type': 'application/json'}, body: JSON.stringify({budgetsData})})
+  return fetch(`${process.env.REACT_APP_API_ENDPOINT || ""}/api/v1/budgets`, {method: "post", headers: {'Content-Type': 'application/json'}, body: JSON.stringify({budgetsData})})
     .then(response=>{if(!response.ok) throw response; return response;})
     .then(response=>response.json())
     .then(data=>data.data)
