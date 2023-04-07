@@ -4,6 +4,7 @@ import useBudgetCycleTransactions from './useBudgetCycleTransactions.js';
 import useBudgetCycleBudgets from './useBudgetCycleBudgets.js';
 import useLocalStorage from './useLocalStorage.js';
 import useApi from './useApi.js';
+import useFetch from './useFetch.js';
 import useError from './useError.js';
 
 
@@ -14,5 +15,6 @@ export {
   useBudgetCycleBudgets,
   useLocalStorage,
   useApi,
+  useFetch,
   useError,
 };
