@@ -12,6 +12,7 @@
   z-index: 1031; //set higher than bootstrap@5.0.1 .fixed-bottom
   // pointer-events: none;
   scrollbar-gutter: stable;
+  pointer-events: none;
 
   &::-webkit-scrollbar {
     width: 4px;
