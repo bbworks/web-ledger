@@ -13,13 +13,20 @@ export const typeCheckTransactions = function (transactions) {
       return {
         ...transaction,
         TransactionId: parseGoogleSheetsNumber(transaction.TransactionId),
-        PostedDate: parseGoogleSheetsDate(transaction.PostedDate),
-        TransactionDate: parseGoogleSheetsDate(transaction.TransactionDate),
+        //PostedDate: parseGoogleSheetsDate(transaction.PostedDate),
+        PostedDate: new Date(transaction.PostedDate),
+        //TransactionDate: parseGoogleSheetsDate(transaction.TransactionDate),
+        TransactionDate: new Date(transaction.TransactionDate),
         Amount: parseGoogleSheetsNumber(isNaN(transaction.Amount) ? transaction.Amount.replace(/(\$|,)/g, "") : transaction.Amount),
         Tags: !isFalsy(transaction.Tags) ? transaction.Tags : [],
-        BudgetCycle: parseGoogleSheetsDate(transaction.BudgetCycle),
-        DateCreated: parseGoogleSheetsDate(transaction.DateCreated),
-        DateModified: parseGoogleSheetsDate(transaction.DateModified),
+        //BudgetCycle: parseGoogleSheetsDate(transaction.BudgetCycle),
+        BudgetCycle: new Date(transaction.BudgetCycle),
+        IsAutoCategorized: Boolean(transaction.IsAutoCategorized),
+        IsUpdatedByUser: Boolean(transaction.IsUpdatedByUser),
+        //DateCreated: parseGoogleSheetsDate(transaction.DateCreated),
+        DateCreated: new Date(transaction.date_created),
+        //DateModified: parseGoogleSheetsDate(transaction.DateModified),
+        DateModified: new Date(transaction.date_modified),
       };
     }
     catch (err) {
