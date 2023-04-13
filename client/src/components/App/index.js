@@ -3,10 +3,10 @@ import {useState, useEffect} from 'react';
 import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
 
 //Import source code
-import {getBudgetCycleFromDate, getBudgetCyclesFromTransactions, getAllBudgetCycles, typeCheckTransactions, isTransactionDuplicate, categorizeTransactionByDescription, importTransactions, typeCheckBudgetsData, typeCheckAccountsData, typeCheckAccountData, throwException} from './../../utilities';
+import {getBudgetCycleFromDate, getBudgetCyclesFromTransactions, getAllBudgetCycles, typeCheckTransactions, isTransactionDuplicate, categorizeTransactionByDescription, importTransactions, typeCheckBudgetsData, typeCheckAccountsData, typeCheckAccountData, throwException, getObjectUpdates} from './../../utilities';
 import {getSpreadsheetId, setSpreadsheetId, getClientId, setClientId, initAuthorization} from './../../googleApi';
 import {getTransactions, updateTransactions, getBudgetsData, updateBudgetsData, getAccountsData, getAccountData} from './../../api';
-import {useScript, useConsoleLog, useBudgetCycleBudgets, useApi} from './../../hooks';
+import {useScript, useConsoleLog, useBudgetCycleBudgets, useApi, useFetch} from './../../hooks';
 
 //Import custom components
 import SignInView from './../SignInView';
@@ -41,9 +41,11 @@ const App = () => {
   const {data:budgetsDataApi, loading:budgetsDataLoading, error:budgetsDataError, fetchApi:fetchBudgetsData} = useApi(getBudgetsData, []);
   const {data:accountsDataApi, loading:accountsDataLoading, error:accountsDataError, fetchApi:fetchAccountsData} = useApi(getAccountsData, []);
   const {data:accountDataApi, loading:accountDataLoading, error:accountDataError, fetchApi:fetchAccountData} = useApi(async ()=>await getAccountData(signedInUser && signedInUser.id), []);
-  const {data:updateTransactionsApi, loading:updateTransactionsLoading, error:updateTransactionsError, fetchApi:fetchUpdateTransactions} = useApi(updateTransactions, []);
-  const {data:updateBudgetsDataApi, loading:updateBudgetsDataLoading, error:updateBudgetsDataError, fetchApi:fetchUpdateBudgetsData} = useApi(updateBudgetsData, []);
-
+  //const {data:updateTransactionsApi, loading:updateTransactionsLoading, error:updateTransactionsError, fetchApi:fetchUpdateTransactions} = useApi(updateTransactions, []);
+  //const {data:updateBudgetsDataApi, loading:updateBudgetsDataLoading, error:updateBudgetsDataError, fetchApi:fetchUpdateBudgetsData} = useApi(updateBudgetsData, []);
+  const {data: updateTransactionResponse, error: updateTransactionError, isLoading: updateTransactionLoading, fetchData: updateTransaction, status: updateTransactionStatus, ok: updateTransactionOk} = useFetch();
+  const {data: updateBudgetResponse, error: updateBudgetError, isLoading: updateBudgetLoading, fetchData: updateBudget, status: updateBudgetStatus, ok: updateBudgetOk} = useFetch();
+  
   const [footerNavbar, setFooterNavbar] = useState(null);
   const [budgetCycle, setBudgetCycle] = useState(getBudgetCycleFromDate(new Date()));
   const [transactionsImportDuplicatesModalNewTransactions, setTransactionsImportDuplicatesModalNewTransactions] = useState([]);
@@ -132,6 +134,26 @@ const App = () => {
   useConsoleLog(budgetsDataApi, "BudgetAPI:");
   useConsoleLog(accountsDataApi, "AccountsAPI:");
   useConsoleLog(accountDataApi, "AccountAPI:");
+  useConsoleLog(
+    {
+      updateTransactionResponse,
+      updateTransactionError,
+      updateTransactionLoading,
+      updateTransactionStatus,
+      updateTransactionOk,
+    }, 
+    "updateTransaction"
+  );
+  useConsoleLog(
+    {
+      updateBudgetResponse,
+      updateBudgetError,
+      updateBudgetLoading,
+      updateBudgetStatus,
+      updateBudgetOk,
+    }, 
+    "updateBudget"
+  );
 
   //Create helper functions
   const saveSettings = savedSettings=>{
@@ -179,7 +201,7 @@ const App = () => {
     return previousTransactions;
   };
 
-  const setTransactionsHandler = (previousTransactions, newTransactions, callback, oldTransaction)=>{
+  const setTransactionsHandler = async (previousTransactions, newTransactions, callback, oldTransaction)=>{
     //If there are no new transactions, short-circuit
     if ((Array.isArray(newTransactions) ? !newTransactions.length : newTransactions !== false && !newTransactions)) return previousTransactions;
 
@@ -198,84 +220,86 @@ const App = () => {
     }
 
     //Return the data manipulation callback result, sorted
-    if (callback) return callback(previousTransactions, transactions, oldTransaction)
+    if (callback) return (await callback(previousTransactions, transactions, oldTransaction))
       .sort((a,b)=>b.TransactionDate-a.TransactionDate);
 
     //Otherwise, just return the transactions, sorted
     return transactions.sort((a,b)=>b.TransactionDate-a.TransactionDate);
   };
 
-  const setTransactionsWrapper = newTransactions=>{
-    //Import new transactions
-    setTransactions(previousTransactions=>{
-      //Run through transaction normalization
-      return setTransactionsHandler(previousTransactions, newTransactions);
-    });
+  const setTransactionsWrapper = async (previousTransactions, newTransactions)=>{
+    //Run through transaction normalization
+    setTransactions(await setTransactionsHandler(previousTransactions, newTransactions));
   };
 
-  const importTransactionsWrapper = newTransactions=>{
-    //Import new transactions
-    setTransactions(previousTransactions=>{
-      const callback = (previousTransactions, newTransactions)=>{
-        //Check for duplicates, and return depending if any were found
-        return checkTransactionsForDuplicates(previousTransactions, newTransactions);
-      };
-
-      //Run through transaction normalization
-      return setTransactionsHandler(previousTransactions, newTransactions, callback);
-    });
+  const importTransactionsWrapper = async (previousTransactions, newTransactions)=>{
+    const callback = async (previousTransactions, newTransactions)=>{
+      //Check for duplicates, and return depending if any were found
+      return checkTransactionsForDuplicates(previousTransactions, newTransactions);
+    };
+    
+    //Run through transaction normalization
+    setTransactions(await setTransactionsHandler(previousTransactions, newTransactions, callback));
   };
 
-  const insertTransactionsWrapper = newTransactions=>{
-    //Import new transactions
-    setTransactions(previousTransactions=>{
-      const callback = (previousTransactions, newTransactions)=>{
-        //Append the new transactions
-        return [...previousTransactions, ...newTransactions];
-      };
-
-      //Run through transaction normalization
-      return setTransactionsHandler(previousTransactions, newTransactions, callback);
-    });
+  const insertTransactionsWrapper = async (previousTransactions, newTransactions)=>{
+    const callback = async (previousTransactions, newTransactions)=>{
+      //Append the new transactions
+      return [...previousTransactions, ...newTransactions];
+    };
+    
+    //Run through transaction normalization
+    setTransactions(await setTransactionsHandler(previousTransactions, newTransactions, callback));
   };
 
-  const updateTransactionWrapper = (oldTransaction, newTransaction)=>{
+  const updateTransactionWrapper = async (previousTransactions, oldTransaction, newTransaction)=>{
     //Update a single transaction
-    setTransactions(previousTransactions=>{
-      const callback = (previousTransactions, newTransactions, oldTransaction)=>{
-        //Get the single updated transaction wrapped in an array
-        const newTransaction = newTransactions[0];
+    const callback = async (previousTransactions, newTransactions, oldTransaction)=>{
+      //Get the single updated transaction wrapped in an array
+      const newTransaction = newTransactions[0];
+      
+      //Update the database
+      try {
+        const body = {
+          transaction: newTransaction,
+          updates: getObjectUpdates(oldTransaction, newTransaction),
+        };
+        const results = await updateTransaction(`${process.env.REACT_APP_API_ENDPOINT ?? ''}/api/v1/transactions/${newTransaction.TransactionDetailId}`, "PUT", body);
+        const updatedTransaction = results.data[0];
 
-        //Update transactions with the new transaction
+        //After successfully updating the database,
+        // update UI transactions with the new transaction
         const transactions = [...previousTransactions]; //create deep copy
         transactions[transactions.indexOf(oldTransaction)] = newTransaction;
-
+        
         return transactions;
-      };
-
-      //Run through transaction normalization
-      return setTransactionsHandler(previousTransactions, newTransaction, callback, oldTransaction);
-    });
+      }
+      catch (err) {
+        //If the requst fails, do NOT update the UI
+        return transactions;
+      }
+    };
+    
+    //Run through transaction normalization
+    setTransactions(await setTransactionsHandler(previousTransactions, newTransaction, callback, oldTransaction));
   };
 
-  const deleteTransactionWrapper = deletedTransaction=>{
+  const deleteTransactionWrapper = async (previousTransactions, deletedTransaction)=>{
     //Delete a single transaction
-    setTransactions(previousTransactions=>{
-      const callback = (previousTransactions, transaction, deletedTransaction)=>{
-        //Update transactions with the new transaction
-        const transactions = [...previousTransactions]; //create deep copy
-        const index = transactions.indexOf(deletedTransaction);
-        transactions.splice(index, 1);
-
-        return transactions;
-      };
-
-      //Run through transaction normalization
-      return setTransactionsHandler(previousTransactions, false, callback, deletedTransaction);
-    });
+    const callback = async (previousTransactions, transaction, deletedTransaction)=>{
+      //Update transactions with the new transaction
+      const transactions = [...previousTransactions]; //create deep copy
+      const index = transactions.indexOf(deletedTransaction);
+      transactions.splice(index, 1);
+      
+      return transactions;
+    };
+    
+    //Run through transaction normalization
+    setTransactions(await setTransactionsHandler(previousTransactions, false, callback, deletedTransaction));
   };
 
-  const setBudgetsDataHandler = (previousBudgets, newBudgets, callback)=>{
+  const setBudgetsHandler = async (previousBudgets, newBudgets, callback)=>{
     //If there are no new budgets, short-circuit
     if ((Array.isArray(newBudgets) ? !newBudgets.length : newBudgets !== false && !newBudgets)) return previousBudgets;
 
@@ -291,78 +315,71 @@ const App = () => {
     }
 
     //Return the data manipulation callback result, sorted
-    if (callback) return callback(previousBudgets, budgets)
+    if (callback) return await callback(previousBudgets, budgets)
       .sort((a,b)=>b.BudgetCycle-a.BudgetCycle);
 
     //Otherwise, just return the budgets, sorted
     return budgets.sort((a,b)=>b.BudgetCycle-a.BudgetCycle);
   };
 
-  const setBudgetsDataWrapper = newBudgetsData=>{
-    //Import new data
-    setBudgetsData(previousBudgetsData=>{
-      //Run through budget normalization
-      return setBudgetsDataHandler(previousBudgetsData, newBudgetsData);
-    });
+  const setBudgetsDataWrapper = async (previousBudgets, newBudgets)=>{
+    //Run through budget normalization
+    const results = await setBudgetsHandler(previousBudgets, newBudgets);
+    setBudgetsData(results);
   };
 
-  const createBudgetsWrapper = newBudgets=>{
+  const createBudgetsWrapper = async (previousBudgets, newBudgets)=>{
     //Add new budget
-    setBudgetsData(previousBudgets=>{
-      const callback = (previousBudgets, newBudgets)=>{
-        //Append the new budget
-        return [...previousBudgets, ...newBudgets];
-      };
-
-      //Run through budget normalization
-      return setBudgetsDataHandler(previousBudgets, newBudgets, callback);
-    });
+    const callback = async (previousBudgets, newBudgets)=>{
+      //Append the new budget
+      return [...previousBudgets, ...newBudgets];
+    };
+    
+    //Run through budget normalization
+    const results = await setBudgetsHandler(previousBudgets, newBudgets, callback);
+    setBudgetsData(results);
   };
 
   const setAccountsDataWrapper = newAccountsData=>{
     //Import new data
-    setAccountsData(previousAccountsData=>{
-      if (!newAccountsData) return [];
-
-      const typeCheckedData = typeCheckAccountsData(newAccountsData);
-      return typeCheckedData;
-    });
+    if (!newAccountsData) return [];
+    
+    const typeCheckedData = typeCheckAccountsData(newAccountsData);
+    setAccountsData(typeCheckedData);
   };
 
   const setAccountDataWrapper = newAccountData=>{
     //Import new data
-    setAccountData(previousAccountData=>{
-      if (!newAccountData) return {};
-
-      const typeCheckedData = typeCheckAccountData(newAccountData);
-      return typeCheckedData;
-    });
+    if (!newAccountData) return {};
+    
+    const typeCheckedData = typeCheckAccountData(newAccountData);
+    setAccountData(typeCheckedData);
   };
 
 
   //Create event listeners
-  const onTransactionsImportFormSubmit = scrapedTransactionsData=>{
+  const onTransactionsImportFormSubmit = (previousTransactions, scrapedTransactionsData)=>{
     //Import the scraped transactions data
     const transactions = importTransactions(scrapedTransactionsData, "scraped");
 
     //Set the new transactions data
-    importTransactionsWrapper(transactions);
+    importTransactionsWrapper(previousTransactions, transactions);
   };
 
-  const onTransactionsImportFormFileInputChange = transactionsDataArray=>{
+  const onTransactionsImportFormFileInputChange = (previousTransactions, transactionsDataArray)=>{
     //Import the csv transactions data
     const transactions = importTransactions(transactionsDataArray, "csv");
 
     //Set the new transactions data
-    importTransactionsWrapper(transactions);
+    importTransactionsWrapper(previousTransactions, transactions);
   };
 
-  const onTransactionDetailModalSubmit = (oldTransaction, updatedTransaction)=>{
-    updateTransactionWrapper(oldTransaction, updatedTransaction);
+  const onTransactionDetailModalSubmit = (previousTransactions, oldTransaction, updatedTransaction)=>{
+    updateTransactionWrapper(previousTransactions, oldTransaction, updatedTransaction);
   };
 
-  const onTransactionDeleteModalSubmit = deletedTransaction=>{
-    deleteTransactionWrapper(deletedTransaction);
+  const onTransactionDeleteModalSubmit = (previousTransactions, deletedTransaction)=>{
+    deleteTransactionWrapper(previousTransactions, deletedTransaction);
   };
 
   const openTransactionsImportDuplicatesModal = ()=>{
@@ -390,9 +407,9 @@ const App = () => {
     setIsTransactionsImportConfirmedModalOpen(false);
   };
 
-  const onTransactionsImportConfirmedModalSubmit = confirmedTransactions=>{
+  const onTransactionsImportConfirmedModalSubmit = (previousTransactions, confirmedTransactions)=>{
     //Update transactions with the new transaction
-    insertTransactionsWrapper(confirmedTransactions);
+    insertTransactionsWrapper(previousTransactions, confirmedTransactions);
 
     //Close the modal
     closeTransactionsImportConfirmedModal();
@@ -406,8 +423,8 @@ const App = () => {
     createBudgetsWrapper(newBudgets);
   };
 
-  const onNewTransactionModalSubmit =(newTransaction)=>{
-    insertTransactionsWrapper(newTransaction);
+  const onNewTransactionModalSubmit =(previousTransactions, newTransaction)=>{
+    insertTransactionsWrapper(previousTransactions, newTransaction);
   };
 
   const onLogoTextScrollIn = ()=>{
@@ -469,11 +486,11 @@ const App = () => {
   // update the application state
   useEffect(()=>{
       if (!transactionsApi.length) return;
-      setTransactionsWrapper(transactionsApi);
+      setTransactionsWrapper(transactions, transactionsApi);
   }, [transactionsApi]);
   useEffect(()=>{
       if (!budgetsDataApi.length) return;
-      setBudgetsDataWrapper(budgetsDataApi);
+      setBudgetsDataWrapper(budgetsData, budgetsDataApi);
   }, [budgetsDataApi]);
   useEffect(()=>{
       if (!accountsDataApi.length) return;
