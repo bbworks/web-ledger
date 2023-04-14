@@ -455,20 +455,22 @@ const App = () => {
   };
 
   //When the app loads, attempt to get the user credential
-  useEffect(async ()=>{
-    //Try to initialize the Google API
-    try {
-      const results = await fetch("/api/v1/authorize/login", {method: "post"}).then(response=>{if(!response.ok) throw response; return response;}).then(response=>response.json());
-      onSignInChange(results);
-    }
-    catch (err) {
-      //If credentials weren't found, prompt the user for the credentials
-      if (err.name === "CredentialsNotFoundError") {
-        return openSignInSettingsModal();
-        // throw new Error("Failed to get authorization credentials.");
+  useEffect(()=>{
+    (async ()=>{
+      //Try to initialize the Google API
+      try {
+        const results = await fetch(`${process.env.REACT_APP_API_ENDPOINT || ""}/api/v1/authorize/login`, {method: "post"}).then(response=>{if(!response.ok) throw response; return response;}).then(response=>response.json());
+        onSignInChange(results);
       }
-      // return throwException(err);
-    }
+      catch (err) {
+        //If credentials weren't found, prompt the user for the credentials
+        if (err.name === "CredentialsNotFoundError") {
+          return openSignInSettingsModal();
+          // throw new Error("Failed to get authorization credentials.");
+        }
+        // return throwException(err);
+      }
+    })()
   }, []);
 
   //Whenever the user gets logged in,
