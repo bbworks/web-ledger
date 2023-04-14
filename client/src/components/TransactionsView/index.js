@@ -15,7 +15,7 @@ import {useBudgetCycleTransactions} from './../../hooks';
 
 import './index.scss';
 
-const TransactionsView = ({ transactions, budgetCycle, allBudgetCycles, transactionsImportDuplicatesModalNewTransactions, transactionsImportDuplicatesModalDuplicates, isTransactionsImportDuplicatesModalOpen, onTransactionsImportDuplicatesModalClose, onTransactionsImportDuplicatesModalSubmit, onTransactionsImportFormSubmit:onTransactionsImportFormSubmitProp, onTransactionsImportFormFileInputChange:onTransactionsImportFormFileInputChangeProp, onTransactionDetailModalSubmit:onTransactionDetailModalSubmitProp, onTransactionDeleteModalSubmit:onTransactionDeleteModalSubmitProp, transactionsImportConfirmedModalTransactions, isTransactionsImportConfirmedModalOpen, closeTransactionsImportConfirmedModal, onTransactionsImportConfirmedModalSubmit, onBudgetCycleChange, transactionCategories, transactionTypes, onNewTransactionModalSubmit:onNewTransactionModalSubmitProp, setFooterNavbar })=>{
+const TransactionsView = ({ transactions, budgetCycle, allBudgetCycles, transactionsImportDuplicatesModalNewTransactions, transactionsImportDuplicatesModalDuplicates, isTransactionsImportDuplicatesModalOpen, onTransactionsImportDuplicatesModalClose, onTransactionsImportDuplicatesModalSubmit, onTransactionsImportFormSubmit:onTransactionsImportFormSubmitProp, onTransactionsImportFormFileInputChange:onTransactionsImportFormFileInputChangeProp, onTransactionDetailModalSubmit:onTransactionDetailModalSubmitProp, onTransactionDeleteModalSubmit:onTransactionDeleteModalSubmitProp, transactionsImportConfirmedModalTransactions, isTransactionsImportConfirmedModalOpen, closeTransactionsImportConfirmedModal, onTransactionsImportConfirmedModalSubmit:onTransactionsImportConfirmedModalSubmitProp, onBudgetCycleChange, transactionCategories, transactionTypes, onNewTransactionModalSubmit:onNewTransactionModalSubmitProp, setFooterNavbar })=>{
   //Send the route to the footer navbar
   const route = useLocation().pathname;
   useEffect(()=>{
@@ -36,18 +36,22 @@ const TransactionsView = ({ transactions, budgetCycle, allBudgetCycles, transact
     setIsTransactionImportFormOpen(wasOpen=>!wasOpen);
   };
 
-  const onTransactionsImportFormSubmit = scrapedTransactionsData=>{
+  const onTransactionsImportFormSubmit = (scrapedTransactionsData)=>{
     //Re-close the form
     setIsTransactionImportFormOpen(false);
 
-    onTransactionsImportFormSubmitProp(scrapedTransactionsData);
+    onTransactionsImportFormSubmitProp(transactions, scrapedTransactionsData);
   };
 
-  const onTransactionsImportFormFileInputChange = transactionsDataArray=>{
+  const onTransactionsImportFormFileInputChange = (transactionsDataArray)=>{
     //Re-close the form
     setIsTransactionImportFormOpen(false);
 
-    onTransactionsImportFormFileInputChangeProp(transactionsDataArray);
+    onTransactionsImportFormFileInputChangeProp(transactions, transactionsDataArray);
+  };
+
+  const onTransactionsImportConfirmedModalSubmit = (deletedTransaction)=>{
+    onTransactionsImportConfirmedModalSubmitProp(transactions, deletedTransaction);
   };
 
   const openTransactionDetailModal = ()=>{
@@ -77,12 +81,12 @@ const TransactionsView = ({ transactions, budgetCycle, allBudgetCycles, transact
   };
 
   const onTransactionDetailModalSubmit = (updatedTransaction)=>{
-    onTransactionDetailModalSubmitProp(transactionDetailModalTransaction, updatedTransaction);
+    onTransactionDetailModalSubmitProp(transactions, transactionDetailModalTransaction, updatedTransaction);
     closeTransactionDetailModal();
   };
 
   const onTransactionDeleteModalSubmit = (deletedTransaction)=>{
-    onTransactionDeleteModalSubmitProp(transactionDeleteModalTransaction, deletedTransaction);
+    onTransactionDeleteModalSubmitProp(transactions, transactionDeleteModalTransaction, deletedTransaction);
     closeTransactionDeleteModal();
   };
 
@@ -98,8 +102,8 @@ const TransactionsView = ({ transactions, budgetCycle, allBudgetCycles, transact
     openNewTransactionModal();
   };
 
-  const onNewTransactionModalSubmit = newTransaction=>{
-    onNewTransactionModalSubmitProp(newTransaction);
+  const onNewTransactionModalSubmit = (newTransaction)=>{
+    onNewTransactionModalSubmitProp(transactions, newTransaction);
     closeNewTransactionModal();
   };
 
