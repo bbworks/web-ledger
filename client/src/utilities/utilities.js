@@ -147,3 +147,82 @@ export const matchValueAgainstValue = (value, matchedValue)=>{
 
   return value.match(new RegExp(`(${escapedMatchedValue})`, "i"));
 };
+
+export const isEqual = (a,b)=>{
+  //## typeof values
+  //"undefined"
+  //"boolean"
+  //"number"
+  //"bigint"
+  //"string"
+  //"symbol"
+  //"function" (non-primitive)
+  //"object"  (non-primitive) //includes null
+
+  const type = typeof a;
+    
+  //First, if the types are not the same, exit
+  if (type !== typeof b) return null;
+    
+  //If the values are both null (type `[object]`) or both undefined (type `undefined`), return true
+  if ((a === null && b === null) || type === undefined) return true;
+
+  //If arrays, check their .toString() values
+  if(type === "Array") return a.toString() === b.toString();
+
+  //If dates, check their .toJSON() values
+  if(a instanceof Date) return a.toJSON() === b.toJSON();
+    
+  //If these are objects, recurse into them
+  if (type === "object") {
+    const aValues = Object.entries(a);
+    const bValues = Object.entries(b);
+
+    //Short-circuit if the number of properties aren't the same
+    if(aValues.length !== bValues.length) return false;
+
+    for(let i = 0; i < aValues.length; i++) {
+      const [aKey, aValue] = aValues[i];
+      const [bKey, bValue] = bValues[i];
+      if(aKey !== bKey) return false;
+      if (!isEqual(aValue, bValue)) return false;
+    }
+
+    //If the objects properties/arrays values are all the same, return true
+    return true;
+  }
+
+  //Otherwise, compare the values
+  // Works for primitives, null, undefined
+  return a === b;
+};
+
+export const getObjectUpdates = (_old, _new)=>{
+  return Object.entries(_new).reduce((acc, [key, newValue])=>{
+      const oldValue = _old[key];
+
+      //Compare the values
+      //  If equal, ignore the value
+      if(isEqual(oldValue, newValue)) return acc;
+
+      //Otherwise, use the new value
+      return {
+          ...acc,
+          [key]: newValue
+      };
+  }, {});
+};
+
+export const flattenObject = (object, parentKey='')=>{
+  return Object.entries(object).reduce((acc,[key, value])=>{
+      if(typeof value === "object") return {
+        ...acc,
+        ...flattenObject(value, key),
+      };
+      
+      return {
+        ...acc,
+        [`${parentKey ? `${parentKey}.` : ''}${key}`]: value,
+      };
+  }, {});
+};

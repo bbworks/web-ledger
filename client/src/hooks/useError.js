@@ -1,4 +1,5 @@
 import {useState, useEffect} from 'react';
+import {flattenObject} from './../utilities';
 
 import {useAddAlert} from './../context/AlertsContext';
 
@@ -40,10 +41,10 @@ const useError = (api, initialValue)=>{
         ...err,
         title: `${errorMsg ? errorMsg+": " : ''}${err.message}`,
       };
-      error.text = error.title;
+      error.text = `${error.title}\r\n${Object.entries(error).length ? Object.entries(flattenObject(error)).map(([key, value])=>`  + ${key}: ${value}\r\n`).join('') : ''}`;
     }
     else if (typeof err === "string") {
-      error.title = `${errorMsg ? errorMsg+": " : ''}${err}`;
+      error.title = `${errorMsg ? errorMsg+": " : ''}${err.message}`;
       error.text = error.title;
     }
 
