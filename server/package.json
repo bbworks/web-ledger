@@ -4,7 +4,14 @@
   "description": "This is the server for web-ledger.",
   "main": "index.js",
   "scripts": {
-    "start": "npx nodemon"
+    "start": "npm run start:database && npm run start:server",
+    "dev": "npm run start:database && npm run dev:server",
+    "start:server": "node .",
+    "dev:server": "npx nodemon",
+    "start:database": "for /F \"tokens=3 delims=: \" %H in ('sc query MySQL8.0.31Dev ^| findstr \"        STATE\"') do (    if /I \"%H\" NEQ \"RUNNING\" (      net start MySQL8.0.31Dev     )  )",
+    "stop:database": "net stop MySQL8.0.31Dev",
+    "check:database": "powershell.exe -Command \"Get-Service MySQL8.0.31Dev | Format-List -Property Name, DisplayName, Status, StartType\"",
+    "init:database": "powershell.exe -Command \".\\db\\init.sql\""
   },
   "repository": {
     "type": "git",
@@ -28,6 +35,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
-    "googleapis": "^107.0.0"
+    "googleapis": "^107.0.0",
+    "mysql2": "^3.1.2"
   }
 }
