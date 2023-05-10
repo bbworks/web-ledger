@@ -1,4 +1,10 @@
-﻿USE ldgr;
+﻿# ---
+# title: 17_TransactionMaster.sql
+# name: TransactionMaster
+# primaryKey: TransactionId
+# ---
+
+USE ldgr;
 
 DROP TABLE IF EXISTS TransactionMaster;
 CREATE TABLE TransactionMaster (
@@ -24,3 +30,4 @@ CREATE TABLE TransactionMaster (
 ALTER TABLE TransactionMaster ADD CONSTRAINT FK_TransactionMaster_AccountId FOREIGN KEY (AccountId) REFERENCES Account(AccountId) ON UPDATE CASCADE ON DELETE CASCADE;
 
 ALTER TABLE TransactionMaster ADD CONSTRAINT FK_TransactionMaster_BudgetCycleId FOREIGN KEY (BudgetCycleId) REFERENCES BudgetCycle(BudgetCycleId) ON UPDATE CASCADE ON DELETE CASCADE;
+

@@ -1,4 +1,10 @@
-﻿USE ldgr;
+﻿# ---
+# title: 1_Color.sql
+# name: Color
+# primaryKey: ColorId
+# ---
+
+USE ldgr;
 
 DROP TABLE IF EXISTS Color;
 CREATE TABLE Color (
@@ -16,3 +22,4 @@ ALTER TABLE Color ADD CONSTRAINT UQ_Color_Value UNIQUE (Value);
 ALTER TABLE Color ADD CONSTRAINT CK_Color_Value CHECK (UPPER(Value) REGEXP '\#[0-9A-F]{6}');
 
 # (Account/Budget/Transaction)
+

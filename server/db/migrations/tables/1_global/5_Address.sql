@@ -1,4 +1,10 @@
-﻿USE ldgr;
+﻿# ---
+# title: 5_Address.sql
+# name: Address
+# primaryKey: AddressId
+# ---
+
+USE ldgr;
 
 DROP TABLE IF EXISTS Address;
 CREATE TABLE Address (
@@ -22,3 +28,4 @@ CREATE TABLE Address (
 ALTER TABLE Address ADD CONSTRAINT FK_Address_StateId FOREIGN KEY (StateId) REFERENCES State(StateId);
 
 ALTER TABLE Address ADD CONSTRAINT FK_Address_CountryId FOREIGN KEY (CountryId) REFERENCES Country(CountryId);
+

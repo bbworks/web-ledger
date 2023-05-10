@@ -1,4 +1,10 @@
-﻿USE ldgr;
+﻿# ---
+# title: 8_Login.sql
+# name: Login
+# primaryKey: LoginId
+# ---
+
+USE ldgr;
 
 DROP TABLE IF EXISTS Login;
 CREATE TABLE Login (
@@ -15,3 +21,4 @@ CREATE TABLE Login (
 ALTER TABLE Login ADD CONSTRAINT UQ_Login_UserName UNIQUE (UserName);
 
 ALTER TABLE Login ADD CONSTRAINT UQ_Login_EmailAddress UNIQUE (EmailAddress);
+

@@ -1,4 +1,10 @@
-﻿USE ldgr;
+﻿# ---
+# title: 4_Country.sql
+# name: Country
+# primaryKey: CountryId
+# ---
+
+USE ldgr;
 
 DROP TABLE IF EXISTS Country;
 CREATE TABLE Country (
@@ -12,3 +18,4 @@ CREATE TABLE Country (
 ALTER TABLE Country ADD CONSTRAINT UQ_Country_Alpha2Code UNIQUE (Alpha2Code);
 
 ALTER TABLE Country ADD CONSTRAINT UQ_Country_CountryCode UNIQUE (CountryCode);
+

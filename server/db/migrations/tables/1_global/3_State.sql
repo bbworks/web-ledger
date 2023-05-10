@@ -1,4 +1,10 @@
-﻿USE ldgr;
+﻿# ---
+# title: 3_State.sql
+# name: State
+# primaryKey: StateId
+# ---
+
+USE ldgr;
 
 DROP TABLE IF EXISTS State;
 CREATE TABLE State (
@@ -9,3 +15,4 @@ CREATE TABLE State (
 ) ENGINE=InnoDB AUTO_INCREMENT=1;
 
 ALTER TABLE State ADD CONSTRAINT UQ_State_StateCode UNIQUE (StateCode);
+

@@ -1,4 +1,10 @@
-﻿USE ldgr;
+﻿# ---
+# title: 2_Type.sql
+# name: Type
+# primaryKey: TypeId
+# ---
+
+USE ldgr;
 
 DROP TABLE IF EXISTS Type;
 CREATE TABLE Type ( # (Account/Budget/Transaction)    
@@ -19,3 +25,4 @@ ALTER TABLE Type ADD CONSTRAINT FK_Type_ColorId FOREIGN KEY (ColorId) REFERENCES
 ALTER TABLE Type ADD CONSTRAINT FK_Type_DefaultTypeId FOREIGN KEY (DefaultTypeId) REFERENCES Type(TypeId);
 
 ALTER TABLE Type ADD CONSTRAINT CK_Type_ResourceType CHECK (ResourceType IN ('T', 'B', 'G', 'A'));
+

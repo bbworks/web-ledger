@@ -1,4 +1,10 @@
-﻿USE ldgr;
+﻿# ---
+# title: 15_BudgetGroup.sql
+# name: BudgetGroup
+# primaryKey: BudgetGroupId
+# ---
+
+USE ldgr;
 
 DROP TABLE IF EXISTS BudgetGroup;
 CREATE TABLE BudgetGroup (
@@ -17,3 +23,4 @@ CREATE TABLE BudgetGroup (
 ALTER TABLE BudgetGroup ADD CONSTRAINT FK_BudgetGroup_TypeId FOREIGN KEY (TypeId) REFERENCES Type(TypeId);
 
 ALTER TABLE BudgetGroup ADD CONSTRAINT FK_BudgetGroup_ColorId FOREIGN KEY (ColorId) REFERENCES Color(ColorId);
+

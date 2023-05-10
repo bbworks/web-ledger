@@ -7,9 +7,12 @@ const getTransactions = async ()=>{
   try {
     const sql = `SELECT * FROM vwTransaction;`
 
-    const [results] = await db.execute(sql);
     console.log("SQL:", mysql.format(sql));
+
+    const [results] = await db.execute(sql);
+    
     // console.log("results", results);
+    
     return results;
   }
   catch (err) {
@@ -19,11 +22,20 @@ const getTransactions = async ()=>{
 
 const getTransaction = async transactionId=>{
   try {
+    const sql = `START TRANSACTION;
+SELECT * FROM vwTransaction WHERE TransactionId = ?;
+ROLLBACK;`;
+
+    const values = [transactionId];
+    
     console.log("transactionId:", transactionId);
-    console.log("SELECT * FROM vwTransaction;");
-    //const [results] = await db.execute("SELECT * FROM vwTransaction;")
-    // console.log("results", results);
-    return false;
+    console.log("SQL:", mysql.format(sql, values));
+
+    const [results] = await db.query(sql, values);
+    
+    console.log("results", results);
+    
+    return results;
   }
   catch (err) {
     throw err;
@@ -32,10 +44,60 @@ const getTransaction = async transactionId=>{
 
 const createTransaction = async transaction=>{
   try {
+    const sql = `START TRANSACTION;
+CALL CreateTransaction (
+    /* $TransactionDate = */ ?
+  , /* $PostedDate = */ ?
+  , /* $Account = */ ?
+  , /* $Type = */ ?
+  , /* $Description = */ ?
+  , /* $DescriptionManual = */ ?
+  , /* $DescriptionDisplay = */ ?
+  , /* $BudgetCycle = */ ?
+  , /* $IsAutoCategorized = */ ?
+  , /* $IsUpdatedByUser = */ ?
+  , /* $Amount = */ ?
+  , /* $Budget = */ ?
+  , /* $Notes = */ ?
+  , /* $Tags = */ ?
+  , /* $date_created = */ ?
+  , /* $created_by = */ ?
+  , /* $date_modified = */ ?
+  , /* $modified_by = */ ?
+  , /* $UserId = */ ?
+);
+ROLLBACK;`;
+
+    const values = [
+      transaction.TransactionDate,
+      transaction.PostedDate,
+      transaction.AccountNumber,
+      transaction.Type,
+      transaction.Description,
+      transaction.DescriptionManual,
+      transaction.DescriptionDisplay,
+      transaction.BudgetCycle,
+      transaction.IsAutoCategorized,
+      transaction.IsUpdatedByUser,
+      transaction.Amount,
+      transaction.Category,
+      transaction.Notes,
+      transaction.Tags,
+      transaction.date_created,
+      transaction.created_by,
+      transaction.date_modified,
+      transaction.modified_by,
+      transaction.UserId,
+    ];
+    
     console.log("transaction:", transaction);
-    //const [results] = await db.execute("SELECT * FROM vwTransaction;")
-    // console.log("results", results);
-    return false;
+    console.log("SQL:", mysql.format(sql, values));
+
+    const [results] = await db.query(sql, values);
+    
+    console.log("results", results);
+    
+    return results;
   }
   catch (err) {
     throw err;
@@ -105,7 +167,7 @@ const updateTransaction = async (transactionDetailId, newTransaction, updates)=>
     )
     .join(",\r\n  ");
 
-    const sql = `START TRANSACTION;
+    const sql = `#START TRANSACTION;
 WITH denormalized AS (
 SELECT
   ? AS TransactionId
@@ -158,7 +220,7 @@ SET
 WHERE TransactionDetail.TransactionDetailId = denormalized.TransactionDetailId
 ;
 SELECT * FROM vwTransaction WHERE TransactionDetailId = ?;
-ROLLBACK;
+#ROLLBACK;
 # UPDATE TransactionMaster
 # INNER JOIN TransactionDetail
 #   ON TransactionMaster.TransactionId=TransactionDetail.TransactionId
@@ -239,10 +301,20 @@ ROLLBACK;
 
 const deleteTransaction = async transactionId=>{
   try {
+    const sql = `START TRANSACTION;
+DELETE FROM vwTransaction WHERE TransactionId = ?;
+ROLLBACK;`;
+
+    const values = [transactionId];
+    
     console.log("transactionId:", transactionId);
-    //const [results] = await db.execute("SELECT * FROM vwTransaction;")
-    // console.log("results", results);
-    return false;
+    console.log("SQL:", mysql.format(sql, values));
+
+    const [results] = await db.query(sql, values);
+    
+    console.log("results", results);
+    
+    return results;
   }
   catch (err) {
     throw err;

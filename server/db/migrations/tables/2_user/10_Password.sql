@@ -1,4 +1,10 @@
-﻿USE ldgr;
+﻿# ---
+# title: 10_Password.sql
+# name: Password
+# primaryKey: PasswordId
+# ---
+
+USE ldgr;
 
 DROP TABLE IF EXISTS Password;
 CREATE TABLE Password (
@@ -15,3 +21,4 @@ CREATE TABLE Password (
 ) ENGINE=InnoDB AUTO_INCREMENT=1;
 
 ALTER TABLE Password ADD CONSTRAINT FK_Password_LoginId FOREIGN KEY (LoginId) REFERENCES Login(LoginId);
+

@@ -1,4 +1,10 @@
-﻿USE ldgr;
+﻿# ---
+# title: 6_Bank.sql
+# name: Bank
+# primaryKey: BankId
+# ---
+
+USE ldgr;
 
 DROP TABLE IF EXISTS Bank;
 CREATE TABLE Bank (
@@ -12,3 +18,4 @@ CREATE TABLE Bank (
 ) ENGINE=InnoDB AUTO_INCREMENT=1;
 
 ALTER TABLE Bank ADD CONSTRAINT UQ_Bank_Name UNIQUE (Name);
+

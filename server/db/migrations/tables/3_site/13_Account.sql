@@ -1,4 +1,10 @@
-﻿USE ldgr;
+﻿# ---
+# title: 13_Account.sql
+# name: Account
+# primaryKey: AccountId
+# ---
+
+USE ldgr;
 
 DROP TABLE IF EXISTS Account;
 CREATE TABLE Account (
@@ -23,3 +29,4 @@ ALTER TABLE Account ADD CONSTRAINT FK_Account_ColorId FOREIGN KEY (ColorId) REFE
 ALTER TABLE Account ADD CONSTRAINT FK_Account_TypeId FOREIGN KEY (TypeId) REFERENCES Type(TypeId);
 
 ALTER TABLE Account ADD CONSTRAINT UQ_Account_AccountNumber_BankId_UserId UNIQUE (AccountNumber, BankId, UserId);
+

@@ -11,7 +11,9 @@
     "start:database": "for /F \"tokens=3 delims=: \" %H in ('sc query MySQL8.0.31Dev ^| findstr \"        STATE\"') do (    if /I \"%H\" NEQ \"RUNNING\" (      net start MySQL8.0.31Dev     )  )",
     "stop:database": "net stop MySQL8.0.31Dev",
     "check:database": "powershell.exe -Command \"Get-Service MySQL8.0.31Dev | Format-List -Property Name, DisplayName, Status, StartType\"",
-    "init:database": "powershell.exe -Command \".\\db\\init.sql\""
+    "init:database": "npm run init:database:schema && npm run init:database:history",
+    "init:database:schema": "powershell.exe -Command \".\\db\\init.sql\"",
+    "init:database:history": "powershell.exe -Command \".\\db\\migrations\\createHistoryTables.ps1\""
   },
   "repository": {
     "type": "git",

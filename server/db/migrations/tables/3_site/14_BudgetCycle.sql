@@ -1,4 +1,10 @@
-﻿USE ldgr;
+﻿# ---
+# title: 14_BudgetCycle.sql
+# name: BudgetCycle
+# primaryKey: BudgetCycleId
+# ---
+
+USE ldgr;
 
 DROP TABLE IF EXISTS BudgetCycle;
 CREATE TABLE BudgetCycle (
@@ -13,3 +19,4 @@ CREATE TABLE BudgetCycle (
 ) ENGINE=InnoDB AUTO_INCREMENT=1;
 
 ALTER TABLE BudgetCycle ADD CONSTRAINT UQ_BudgetCycle_BudgetCycle UNIQUE (BudgetCycle);
+

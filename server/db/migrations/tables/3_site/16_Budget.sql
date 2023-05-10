@@ -1,4 +1,10 @@
-﻿USE ldgr;
+﻿# ---
+# title: 16_Budget.sql
+# name: Budget
+# primaryKey: BudgetId
+# ---
+
+USE ldgr;
 
 DROP TABLE IF EXISTS Budget;
 CREATE TABLE Budget (
@@ -30,3 +36,4 @@ ALTER TABLE Budget ADD CONSTRAINT FK_Budget_ColorId FOREIGN KEY (ColorId) REFERE
 ALTER TABLE Budget ADD CONSTRAINT UQ_Budget_Name_BudgetCycleId UNIQUE (Name, BudgetCycleId);
 
 ALTER TABLE Budget ADD CONSTRAINT CK_Budget_DueDate CHECK (DueDate BETWEEN 1 AND 28);
+

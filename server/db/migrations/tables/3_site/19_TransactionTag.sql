@@ -1,4 +1,10 @@
-﻿USE ldgr;
+﻿# ---
+# title: 19_TransactionTag.sql
+# name: TransactionTag
+# primaryKey: TransactionTagId
+# ---
+
+USE ldgr;
 
 DROP TABLE IF EXISTS TransactionTag;
 CREATE TABLE TransactionTag (
@@ -16,3 +22,4 @@ CREATE TABLE TransactionTag (
 ALTER TABLE TransactionTag ADD CONSTRAINT FK_TransactionTag_TransactionId FOREIGN KEY (TransactionId) REFERENCES TransactionMaster(TransactionId) ON UPDATE CASCADE ON DELETE CASCADE;
 
 ALTER TABLE TransactionTag ADD CONSTRAINT FK_TransactionTag_TagId FOREIGN KEY (TagId) REFERENCES Tag(TagId) ON UPDATE CASCADE ON DELETE CASCADE;
+

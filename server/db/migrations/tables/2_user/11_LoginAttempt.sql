@@ -1,4 +1,10 @@
-﻿USE ldgr;
+﻿# ---
+# title: 11_LoginAttempt.sql
+# name: LoginAttempt
+# primaryKey: LoginAttemptId
+# ---
+
+USE ldgr;
 
 DROP TABLE IF EXISTS LoginAttempt;
 CREATE TABLE LoginAttempt (
@@ -15,3 +21,4 @@ CREATE TABLE LoginAttempt (
     , modified_by      int           NULL  DEFAULT NULL
     , CONSTRAINT PK_LoginAttempt_LoginAttemptId PRIMARY KEY CLUSTERED (LoginAttemptId)
 ) ENGINE=InnoDB AUTO_INCREMENT=1;
+

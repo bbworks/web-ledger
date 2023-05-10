@@ -1,4 +1,10 @@
-﻿USE ldgr;
+﻿# ---
+# title: 9_UserLogin.sql
+# name: UserLogin
+# primaryKey: UserLoginId
+# ---
+
+USE ldgr;
 
 DROP TABLE IF EXISTS UserLogin;
 CREATE TABLE UserLogin (
@@ -15,3 +21,4 @@ CREATE TABLE UserLogin (
 ALTER TABLE UserLogin ADD CONSTRAINT FK_UserLogin_UserId FOREIGN KEY (UserId) REFERENCES User(UserId);
 
 ALTER TABLE UserLogin ADD CONSTRAINT FK_UserLogin_LoginId FOREIGN KEY (LoginId) REFERENCES Login(LoginId);
+

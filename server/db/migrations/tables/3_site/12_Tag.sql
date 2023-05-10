@@ -1,4 +1,10 @@
-﻿USE ldgr;
+﻿# ---
+# title: 12_Tag.sql
+# name: Tag
+# primaryKey: TagId
+# ---
+
+USE ldgr;
 
 DROP TABLE IF EXISTS Tag;
 CREATE TABLE Tag (
@@ -14,3 +20,4 @@ CREATE TABLE Tag (
 ) ENGINE=InnoDB AUTO_INCREMENT=1;
 
 ALTER TABLE Tag ADD CONSTRAINT FK_Tag_ColorId FOREIGN KEY (ColorId) REFERENCES Color(ColorId);
+

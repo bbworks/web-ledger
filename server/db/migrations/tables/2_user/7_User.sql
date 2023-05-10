@@ -1,4 +1,10 @@
-﻿USE ldgr;
+﻿# ---
+# title: 7_User.sql
+# name: User
+# primaryKey: UserId
+# ---
+
+USE ldgr;
 
 DROP TABLE IF EXISTS User;
 CREATE TABLE User (
@@ -18,3 +24,4 @@ CREATE TABLE User (
 ) ENGINE=InnoDB AUTO_INCREMENT=1;
 
 ALTER TABLE User ADD CONSTRAINT FK_User_AddressId FOREIGN KEY (AddressId) REFERENCES Address(AddressId);
+
