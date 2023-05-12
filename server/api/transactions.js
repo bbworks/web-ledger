@@ -22,9 +22,7 @@ const getTransactions = async ()=>{
 
 const getTransaction = async transactionId=>{
   try {
-    const sql = `START TRANSACTION;
-SELECT * FROM vwTransaction WHERE TransactionId = ?;
-ROLLBACK;`;
+    const sql = `SELECT * FROM vwTransaction WHERE TransactionId = ?;`;
 
     const values = [transactionId];
     
@@ -44,8 +42,7 @@ ROLLBACK;`;
 
 const createTransaction = async transaction=>{
   try {
-    const sql = `START TRANSACTION;
-CALL CreateTransaction (
+    const sql = `CALL CreateTransaction (
     /* $TransactionDate = */ ?
   , /* $PostedDate = */ ?
   , /* $Account = */ ?
@@ -65,8 +62,7 @@ CALL CreateTransaction (
   , /* $date_modified = */ ?
   , /* $modified_by = */ ?
   , /* $UserId = */ ?
-);
-ROLLBACK;`;
+);`;
 
     const values = [
       transaction.TransactionDate,
@@ -165,81 +161,109 @@ const updateTransaction = async (transactionDetailId, newTransaction, updates)=>
       .map(([column, statement])=>statement)
       .join(",\r\n  ")
     )
+    .filter(statement=>!!statement)  //filter out empty entries (like Tags)
     .join(",\r\n  ");
 
-    const sql = `#START TRANSACTION;
+    const sql = `START TRANSACTION;
+${
+  !setStatements
+  ?
+  ''
+  :
+  `# Update the TransactionMaster and TransactionDetail tables
 WITH denormalized AS (
 SELECT
-  ? AS TransactionId
-  , ? AS TransactionDate
-  , ? AS PostedDate
-  , ? AS Account
-  , ? AS Type
-  , ? AS Description
-  , ? AS DescriptionManual
-  , ? AS DescriptionDisplay
-  , ? AS BudgetCycle
-  , ? AS IsAutoCategorized
-  , ? AS IsUpdatedByUser
-  , ? AS date_created
-  , ? AS created_by
-  , ? AS date_modified
-  , ? AS modified_by
-  , ? AS User
-  , ? AS TransactionDetailId
-  , ? AS Amount
-  , ? AS Budget
-  , ? AS Notes
-  , ? AS detail_date_created
-  , ? AS detail_created_by
-  , ? AS detail_date_modified
-  , ? AS detail_modified_by
-  , ? AS detail_User
+    ? AS TransactionId
+    , ? AS TransactionDate
+    , ? AS PostedDate
+    , ? AS Account
+    , ? AS Type
+    , ? AS Description
+    , ? AS DescriptionManual
+    , ? AS DescriptionDisplay
+    , ? AS BudgetCycle
+    , ? AS IsAutoCategorized
+    , ? AS IsUpdatedByUser
+    , ? AS date_created
+    , ? AS created_by
+    , ? AS date_modified
+    , ? AS modified_by
+    , ? AS User
+    , ? AS TransactionDetailId
+    , ? AS Amount
+    , ? AS Budget
+    , ? AS Notes
+    , ? AS Tags
+    , ? AS detail_date_created
+    , ? AS detail_created_by
+    , ? AS detail_date_modified
+    , ? AS detail_modified_by
+    , ? AS detail_User
 )
 UPDATE TransactionMaster
 INNER JOIN TransactionDetail
-  ON TransactionMaster.TransactionId=TransactionDetail.TransactionId
+    ON TransactionMaster.TransactionId=TransactionDetail.TransactionId
 INNER JOIN denormalized
-  ON denormalized.TransactionDetailId = TransactionDetail.TransactionDetailId
+    ON denormalized.TransactionDetailId = TransactionDetail.TransactionDetailId
 LEFT OUTER JOIN Type
-  ON Type.Name = denormalized.Type
+    ON Type.Name = denormalized.Type
   AND Type.ResourceType = 'T'
 LEFT OUTER JOIN BudgetCycle
-  ON BudgetCycle.BudgetCycle = denormalized.BudgetCycle
+    ON BudgetCycle.BudgetCycle = denormalized.BudgetCycle
 LEFT OUTER JOIN Account
-  ON Account.AccountNumber = denormalized.Account
+    ON Account.AccountNumber = denormalized.Account
 LEFT OUTER JOIN Budget
-  ON Budget.Name = denormalized.Budget
+    ON Budget.Name = denormalized.Budget
   AND Budget.BudgetCycleId = BudgetCycle.BudgetCycleId
 /*LEFT OUTER JOIN User
-  ON User.Username = denormalized.User*/
+    ON User.Username = denormalized.User*/
 /*LEFT OUTER JOIN User detailUser
-  ON detailUser.Username = denormalized.detail_User*/
+    ON detailUser.Username = denormalized.detail_User*/
 SET 
-  ${setStatements}
+   ${setStatements}
 WHERE TransactionDetail.TransactionDetailId = denormalized.TransactionDetailId
 ;
+`}${
+  !_updates.Tags
+  ?
+  ''
+  :
+  `# Insert tags, if exists
+CALL ConvertArrayToList(?, ',');
+
+INSERT INTO Tag (Name, ColorId, UserId)
+SELECT 
+    newTags.value
+    , NULL
+    , ?
+FROM listTable newTags
+LEFT OUTER JOIN Tag
+    ON newTags.value = Tag.Name
+WHERE Tag.TagId IS NULL;
+
+INSERT INTO TransactionTag (TransactionId, TagId, UserId)
+SELECT 
+  ?
+  , Tag.TagId
+  , ?
+FROM listTable newTags
+INNER JOIN Tag
+    ON newTags.value = Tag.Name
+LEFT OUTER JOIN TransactionTag
+    ON TransactionTag.TagId = Tag.TagId
+    AND TransactionTag.TransactionId = ?
+WHERE TransactionTag.TagId IS NULL;
+
+DELETE TransactionTag
+FROM TransactionTag
+INNER JOIN Tag
+	ON Tag.TagId = TransactionTag.TagId
+LEFT OUTER JOIN listTable newTags
+	ON newTags.value = Tag.Name
+WHERE newTags.value IS NULL;`}
+
 SELECT * FROM vwTransaction WHERE TransactionDetailId = ?;
-#ROLLBACK;
-# UPDATE TransactionMaster
-# INNER JOIN TransactionDetail
-#   ON TransactionMaster.TransactionId=TransactionDetail.TransactionId
-# LEFT OUTER JOIN Type
-#     ON Type.Name = ?
-#     AND Type.ResourceType = 'T'
-# LEFT OUTER JOIN BudgetCycle
-#     ON BudgetCycle.BudgetCycle = ?
-# LEFT OUTER JOIN Account
-#     ON Account.AccountNumber = ?
-# LEFT OUTER JOIN Budget
-#     ON Budget.Name = ?
-#     AND Budget.BudgetCycleId = BudgetCycle.BudgetCycleId
-# /*LEFT OUTER JOIN User
-#     ON User.Username = ?*/
-# SET ?
-# WHERE TransactionDetail.TransactionDetailId = ?
-# ;
-`;
+COMMIT;`;
     // const values = [
     //   newTransaction.Type
     //   , new Date(newTransaction.BudgetCycle)
@@ -250,32 +274,54 @@ SELECT * FROM vwTransaction WHERE TransactionDetailId = ?;
     //   , transactionDetailId
     // ];
     const values = [
-      newTransaction.TransactionId
-      , new Date(newTransaction.TransactionDate)
-      , new Date(newTransaction.PostedDate)
-      , newTransaction.AccountNumber /* Account */
-      , newTransaction.Type
-      , newTransaction.Description
-      , newTransaction.DescriptionManual
-      , newTransaction.DescriptionDisplay
-      , new Date(newTransaction.BudgetCycle)
-      , Boolean(newTransaction.IsAutoCategorized)
-      , Boolean(newTransaction.IsUpdatedByUser)
-      , new Date(newTransaction.date_created)
-      , newTransaction.created_by
-      , new Date(newTransaction.date_modified)
-      , newTransaction.modified_by
-      , newTransaction.User
-      , newTransaction.TransactionDetailId
-      , newTransaction.Amount
-      , newTransaction.Category /* Budget */
-      , newTransaction.Notes
-      , new Date(newTransaction.detail_date_created)
-      , newTransaction.detail_created_by
-      , new Date(newTransaction.detail_date_modified)
-      , newTransaction.detail_modified_by
-      , newTransaction.detail_User
-      , newTransaction.TransactionDetailId
+      ...(
+        !setStatements
+        ?
+        []
+        :
+        [
+          newTransaction.TransactionId
+          , new Date(newTransaction.TransactionDate)
+          , new Date(newTransaction.PostedDate)
+          , newTransaction.AccountNumber /* Account */
+          , newTransaction.Type
+          , newTransaction.Description
+          , newTransaction.DescriptionManual
+          , newTransaction.DescriptionDisplay
+          , new Date(newTransaction.BudgetCycle)
+          , Boolean(newTransaction.IsAutoCategorized)
+          , Boolean(newTransaction.IsUpdatedByUser)
+          , new Date(newTransaction.date_created)
+          , newTransaction.created_by
+          , new Date(newTransaction.date_modified)
+          , newTransaction.modified_by
+          , newTransaction.User
+          , newTransaction.TransactionDetailId
+          , newTransaction.Amount
+          , newTransaction.Category /* Budget */
+          , newTransaction.Notes
+          , newTransaction.Tags.toString()
+          , new Date(newTransaction.detail_date_created)
+          , newTransaction.detail_created_by
+          , new Date(newTransaction.detail_date_modified)
+          , newTransaction.detail_modified_by
+          , newTransaction.detail_User
+        ]
+      ),
+      ...(
+        !_updates.Tags
+        ?
+        []
+        :
+        [
+            newTransaction.Tags.toString()
+          , newTransaction.User
+          , newTransaction.TransactionId
+          , newTransaction.User
+          , newTransaction.TransactionId
+        ]
+      ),
+      newTransaction.TransactionDetailId
     ];
     
     console.log("updates:", _updates);
@@ -301,9 +347,7 @@ SELECT * FROM vwTransaction WHERE TransactionDetailId = ?;
 
 const deleteTransaction = async transactionId=>{
   try {
-    const sql = `START TRANSACTION;
-DELETE FROM vwTransaction WHERE TransactionId = ?;
-ROLLBACK;`;
+    const sql = `DELETE FROM vwTransaction WHERE TransactionId = ?;`;
 
     const values = [transactionId];
     

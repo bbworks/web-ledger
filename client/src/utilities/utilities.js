@@ -168,7 +168,7 @@ export const isEqual = (a,b)=>{
   if ((a === null && b === null) || type === undefined) return true;
 
   //If arrays, check their .toString() values
-  if(type === "Array") return a.toString() === b.toString();
+  if(Array.isArray(type)) return a.toString() === b.toString();
 
   //If dates, check their .toJSON() values
   if(a instanceof Date) return a.toJSON() === b.toJSON();

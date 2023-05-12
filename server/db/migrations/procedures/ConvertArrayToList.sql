@@ -7,7 +7,7 @@ DROP PROCEDURE IF EXISTS `ConvertArrayToList`;
 DELIMITER ;;
 
 CREATE PROCEDURE `ConvertArrayToList` (
-      $array              VARCHAR(1000)
+      $array        VARCHAR(1000)
       , $delimiter  VARCHAR(10)
 )
 BEGIN
@@ -19,10 +19,14 @@ BEGIN
         , value  varchar(100)
 	);
     
-	SET @sql := CONCAT('INSERT INTO listTable (value) VALUES (''', REGEXP_REPLACE($array, CONCAT('[:space:]*', $delimiter ,'[:space:]*'), '''), ('''), ''')');
+    # Dynamically insert the regex-split array string items into the table
+	SET @sql := CONCAT('INSERT INTO listTable (value) VALUES (''', REGEXP_REPLACE(COALESCE($array, ''), CONCAT('[:space:]*', $delimiter ,'[:space:]*'), '''), ('''), ''');');
 	PREPARE stmt FROM @sql;
 	EXECUTE stmt;
 	DEALLOCATE PREPARE stmt;
+    
+    # Cleanup NULL values
+    DELETE FROM listTable WHERE value = '' OR value IS NULL;
 END;;
 
 DELIMITER ;

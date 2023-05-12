@@ -18,7 +18,7 @@ export const typeCheckTransactions = function (transactions) {
         //TransactionDate: parseGoogleSheetsDate(transaction.TransactionDate),
         TransactionDate: new Date(transaction.TransactionDate),
         Amount: parseGoogleSheetsNumber(isNaN(transaction.Amount) ? transaction.Amount.replace(/(\$|,)/g, "") : transaction.Amount),
-        Tags: !isFalsy(transaction.Tags) ? transaction.Tags : [],
+        Tags: isFalsy(transaction.Tags) ? [] : (typeof transaction.Tags === "string" ? transaction.Tags.split(',') : transaction.Tags),
         //BudgetCycle: parseGoogleSheetsDate(transaction.BudgetCycle),
         BudgetCycle: new Date(transaction.BudgetCycle),
         IsAutoCategorized: Boolean(transaction.IsAutoCategorized),
