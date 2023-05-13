@@ -21,10 +21,11 @@ const useBudgetCycleTransactions = (transactions, budgetCycle)=>{
     return (
       ["Transfer", "Deposit"].includes(transaction.Type) &&
       transactions.find(transaction2=>
+        ["Transfer", "Deposit"].includes(transaction2.Type) &&
         transaction.TransactionDate.getTime()===transaction2.TransactionDate.getTime() &&
         transaction.Amount===-transaction2.Amount &&
-        (typeof transaction.DescriptionDisplay === "string" && transaction.DescriptionDisplay.match(/\*(\d{4})/)[1]) === (transaction2.AccountNumber && transaction2.AccountNumber.match(/\*(\d{4})/)[1]) &&
-        (typeof transaction.AccountNumber === "string" && transaction.AccountNumber.match(/\*(\d{4})/)[1]) === (transaction2.DescriptionDisplay && transaction2.DescriptionDisplay.match(/\*(\d{4})/)[1])
+        (typeof transaction.DescriptionDisplay === "string" && transaction.DescriptionDisplay.match(/\*(\d{4})/)?.[1]) === (transaction2.AccountNumber && transaction2.AccountNumber.match(/\*(\d{4})/)?.[1]) &&
+        (typeof transaction.AccountNumber === "string" && transaction.AccountNumber.match(/\*(\d{4})/)?.[1]) === (transaction2.DescriptionDisplay && transaction2.DescriptionDisplay.match(/\*(\d{4})/)?.[1])
       )
     )
   };
