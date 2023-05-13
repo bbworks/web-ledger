@@ -12,14 +12,15 @@ export const parseNumber = value=>{
   return (value !== null && value !== undefined && !isNaN(potentialNumber) ? potentialNumber : null);
 };
 
-export const convertNumberToCurrency = value=>{
-  if (isNaN(value)) return null;
-  return Number(value)
+export const convertNumberToCurrency = number =>{
+  if (isNaN(number)) throw `Value "${number.toString()}" cannot be casted to type Number.`;
+
+  return Number(number)
     .toFixed(2)
     .toString()
-    .replace(/\d{4,}/, (p0)=>p0.split('').reverse().join('').replace(/(\d{3})(?=\d)/g, "$1,").split('').reverse().join('')) //add commas
-    .replace(/(\d)/, "$$$1") //add $
-};
+    .replace(/(\d)(?=(\d{3})+\.\d{2})/g, "$1,") //add commas
+    .replace(/(\d)/, "$$$1"); //add $
+}
 
 export const convertCurrencyToNumber = value=>{
   if(value === null || value === undefined) return NaN;
@@ -132,20 +133,31 @@ export const isDescendantOf = (element, potentialParent) => {
     element.parentElement === potentialParent;
 };
 
-export const matchValueAgainstValue = (value, matchedValue)=>{
-  //Perform validations
-  if (!value) value = "";
-  if (value instanceof Date) value = value.toJSON(); //perform Date before Number (as Date() is not NaN)
-  if (!isNaN(value)) value = value.toString();
+export const matchValueAgainstValue = (value, pattern)=>{
+  //Convert both the value and the matched value to strings
+  // for easy comparision
+  if (typeof value === "string" && value.length === 0) value = ""; 
+  else if (value instanceof Date) value = value.toJSON(); //perform Date before Number (as Date() is not NaN)
+  else if (typeof value === "object" && !Array.isArray(value)) value = JSON.stringify(value)
+  else
+    // fallback
+    // Array.isArray(value)  //Array
+    // (!isNaN(value))  //Number
+    value = value.toString();
 
-  if (!matchedValue) matchedValue = "";
-  if (matchedValue instanceof Date) matchedValue = matchedValue.toJSON(); //perform Date before Number (as Date() is not NaN)
-  if (!isNaN(matchedValue)) matchedValue = matchedValue.toString();
+  if (typeof pattern === "string" && pattern.length === 0) pattern = ""; 
+  else if (pattern instanceof Date) pattern = pattern.toJSON(); //perform Date before Number (as Date() is not NaN)
+  else if (typeof pattern === "object" && !Array.isArray(pattern)) pattern = JSON.stringify(pattern)
+  else
+    // fallback
+    // Array.isArray(pattern)  //Array
+    // (!isNaN(pattern))  //Number
+    pattern = pattern.toString();
 
-  //Escape the matched value to prepare for RegExp
-  const escapedMatchedValue = matchedValue.replace(/([-\/\\^$*+?.()|[\]{}])/g, '\\$1');
+  // Escape the pattern with prepended '\'s (for RegEx)
+  const escapedPattern = pattern.replace(/([-\/\\^$*+?.()|[\]{}])/g, '\\$1');
 
-  return value.match(new RegExp(`(${escapedMatchedValue})`, "i"));
+  return value.match(new RegExp(`(${escapedPattern})`, "i"));
 };
 
 export const isEqual = (a,b)=>{

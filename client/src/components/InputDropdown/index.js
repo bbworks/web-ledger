@@ -129,7 +129,12 @@ const InputDropdown = (props)=>{
     if(!searchFilter) return text;
 
     const match = matchValueAgainstValue(text, searchFilter);
-    if (!match) return text;
+    
+    // If not matching, return the HTML text node
+    if (!match) 
+      return text;
+    
+    //Otherwise, return the HTML text node wrapped in a highlight <mark>
     return text.replace(match[1], `<mark className="input-dropdown-list-item-highlight">$&</mark>`);
   };
 
@@ -197,6 +202,8 @@ const InputDropdown = (props)=>{
     // where onClick is not registered due to list items disappearing
     // from component re-render on onBlur
     // https://github.com/facebook/react/issues/4210
+    event.preventDefault();
+    
     const newValue = event.target.innerText;
 
     //Set the value
