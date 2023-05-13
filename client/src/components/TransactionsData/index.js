@@ -4,7 +4,7 @@ import TransactionsDataSearchForm from './../TransactionsDataSearchForm';
 import TransactionRowDateSeparator from './../TransactionRowDateSeparator';
 import TransactionRow from './../TransactionRow';
 
-import {convertNumberToCurrencyString, getTransactionsAmountTotal, isMatchedValue} from './../../utilities';
+import {convertNumberToCurrencyString, getTransactionsAmountTotal, isMatchedValue, formatTransactionDisplay} from './../../utilities';
 import {useConsoleLog} from './../../hooks';
 
 import './index.scss';
@@ -58,9 +58,9 @@ const TransactionsData = ({ budgetCycleTransactions, onTransactionEditButtonClic
   const filterTransactionsBySearchFilters = (budgetCycleTransactions, searchFilters)=>{
     const filterBudgetCycleTransactions = budgetCycleTransactions=>{
       return budgetCycleTransactions
-        .filter(t=>
+        .filter(transaction=>
           searchFilters.map(({key:searchKey, value:searchValue})=>{
-            const value = t[searchKey ?? defaultTransactionProperty];
+            const value = formatTransactionDisplay(transaction)[searchKey ?? defaultTransactionProperty];
             if (!value && !(searchKey === "Category" && searchValue === "Miscellaneous")) return false;
 
             if (searchKey === "Category" && searchValue === "Miscellaneous") return value === null || value.match(new RegExp(searchValue, "i"));

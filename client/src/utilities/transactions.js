@@ -471,6 +471,7 @@ export const formatTransactionDisplay = function(transaction) {
     Amount: convertNumberToCurrencyString(transaction.Amount) || "",
     Category: transaction.Category || "",
     Notes: transaction.Notes || "",
+    Tags: transaction.Tags.toString(),
   };
 };
 

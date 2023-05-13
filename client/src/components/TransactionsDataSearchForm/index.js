@@ -1,4 +1,5 @@
 import {useState, useEffect, useRef} from 'react';
+import {formatTransactionDisplay} from './../../utilities';
 
 import InputDropdown from './../InputDropdown';
 
@@ -10,26 +11,25 @@ const TransactionsDataSearchForm = ({ budgetCycleTransactions, transactionProper
 
   const transactionsDataSearchFormInput = useRef(null);
 
-  const getUniqueTransactionsPropertiesValues = (budgetCycleTransactions, property)=>{
-    return [
-      ...new Set(
-        budgetCycleTransactions.map(t=>{
-          const value = t[property];
-          return (value instanceof Date ? value.toJSON() : value)
-        })
-        .filter(t=>(Array.isArray(t) ? t.length : t))
-      )
-    ]
-      .sort((a,b)=>a<b ? -1 : b<a ? 1 : 0);
-  };
-
   const getSearchSuggestions = ()=>{
+    const getUniqueTransactionsPropertyValues = (budgetCycleTransactions, property)=>{
+      return [
+        ...new Set(
+          budgetCycleTransactions.map(transaction=>
+            formatTransactionDisplay(transaction)[property]
+          )
+          .filter(stringValue=>!!stringValue)
+        )
+      ]
+        .sort();
+    };
+    
     const escapedSearchQuery = searchQuery.replace(/([-\/\\^$*+?.()|[\]{}])/g, '\\$1');
 
     if (!activeSearchFilter) 
       return transactionProperties.filter(p=>p.match(new RegExp("^"+escapedSearchQuery, "i")));
 
-    return getUniqueTransactionsPropertiesValues(budgetCycleTransactions.all, activeSearchFilter);
+    return getUniqueTransactionsPropertyValues(budgetCycleTransactions.all, activeSearchFilter);
   };
 
   const onTransactionsDataSearchFormActiveSearchFilterClick = event=>{
