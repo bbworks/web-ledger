@@ -4,7 +4,7 @@ import TransactionsDataSearchForm from './../TransactionsDataSearchForm';
 import TransactionRowDateSeparator from './../TransactionRowDateSeparator';
 import TransactionRow from './../TransactionRow';
 
-import {convertNumberToCurrency, getTransactionsAmountTotal, matchValueAgainstValue} from './../../utilities';
+import {convertNumberToCurrencyString, getTransactionsAmountTotal, matchValueAgainstValue} from './../../utilities';
 import {useConsoleLog} from './../../hooks';
 
 import './index.scss';
@@ -19,7 +19,7 @@ const TransactionsDataRows = ({ filteredBudgetCycleTransactions, heading, search
         <div className="transaction-rows-heading-container d-flex justify-content-between align-items-end mb-2">
           <h2 className="transaction-rows-heading mb-0">{heading}</h2>
           <div className="fw-bold">
-            <span className="transaction-rows-heading-count">{convertNumberToCurrency(getTransactionsAmountTotal(filteredBudgetCycleTransactions))}</span>
+            <span className="transaction-rows-heading-count">{convertNumberToCurrencyString(getTransactionsAmountTotal(filteredBudgetCycleTransactions))}</span>
             &nbsp;
             <span className="transaction-rows-heading-count me-3">({filteredBudgetCycleTransactions.length})</span>
           </div>
@@ -83,7 +83,7 @@ const TransactionsData = ({ budgetCycleTransactions, onTransactionEditButtonClic
   const [searchFilters, setSearchFilters] = useState([]);
   const [filteredBudgetCycleTransactions, setFilteredBudgetCycleTransactions] = useState(filterTransactionsBySearchFilters(budgetCycleTransactions, searchFilters));
 
-  const filteredRemainingTotal = convertNumberToCurrency(getTransactionsAmountTotal(filteredBudgetCycleTransactions.all));
+  const filteredRemainingTotal = convertNumberToCurrencyString(getTransactionsAmountTotal(filteredBudgetCycleTransactions.all));
   const transactionProperties = (filteredBudgetCycleTransactions.all?.length ? Object.keys(filteredBudgetCycleTransactions.all[0]).filter(property=>!["DateCreated","DateModified","IsAutoCategorized","IsUpdatedByUser"].includes(property)) : []);
 
   const onTransactionsDataSearchFormSubmit = searchObject=>{

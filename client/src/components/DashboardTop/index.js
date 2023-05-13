@@ -1,4 +1,4 @@
-import {convertNumberToCurrency} from './../../utilities';
+import {convertNumberToCurrencyString} from './../../utilities';
 import {useBudgetCycleTransactions} from './../../hooks';
 
 import DashboardBudgetCycleDropdown from './../DashboardBudgetCycleDropdown';
@@ -28,7 +28,7 @@ const DashboardTop = ({ transactions, accountsData, accountData, budgetCycle, al
         <div className="row">
           <div className="dashboard-accounts-total-container col text-center fw-bold h4 d-flex flex-column border-end border-2">
             Month Remaining:
-            <span className="dashboard-accounts-total">{currentBudgetCycleRemaining ? convertNumberToCurrency(currentBudgetCycleRemaining) : "--"}</span>
+            <span className="dashboard-accounts-total">{currentBudgetCycleRemaining ? convertNumberToCurrencyString(currentBudgetCycleRemaining) : "--"}</span>
           </div>
           <div className="dashboard-credit-score-container col text-center fw-bold h4 d-flex flex-column">
             Credit Score:

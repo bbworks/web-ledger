@@ -12,7 +12,7 @@ const parseNumber = value=>{
   return (value !== null && value !== undefined && !isNaN(potentialNumber) ? potentialNumber : null);
 };
 
-const convertNumberToCurrency = value=>{
+const convertNumberToCurrencyString = value=>{
   if (isNaN(value)) return null;
   return Number(value)
     .toFixed(2)
@@ -152,7 +152,7 @@ module.exports = {
   isFalsy,
   nullCoalesce,
   parseNumber,
-  convertNumberToCurrency,
+  convertNumberToCurrencyString,
   convertCurrencyToNumber,
   convertCSVToJSON,
   getSumByProp,

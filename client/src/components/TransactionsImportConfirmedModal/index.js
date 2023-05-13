@@ -1,6 +1,6 @@
 import Modal from 'react-bootstrap/Modal';
 
-import {convertNumberToCurrency} from './../../utilities';
+import {convertNumberToCurrencyString} from './../../utilities';
 
 import './index.scss';
 
@@ -12,7 +12,7 @@ const TransactionsImportConfirmedModal = ({ transactions, duplicates, isOpen, on
   };
 
   const longestTransactionDate = Math.max(...transactions.map(({TransactionDate})=>TransactionDate.toLocaleDateString("en-US", {timeZone: "UTC"}).length));
-  const longestAmount = Math.max(...transactions.map(({Amount})=>`${Amount >= 0 ? " " : ""}${convertNumberToCurrency(Amount)}`.length));
+  const longestAmount = Math.max(...transactions.map(({Amount})=>`${Amount >= 0 ? " " : ""}${convertNumberToCurrencyString(Amount)}`.length));
   const longestDescription = Math.max(...transactions.map(({Description})=>Description.length));
 
   return (
@@ -28,7 +28,7 @@ const TransactionsImportConfirmedModal = ({ transactions, duplicates, isOpen, on
             {
               transactions.map((transaction, i)=>{
                 const transactionDateString = transaction.TransactionDate.toLocaleDateString("en-US", {timeZone: "UTC"});
-                const amountString = `${transaction.Amount >= 0 ? " " : ""}${convertNumberToCurrency(transaction.Amount)}`;
+                const amountString = `${transaction.Amount >= 0 ? " " : ""}${convertNumberToCurrencyString(transaction.Amount)}`;
                 const descriptionString = transaction.Description;
 
                 const transactionDateSpaces = Array(longestTransactionDate-transactionDateString.length).fill(" ").join("");

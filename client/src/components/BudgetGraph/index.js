@@ -1,4 +1,4 @@
-import {convertNumberToCurrency} from './../../utilities';
+import {convertNumberToCurrencyString} from './../../utilities';
 
 import BudgetGraphStatusIcon from './../BudgetGraphStatusIcon';
 
@@ -22,10 +22,10 @@ const BudgetGraph = ({ budget })=>{
             ),
           }
         }>
-          {convertNumberToCurrency(Math.abs(budget.amountSpent))} of {convertNumberToCurrency(Math.abs(budget.Amount))} {(isExpenseBudget ? "spent" : "earned")}
+          {convertNumberToCurrencyString(Math.abs(budget.amountSpent))} of {convertNumberToCurrencyString(Math.abs(budget.Amount))} {(isExpenseBudget ? "spent" : "earned")}
         </h6>
         <h6 className="budget-graph-bar-remaining text-muted" >
-          {convertNumberToCurrency(budget.Amount - budget.amountSpent)} {(overBudget ? "overspent" : "remaining")}
+          {convertNumberToCurrencyString(budget.Amount - budget.amountSpent)} {(overBudget ? "overspent" : "remaining")}
         </h6>
         <div className="budget-graph-bar-inner" style={
           {

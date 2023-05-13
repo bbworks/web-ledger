@@ -3,7 +3,7 @@ import {useState, useEffect} from 'react';
 import TransactionDetailModalInput from './../TransactionDetailModalInput';
 import Modal from 'react-bootstrap/Modal';
 
-import {getBudgetCycleString, getBudgetCycleFromBudgetCycleString, convertNumberToCurrency} from './../../utilities';
+import {getBudgetCycleString, getBudgetCycleFromBudgetCycleString, convertNumberToCurrencyString} from './../../utilities';
 
 import './index.scss';
 

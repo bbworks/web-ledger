@@ -1,7 +1,7 @@
 import {useState, useEffect} from 'react';
 
 import DashboardInsight from './../DashboardInsight';
-import {getSumByProp, convertNumberToCurrency, getBudgetAmountSpentFromTransactions} from './../../utilities';
+import {getSumByProp, convertNumberToCurrencyString, getBudgetAmountSpentFromTransactions} from './../../utilities';
 
 import './index.scss';
 
@@ -30,7 +30,7 @@ const DashboardInsights = ({ budgetCycle, budgetCycleTransactions, budgetCycleBu
         type: "danger",
         iconClass: "fas fa-chart-pie",
         title: "Analysis",
-        text: `You have under-earned ${convertNumberToCurrency(incomeUnderEarned)} for this month.`
+        text: `You have under-earned ${convertNumberToCurrencyString(incomeUnderEarned)} for this month.`
       };
       setInsights(previousInsights=>[...previousInsights, insight]);
     }
@@ -56,7 +56,7 @@ const DashboardInsights = ({ budgetCycle, budgetCycleTransactions, budgetCycleBu
           type: "primary",
           iconClass: "fas fa-chart-pie",
           title: "Analysis",
-          text: `You have ${convertNumberToCurrency(personalSpendingBudgetLeft)} remaining in "${personalSpendingBudget.Name}".`
+          text: `You have ${convertNumberToCurrencyString(personalSpendingBudgetLeft)} remaining in "${personalSpendingBudget.Name}".`
         };
         setInsights(previousInsights=>[...previousInsights, insight]);
       }
@@ -70,7 +70,7 @@ const DashboardInsights = ({ budgetCycle, budgetCycleTransactions, budgetCycleBu
           type: "danger",
           iconClass: "fas fa-exclamation",
           title: "Higher Bill",
-          text: `You overpaid bill ${overspentBillWithSpent.Name} by ${convertNumberToCurrency(Math.abs(overspentBillWithSpent.Spent)-Math.abs(overspentBillWithSpent.Amount))}.`
+          text: `You overpaid bill ${overspentBillWithSpent.Name} by ${convertNumberToCurrencyString(Math.abs(overspentBillWithSpent.Spent)-Math.abs(overspentBillWithSpent.Amount))}.`
         };
         console.log(overspentBillWithSpent)
         setInsights(previousInsights=>[...previousInsights, insight]);
@@ -87,7 +87,7 @@ const DashboardInsights = ({ budgetCycle, budgetCycleTransactions, budgetCycleBu
           type: "warning",
           iconClass: "fas fa-chart-bar",
           title: "Trends",
-          text: `Bill "${bill.name}" has gone up ${convertNumberToCurrency(Math.abs(amountSpent)-Math.abs(bill.amount))}.`
+          text: `Bill "${bill.name}" has gone up ${convertNumberToCurrencyString(Math.abs(amountSpent)-Math.abs(bill.amount))}.`
         };
         setInsights(previousInsights=>[...previousInsights, insight]);
       }
@@ -128,7 +128,7 @@ const DashboardInsights = ({ budgetCycle, budgetCycleTransactions, budgetCycleBu
         type: "primary",
         iconClass: "fas fa-chart-line",
         title: "Projection",
-        text: `You have ${convertNumberToCurrency(remainingFlexibleSpendingMoney)} of flexible money remaining.`
+        text: `You have ${convertNumberToCurrencyString(remainingFlexibleSpendingMoney)} of flexible money remaining.`
       };
       setInsights(previousInsights=>[...previousInsights, insight]);
     }
@@ -137,7 +137,7 @@ const DashboardInsights = ({ budgetCycle, budgetCycleTransactions, budgetCycleBu
         type: "warning",
         iconClass: "fas fa-chart-line",
         title: "Projection",
-        text: `You are ${convertNumberToCurrency(remainingFlexibleSpendingMoney)} in the negative of "flexible" money.`
+        text: `You are ${convertNumberToCurrencyString(remainingFlexibleSpendingMoney)} in the negative of "flexible" money.`
       };
       setInsights(previousInsights=>[...previousInsights, insight]);
     }
@@ -150,7 +150,7 @@ const DashboardInsights = ({ budgetCycle, budgetCycleTransactions, budgetCycleBu
         type: "primary",
         iconClass: "fas fa-chart-pie",
         title: "Analysis",
-        text: `You have ${convertNumberToCurrency(savingsBudgetLeft)} more to put into "Savings".`
+        text: `You have ${convertNumberToCurrencyString(savingsBudgetLeft)} more to put into "Savings".`
       };
       setInsights(previousInsights=>[...previousInsights, insight]);
     }

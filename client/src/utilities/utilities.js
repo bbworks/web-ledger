@@ -12,7 +12,7 @@ export const parseNumber = value=>{
   return (value !== null && value !== undefined && !isNaN(potentialNumber) ? potentialNumber : null);
 };
 
-export const convertNumberToCurrency = number =>{
+export const convertNumberToCurrencyString = number =>{
   if (isNaN(number)) throw `Value "${number.toString()}" cannot be casted to type Number.`;
 
   return Number(number)

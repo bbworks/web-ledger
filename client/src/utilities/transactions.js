@@ -1,4 +1,4 @@
-import {isFalsy, nullCoalesce, convertNumberToCurrency, convertCSVToJSON, convertDateStringToDate, areObjectsEqual, getBudgetCycleFromDate, getBudgetCycleString} from './../utilities';
+import {isFalsy, nullCoalesce, convertNumberToCurrencyString, convertCSVToJSON, convertDateStringToDate, areObjectsEqual, getBudgetCycleFromDate, getBudgetCycleString} from './../utilities';
 import {parseGoogleSheetsNumber, parseGoogleSheetsDate} from './../googleApi';
 
 //Declare private functions
@@ -468,7 +468,7 @@ export const formatTransactionDisplay = function(transaction) {
     Type: transaction.Type || "",
     Description: transaction.Description || "",
     DescriptionDisplay: transaction.DescriptionDisplay || "",
-    Amount: convertNumberToCurrency(transaction.Amount) || "",
+    Amount: convertNumberToCurrencyString(transaction.Amount) || "",
     Category: transaction.Category || "",
     Notes: transaction.Notes || "",
   };
