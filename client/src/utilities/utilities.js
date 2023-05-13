@@ -133,27 +133,25 @@ export const isDescendantOf = (element, potentialParent) => {
     element.parentElement === potentialParent;
 };
 
+export const convertToString = (value)=>{
+  if (typeof value === "string" && !value.length) 
+    return "";
+  if (value instanceof Date) 
+    return value.toJSON();
+  if (typeof value === "object" && !Array.isArray(value)) 
+    return JSON.stringify(value);
+    
+  // fallback
+  // Array, Number, etc
+  return value.toString();
+}
+
 export const matchValueAgainstValue = (value, pattern)=>{
   //Convert both the value and the matched value to strings
   // for easy comparision
-  if (typeof value === "string" && value.length === 0) value = ""; 
-  else if (value instanceof Date) value = value.toJSON(); //perform Date before Number (as Date() is not NaN)
-  else if (typeof value === "object" && !Array.isArray(value)) value = JSON.stringify(value)
-  else
-    // fallback
-    // Array.isArray(value)  //Array
-    // (!isNaN(value))  //Number
-    value = value.toString();
-
-  if (typeof pattern === "string" && pattern.length === 0) pattern = ""; 
-  else if (pattern instanceof Date) pattern = pattern.toJSON(); //perform Date before Number (as Date() is not NaN)
-  else if (typeof pattern === "object" && !Array.isArray(pattern)) pattern = JSON.stringify(pattern)
-  else
-    // fallback
-    // Array.isArray(pattern)  //Array
-    // (!isNaN(pattern))  //Number
-    pattern = pattern.toString();
-
+  value = convertToString(value);
+  pattern = convertToString(pattern);
+  
   // Escape the pattern with prepended '\'s (for RegEx)
   const escapedPattern = pattern.replace(/([-\/\\^$*+?.()|[\]{}])/g, '\\$1');
 
