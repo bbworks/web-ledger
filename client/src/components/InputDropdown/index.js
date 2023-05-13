@@ -26,7 +26,7 @@
 
 import {useState, useEffect, useRef} from 'react';
 
-import {isDescendantOf, matchValueAgainstValue} from './../../utilities';
+import {isDescendantOf, isMatchedValue} from './../../utilities';
 
 //import './InputDropdown.js';
 import './InputDropdown.css';
@@ -58,7 +58,7 @@ const InputDropdown = (props)=>{
     if (!searchFilter) return items;
 
     //Add .hidden to unmatched items
-    return items.filter(item=>matchValueAgainstValue(item, searchFilter));
+    return items.filter(item=>isMatchedValue(item, searchFilter));
   };
 
   const [value, setValue] = useState(initialValue);
@@ -128,7 +128,7 @@ const InputDropdown = (props)=>{
     //If no value was passed, exit
     if(!searchFilter) return text;
 
-    const match = matchValueAgainstValue(text, searchFilter);
+    const match = isMatchedValue(text, searchFilter);
     
     // If not matching, return the HTML text node
     if (!match) 

@@ -146,7 +146,7 @@ export const convertToString = (value)=>{
   return value.toString();
 }
 
-export const matchValueAgainstValue = (value, pattern)=>{
+export const isMatchedValue = (value, pattern)=>{
   //Convert both the value and the matched value to strings
   // for easy comparision
   value = convertToString(value);

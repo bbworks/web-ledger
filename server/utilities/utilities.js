@@ -132,7 +132,7 @@ const isDescendantOf = (element, potentialParent) => {
     element.parentElement === potentialParent;
 };
 
-const matchValueAgainstValue = (value, matchedValue)=>{
+const isMatchedValue = (value, matchedValue)=>{
   //Perform validations
   if (!value) value = "";
   if (value instanceof Date) value = value.toJSON(); //perform Date before Number (as Date() is not NaN)
@@ -158,5 +158,5 @@ module.exports = {
   getSumByProp,
   areObjectsEqual,
   isDescendantOf,
-  matchValueAgainstValue,
+  isMatchedValue,
 };
