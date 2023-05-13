@@ -5,9 +5,8 @@ import InputDropdown from './../InputDropdown';
 import './index.scss';
 
 const TransactionsDataSearchForm = ({ budgetCycleTransactions, transactionProperties, searchFilters, onSubmit:onSubmitProp, onFilterClick:onFilterClickProp })=>{
-  const [search, setSearch] = useState("");
-  const [isSearchSuggestionsOpen, setIsSearchSuggestionsOpen] = useState(false);
-  const [activeSearchSuggestion, setActiveSearchSuggestion] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeSearchFilter, setActiveSearchFilter] = useState(null);
 
   const transactionsDataSearchFormInput = useRef(null);
 
@@ -25,59 +24,56 @@ const TransactionsDataSearchForm = ({ budgetCycleTransactions, transactionProper
   };
 
   const getSearchSuggestions = ()=>{
-    const escapedSearch = (
-      search ?
-      search.replace(/([-\/\\^$*+?.()|[\]{}])/g, '\\$1') :
-      ""
-    );
+    const escapedSearchQuery = searchQuery.replace(/([-\/\\^$*+?.()|[\]{}])/g, '\\$1');
 
-    if (!activeSearchSuggestion) return transactionProperties.filter(p=>p.match(new RegExp("^"+escapedSearch, "i")));
+    if (!activeSearchFilter) 
+      return transactionProperties.filter(p=>p.match(new RegExp("^"+escapedSearchQuery, "i")));
 
-    return getUniqueTransactionsPropertiesValues(budgetCycleTransactions.all, activeSearchSuggestion);
+    return getUniqueTransactionsPropertiesValues(budgetCycleTransactions.all, activeSearchFilter);
   };
 
-  const onTransactionsDataSearchFormActiveSearchSuggestionClick = event=>{
-    setActiveSearchSuggestion(null);
-    setSearch("");
+  const onTransactionsDataSearchFormActiveSearchFilterClick = event=>{
+    setActiveSearchFilter(null);
+    setSearchQuery("");
   };
 
   const onTransactionsDataSearchFormInputDropdownKeyDown = event=>{
-    if(activeSearchSuggestion && event.target.value === "" && event.keyCode === 8 /* Backspace */) {
-      setActiveSearchSuggestion(null);
-      setSearch("");
+    if(activeSearchFilter && event.target.value === "" && event.keyCode === 8 /* Backspace */) {
+      setActiveSearchFilter(null);
+      setSearchQuery("");
       return;
     }
   };
 
-  const onTransactionsDataSearchFormInputDropdownSubmit = (newSearch, event)=>{
+  const onTransactionsDataSearchFormInputDropdownSubmit = (value, event)=>{
     //If an active search filter has not yet been applied,
     // and a list item was selected, apply a search filter
-    if (!activeSearchSuggestion && event.isSelectedListItem) {
-      setActiveSearchSuggestion(newSearch);
-      setSearch(""); //set to "" so it will propagate down to InputDropdown
+    if (!activeSearchFilter && event.isSelectedListItem) {
+      setActiveSearchFilter(value);
+      setSearchQuery(""); //set to "" so it will propagate down to InputDropdown
       transactionsDataSearchFormInput.current.focus();
       return;
     }
 
-    //Otherwise, set the new search value
+    //Otherwise, set the new search query value
     transactionsDataSearchFormInput.current.focus();
-    onSubmit(newSearch);
+    onSubmit(value);
   };
 
-  const onSubmit = searchValue=>{
-    //Reset the search value
-    setSearch("");
+  const onSubmit = value=>{
+    //Reset the search query
+    setSearchQuery("");
 
     //Reset the active search suggestion
-    setActiveSearchSuggestion(null);
+    setActiveSearchFilter(null);
 
-    const searchObject = {
-      key: activeSearchSuggestion,
-      value: searchValue,
+    const search = {
+      key: activeSearchFilter,
+      value: value,
     };
 
-    //Send the search value to the parent
-    onSubmitProp(searchObject);
+    //Send the search to the parent
+    onSubmitProp(search);
   };
 
   const onFilterClick = removedSearchFilter=>{
@@ -89,16 +85,16 @@ const TransactionsDataSearchForm = ({ budgetCycleTransactions, transactionProper
       <div className="transactions-data-search-form-input-container">
         <i className="transactions-data-search-form-icon fas fa-search"></i>
         {
-          activeSearchSuggestion ?
+          activeSearchFilter ?
           (
-            <span className="transactions-data-search-form-active-search-suggestion badge rounded-pill" onClick={onTransactionsDataSearchFormActiveSearchSuggestionClick}>
+            <span className="transactions-data-search-form-active-search-suggestion badge rounded-pill" onClick={onTransactionsDataSearchFormActiveSearchFilterClick}>
               <i className="transactions-data-search-form-active-search-suggestion-x fas fa-xs fa-times me-1"></i>
-              {activeSearchSuggestion}
+              {activeSearchFilter}
             </span>
           ) :
           null
         }
-        <InputDropdown className="transactions-data-search-form-input" value={search} items={getSearchSuggestions()} placeholder="Search..." inputDropdownInputRef={transactionsDataSearchFormInput} onSubmit={onTransactionsDataSearchFormInputDropdownSubmit} onInputDropdownInputKeyDown={onTransactionsDataSearchFormInputDropdownKeyDown} />
+        <InputDropdown className="transactions-data-search-form-input" value={searchQuery} items={getSearchSuggestions()} placeholder="Search..." inputDropdownInputRef={transactionsDataSearchFormInput} onSubmit={onTransactionsDataSearchFormInputDropdownSubmit} onInputDropdownInputKeyDown={onTransactionsDataSearchFormInputDropdownKeyDown} />
       </div>
       <div className="transactions-data-search-form-search-filters">
         {searchFilters.map(({key:searchKey, value:searchValue}, i)=>(
