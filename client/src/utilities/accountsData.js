@@ -1,9 +1,9 @@
-import {parseGoogleSheetsNumber} from './../googleApi';
+import {parseDbNumber} from './../utilities';
 
 export const typeCheckAccountsData = accountsData=>{
   return accountsData.map(accountData=>({
       ...accountData,
-      Balance: parseGoogleSheetsNumber(accountData.Balance),
+      Balance: parseDbNumber(accountData.Balance),
     })
   );
 };

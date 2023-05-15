@@ -1,5 +1,5 @@
 import {isFalsy, nullCoalesce, convertNumberToCurrencyString, convertCSVToJSON, convertDateStringToDate, areObjectsEqual, getBudgetCycleFromDate, getBudgetCycleString} from './../utilities';
-import {parseGoogleSheetsNumber, parseGoogleSheetsDate} from './../googleApi';
+import {parseDbNumber, parseDbDate} from './../utilities';
 
 //Declare private functions
 const toPascalCase = phrase=>{
@@ -12,20 +12,20 @@ export const typeCheckTransactions = function (transactions) {
     try {
       return {
         ...transaction,
-        TransactionId: parseGoogleSheetsNumber(transaction.TransactionId),
-        //PostedDate: parseGoogleSheetsDate(transaction.PostedDate),
+        TransactionId: parseDbNumber(transaction.TransactionId),
+        //PostedDate: parseDbDate(transaction.PostedDate),
         PostedDate: !transaction.PostedDate ? null : new Date(transaction.PostedDate),
-        //TransactionDate: parseGoogleSheetsDate(transaction.TransactionDate),
+        //TransactionDate: parseDbDate(transaction.TransactionDate),
         TransactionDate: !transaction.TransactionDate ? null : new Date(transaction.TransactionDate),
-        Amount: parseGoogleSheetsNumber(isNaN(transaction.Amount) ? transaction.Amount.replace(/(\$|,)/g, "") : transaction.Amount),
+        Amount: parseDbNumber(isNaN(transaction.Amount) ? transaction.Amount.replace(/(\$|,)/g, "") : transaction.Amount),
         Tags: isFalsy(transaction.Tags) ? [] : (typeof transaction.Tags === "string" ? transaction.Tags.split(',') : transaction.Tags),
-        //BudgetCycle: parseGoogleSheetsDate(transaction.BudgetCycle),
+        //BudgetCycle: parseDbDate(transaction.BudgetCycle),
         BudgetCycle: new Date(transaction.BudgetCycle),
         IsAutoCategorized: Boolean(transaction.IsAutoCategorized),
         IsUpdatedByUser: Boolean(transaction.IsUpdatedByUser),
-        //DateCreated: parseGoogleSheetsDate(transaction.DateCreated),
+        //DateCreated: parseDbDate(transaction.DateCreated),
         DateCreated: new Date(transaction.date_created),
-        //DateModified: parseGoogleSheetsDate(transaction.DateModified),
+        //DateModified: parseDbDate(transaction.DateModified),
         DateModified: new Date(transaction.date_modified),
       };
     }
