@@ -104,6 +104,7 @@ export const importTransactions = function(transactionsData, dataType) {
             !isNewTransaction ?
             transactions[transactions.length-1] :
             {
+              TransactionId: null,
               PostedDate: null,
               TransactionDate: newTransactionData.TransactionDate,
               AccountNumber: null,
@@ -183,6 +184,7 @@ export const importTransactions = function(transactionsData, dataType) {
 
 
       return {
+        TransactionId: null,
         PostedDate: (PostedDate ? convertDateStringToDate(PostedDate, "MM/dd/yyyy") : null),
         TransactionDate: transactionDate,
         AccountNumber: (AccountNumber ? `*${AccountNumber}` : null),
