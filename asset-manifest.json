@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/web-ledger/static/css/main.fa520b5e.chunk.css",
-    "main.js": "/web-ledger/static/js/main.664bad35.chunk.js",
-    "main.js.map": "/web-ledger/static/js/main.664bad35.chunk.js.map",
+    "main.js": "/web-ledger/static/js/main.58f3122b.chunk.js",
+    "main.js.map": "/web-ledger/static/js/main.58f3122b.chunk.js.map",
     "runtime-main.js": "/web-ledger/static/js/runtime-main.7904b625.js",
     "runtime-main.js.map": "/web-ledger/static/js/runtime-main.7904b625.js.map",
     "static/js/2.da1ff6f2.chunk.js": "/web-ledger/static/js/2.da1ff6f2.chunk.js",
@@ -17,6 +17,6 @@
     "static/js/runtime-main.7904b625.js",
     "static/js/2.da1ff6f2.chunk.js",
     "static/css/main.fa520b5e.chunk.css",
-    "static/js/main.664bad35.chunk.js"
+    "static/js/main.58f3122b.chunk.js"
   ]
 }
