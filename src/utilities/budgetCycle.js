@@ -27,6 +27,7 @@ export const getBudgetCycleFromBudgetCycleString = budgetCycleString=>{
 export const getBudgetCycleString = budgetCycle=>{
   //Short-circut for "All Transactions" budget cycle
   if (isAllTransactionsBudgetCycle(budgetCycle)) return ALL_TRANSACTIONS_BUDGET_CYCLE.string;
+  if (!budgetCycle) return null;
 
   return `${getMonthFromNumber(budgetCycle.getUTCMonth())} ${budgetCycle.getUTCFullYear()}`;
 };
