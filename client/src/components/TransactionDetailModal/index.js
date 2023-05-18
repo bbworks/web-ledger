@@ -51,7 +51,7 @@ const TransactionDetailModal = ({ transaction, allBudgetCycles, categories, type
     setCategory(transactionDisplay.Category);
     setNotes(transactionDisplay.Notes);
     setType(transactionDisplay.Type);
-    setTags(transactionDisplay.Tags);
+    setTags(transaction.Tags); //leave Tags as an array
     console.log("Updating TransactionDetailModal state based on updated prop \"transaction\".", transaction, PostedDate, TransactionDate, AccountNumber, Amount, Description, Category, Notes, Type, Tags)
   }, [transaction, isOpen]);
 
