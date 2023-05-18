@@ -1,5 +1,3 @@
-import {signOut} from './../../googleApi';
-
 import './index.scss';
 
 const GoogleApiUserButton = ({ signedInUser })=>{
@@ -10,7 +8,7 @@ const GoogleApiUserButton = ({ signedInUser })=>{
         <span className="user-button-name">{signedInUser.firstName}</span>
       </button>
       <ul className="dropdown-menu" aria-labelledby="user-button">
-        <li><a className="dropdown-item" onClick={signOut}>Sign out</a></li>
+        <li><a className="dropdown-item" onClick={/* signOut */()=>{}}>Sign out</a></li>
       </ul>
     </div>
 

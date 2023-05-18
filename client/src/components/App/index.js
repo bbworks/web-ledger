@@ -4,7 +4,6 @@ import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
 
 //Import source code
 import {getBudgetCycleFromDate, getBudgetCyclesFromTransactions, getAllBudgetCycles, typeCheckTransactions, isTransactionDuplicate, categorizeTransactionByDescription, importTransactions, typeCheckBudgetsData, typeCheckAccountsData, typeCheckAccountData, throwException, getObjectUpdates} from './../../utilities';
-import {getSpreadsheetId, setSpreadsheetId, getClientId, setClientId, initAuthorization} from './../../googleApi';
 import {getTransactions, updateTransactions, getBudgetsData, updateBudgetsData, getAccountsData, getAccountData} from './../../api';
 import {useScript, useConsoleLog, useBudgetCycleBudgets, useApi, useFetch} from './../../hooks';
 
@@ -60,14 +59,10 @@ const App = () => {
 
   //Declare settings
   const settings = {
-    "Client Id": {
-      value: getClientId(),
-      update: clientId=>setClientId(clientId),
-    },
-    "Spreadsheet id": {
-      value: getSpreadsheetId(),
-      update: spreadsheetId=>setSpreadsheetId(spreadsheetId),
-    }
+    // "Setting Name": {
+    //   value: getSettingValue(),
+    //   update: newValue=>setSetting(newValue),
+    // }
   };
 
   const transactionTypes = [
