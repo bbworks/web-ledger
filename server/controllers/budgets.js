@@ -41,23 +41,23 @@ const get = async (request, response)=>{
 }
 
 const create = async (request, response)=>{
-//  try {
-//    //Destructure the request object
-//    const {body: {transaction}} = request;
-//
-//    //Call the getTransaction API
-//    /* DEBUG */ console.info(`>[${new Date().toJSON()}] >POST /api/v1/transactions`);
-//    const results = await TransactionsApi.createTransaction(transaction);
-//    /* DEBUG */ console.info(`>[${new Date().toJSON()}] >Response: POST /api/v1/transactions |\r\n`, results);
-//
-//    response.json({data: results,});
-//  }
-//  catch (err) {
-//    /* DEBUG */ console.info(`>[${new Date().toJSON()}] >FAILED: POST /api/v1/transactions |\r\n`, err);
-//    return response.status(500).json({
-//      error: err,
-//    });
-//  }
+  try {
+    //Destructure the request object
+    const {body: {budget}} = request;
+
+    //Call the getBudget API
+    /* DEBUG */ console.info(`>[${new Date().toJSON()}] >POST /api/v1/budgets`);
+    const results = await BudgetsApi.createBudget(budget);
+    /* DEBUG */ console.info(`>[${new Date().toJSON()}] >Response: POST /api/v1/budgets |\r\n`, results);
+
+    response.json({data: results,});
+  }
+  catch (err) {
+    /* DEBUG */ console.info(`>[${new Date().toJSON()}] >FAILED: POST /api/v1/budgets |\r\n`, err);
+    return response.status(500).json({
+      error: err,
+    });
+  }
 }
 
 const save = async (request, response)=>{
