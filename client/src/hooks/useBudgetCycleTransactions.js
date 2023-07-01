@@ -12,7 +12,7 @@ const useBudgetCycleTransactions = (transactions, budgetCycle)=>{
     return (
       transaction.Type === "Payment" ||
       transaction.Description.match(/(?:MOBILE TO \*{12}(\d{4}) )?CREDIT CARD PAYMENT(?: (?:MOBILE APP PAYMENT|ONLINE BANKING TRANSFER) TO \d{4} \d{6}\*{6}(\d{4}))?/i) ||
-      transaction.Description.match(/PAYMENT - \w{5} \w{3} \w{7} \w{2}/i)
+      transaction.Description.match(/PAYMENTS? - (?:\w{5} \w{3} \w{7} \w{2}|THANK YOU)/i)
     )
   };
 

@@ -253,7 +253,7 @@ export const categorizeTransactionByDescription = function(transaction) {
 
   //Payments
   else if (matches = Description.match(/(?:MOBILE TO \*{12}(\d{4}) )?CREDIT CARD PAYMENT(?: (?:MOBILE APP PAYMENT|ONLINE BANKING TRANSFER) TO \d{4} \d{6}\*{6}(\d{4}))?/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: `Payment for CCD *${matches[1] ?? matches[2]}`, Notes: null};
-  else if (matches = Description.match(/PAYMENT - \w{5} \w{3} \w{7} \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: `Credit card payment`, Notes: null};
+  else if (matches = Description.match(/PAYMENTS? - (\w{5} \w{3} \w{7} \w{2}|THANK YOU)/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: `Credit card payment`, Notes: null};
 
   //Bills
   else if (Description.match(/(?:ELECTRONIC\/ACH DEBIT )?PIEDMONT N\. G\.(?: DRAFT \d{13} \d{10})?/i))  categorizedTransactionData = {Category: "Piedmont Natural Gas", DescriptionDisplay: "Piedmont Natural Gas", Notes: null};
