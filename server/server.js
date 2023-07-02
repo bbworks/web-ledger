@@ -8,6 +8,7 @@ const BudgetsRouter = require("./routes/budgets")
 const AccountsRouter = require("./routes/accounts")
 const AccountRouter = require("./routes/account")
 const AuthRouter = require("./routes/authorize")
+const BulkRouter = require("./routes/bulk")
 
 class Server {
   constructor() {
@@ -21,6 +22,7 @@ class Server {
       accounts: `${this.basePath}/accounts`,
       account: `${this.basePath}/account`,
       authorize: `${this.basePath}/authorize`,
+      bulk: `${this.basePath}/bulk`,
     };
 
     //Set up server middleware
@@ -47,12 +49,15 @@ class Server {
     this.server.use(this.paths.accounts, AccountsRouter);
     this.server.use(this.paths.account, AccountRouter);
     this.server.use(this.paths.authorize, AuthRouter);
+    this.server.use(this.paths.bulk, BulkRouter);
 
     //Set up 404 handling and forward to error handler
     // (HTTP 404 does not constitute an error)
     this.server.use((req, res, next) => {
-      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >404 ${req.method} ${req.originalUrl}`);
-      res.status(404).send("404 Not Found");
+      /* DEBUG */ console.error(`>[${new Date().toJSON()}] >404 ${req.method} ${req.originalUrl}`);
+      res.status(404).json({
+        error: "404 Not Found",
+      });
     });
 
     //Set up error handling route

@@ -25,3 +25,17 @@ export const updateTransactions = async transactions=>{
       };
     });
 };
+
+export const importTransactions = async transactions=>{
+  return fetch(`${process.env.REACT_APP_API_ENDPOINT || ""}/api/v1/bulk`, {method: "post", headers: {'Content-Type': 'application/json'}, body: JSON.stringify({transactions})})
+    .then(response=>{if(!response.ok) throw response; return response;})
+    .then(response=>response.json())
+    .then(data=>data.data)
+    .catch(err=>{
+      throw {
+        message: "Failed to update transactions",
+        throw: false,
+        err,
+      };
+    });
+};
