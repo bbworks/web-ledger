@@ -65,25 +65,25 @@ const createTransaction = async transaction=>{
 );`;
 
     const values = [
-      transaction.TransactionDate,
-      transaction.PostedDate,
-      transaction.AccountNumber,
+      new Date(transaction.TransactionDate),
+      new Date(transaction.PostedDate),
+      transaction.AccountNumber /* Account */,
       transaction.Type,
       transaction.Description,
       transaction.DescriptionManual,
       transaction.DescriptionDisplay,
-      transaction.BudgetCycle,
-      transaction.IsAutoCategorized,
-      transaction.IsUpdatedByUser,
+      new Date(transaction.BudgetCycle),
+      Boolean(transaction.IsAutoCategorized),
+      Boolean(transaction.IsUpdatedByUser),
       transaction.Amount,
-      transaction.Category,
+      transaction.Category /* Budget */,
       transaction.Notes,
-      transaction.Tags,
-      transaction.date_created,
+      transaction.Tags.toString(),
+      new Date(transaction.date_created),
       transaction.created_by,
-      transaction.date_modified,
+      new Date(transaction.date_modified),
       transaction.modified_by,
-      transaction.UserId,
+      transaction.User,
     ];
     
     console.log("transaction:", transaction);
