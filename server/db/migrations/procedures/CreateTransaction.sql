@@ -41,7 +41,7 @@ BEGIN
 		SELECT 1 FROM Type WHERE Name = $Type AND ResourceType = 'T'
 	)
 	THEN
-		SET @throw = CONCAT('Invalid Type "', $Type, '".');
+		SET @throw = CONCAT('Invalid Type: ', COALESCE($Type, 'NULL'), '.');
 		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = @throw;
 	END IF;
 
@@ -50,7 +50,7 @@ BEGIN
 		SELECT 1 FROM Account WHERE AccountNumber = $Account
 	)
 	THEN
-		SET @throw = CONCAT('Invalid Account "', $Account, '".');
+		SET @throw = CONCAT('Invalid Account: ', COALESCE($Account, 'NULL'), '.');
 		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = @throw;
 	END IF;
 
@@ -59,7 +59,7 @@ BEGIN
 		SELECT 1 FROM BudgetCycle WHERE BudgetCycle = $BudgetCycle
 	)
 	THEN
-		SET @throw = CONCAT('Invalid BudgetCycle "', $BudgetCycle, '".');
+		SET @throw = CONCAT('Invalid BudgetCycle: ', COALESCE($BudgetCycle, 'NULL'), '.');
 		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = @throw;
 	END IF;
 
@@ -68,7 +68,7 @@ BEGIN
 		SELECT 1 FROM Budget INNER JOIN BudgetCycle ON Budget.BudgetCycleId = BudgetCycle.BudgetCycleId WHERE Budget.Name = $Budget AND BudgetCycle.BudgetCycle = $BudgetCycle
 	)
 	THEN
-		SET @throw = CONCAT('Invalid Budget "', $Budget, '" for Budget Cycle "', $BudgetCycle, '".');
+		SET @throw = CONCAT('Invalid Budget for Budget Cycle "', COALESCE($BudgetCycle, 'NULL'), '": ', COALESCE($Budget, 'NULL'), '.');
 		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = @throw;
 	END IF;
 

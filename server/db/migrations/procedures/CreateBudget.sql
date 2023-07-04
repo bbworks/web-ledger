@@ -7,14 +7,14 @@ DROP PROCEDURE IF EXISTS `CreateBudget`;
 DELIMITER ;;
 
 CREATE PROCEDURE `CreateBudget` (
-	  $Name                          varchar(50)
-	, $Amount                        decimal(15,2)
-	, $Type                          varchar(50)
-	, $BudgetGroup                   varchar(50)
-	, $BudgetCycle                   date
-	, $DueDate                       int
-	, $IsPaidByCreditCardNotAccount  boolean
-	, $Color                         char(7)
+      $Name                          varchar(50)
+    , $Amount                        decimal(15,2)
+    , $Type                          varchar(50)
+    , $BudgetGroup                   varchar(50)
+    , $BudgetCycle                   date
+    , $DueDate                       int
+    , $IsPaidByCreditCardNotAccount  boolean
+    , $Color                         char(7)
     , $date_created                  datetime
     , $created_by                    int
     , $date_modified                 datetime
@@ -35,7 +35,7 @@ BEGIN
 		SELECT 1 FROM Type WHERE Name = $Type AND ResourceType = 'B'
 	)
 	THEN
-		SET @throw = CONCAT('Invalid Type "', $Type, '".');
+		SET @throw = CONCAT('Invalid Type: ', COALESCE($Type, 'NULL'), '.');
 		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = @throw;
 	END IF;
 
@@ -44,7 +44,7 @@ BEGIN
 		SELECT 1 FROM BudgetCycle WHERE BudgetCycle = $BudgetCycle
 	)
 	THEN
-		SET @throw = CONCAT('Invalid BudgetCycle "', $BudgetCycle, '".');
+		SET @throw = CONCAT('Invalid BudgetCycle: ', COALESCE($BudgetCycle, 'NULL'), '.');
 		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = @throw;
 	END IF;
 
@@ -53,7 +53,7 @@ BEGIN
 		SELECT 1 FROM BudgetGroup WHERE Name = $BudgetGroup
 	)
 	THEN
-		SET @throw = CONCAT('Invalid BudgetGroup "', $BudgetGroup, '".');
+		SET @throw = CONCAT('Invalid BudgetGroup: ', COALESCE($BudgetGroup, 'NULL'), '.');
 		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = @throw;
 	END IF;
 
@@ -62,7 +62,7 @@ BEGIN
 		SELECT 1 FROM Color WHERE Value = $Color
 	)
 	THEN
-		SET @throw = CONCAT('Invalid Color "', IFNULL($Color, ''), '".');
+		SET @throw = CONCAT('Invalid Color: ', COALESCE($Color, 'NULL'), '.');
 		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = @throw;
 	END IF;
 
