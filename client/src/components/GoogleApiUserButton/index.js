@@ -1,6 +1,6 @@
 import './index.scss';
 
-const GoogleApiUserButton = ({ signedInUser })=>{
+const GoogleApiUserButton = ({ signedInUser, onLogOut })=>{
   return (
     <div className="dropdown">
       <button className="user-button btn bg-light" type="button" id="user-button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -8,7 +8,7 @@ const GoogleApiUserButton = ({ signedInUser })=>{
         <span className="user-button-name">{signedInUser.given_name}</span>
       </button>
       <ul className="dropdown-menu" aria-labelledby="user-button">
-        <li><a className="dropdown-item" onClick={/* signOut */()=>{}}>Sign out</a></li>
+        <li><a className="dropdown-item" href="#" onClick={onLogOut}>Sign out</a></li>
       </ul>
     </div>
 
