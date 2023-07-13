@@ -1,8 +1,8 @@
 //Import modules
 const express = require("express");
-const path = require("path");
 const cors = require("cors");
 
+//Import routers
 const TransactionsRouter = require("./routes/transactions")
 const BudgetsRouter = require("./routes/budgets")
 const AccountsRouter = require("./routes/accounts")
@@ -10,11 +10,12 @@ const AccountRouter = require("./routes/account")
 const AuthRouter = require("./routes/authorize")
 const BulkRouter = require("./routes/bulk")
 
+
 class Server {
-  constructor() {
+  constructor(port = process.env.PORT) {
     //Declare properties
-    this.server = express();
-    this.port = process.env.PORT;
+    this.app = express();
+    this.port = port;
     this.basePath = "/api/v1"
     this.paths = {
       transactions: `${this.basePath}/transactions`,
@@ -30,6 +31,9 @@ class Server {
 
     //Set up application routes
     this.initRoutes();
+
+    //Set up application error handling
+    this.initErrorHandling();
   }
 
   initMiddleware() {
@@ -37,31 +41,33 @@ class Server {
     //  request processing & response sending; this can include
     //  libraries for extending Express's functionality and
     //  establishing routers to use for certain routes
-    this.server.use(express.json());
-    this.server.use(express.urlencoded({ extended: true }));
-    this.server.use(cors());
+    this.app.use(express.json());
+    this.app.use(express.urlencoded({ extended: true }));
+    this.app.use(cors());
   }
 
   initRoutes() {
     //Set up server routes
-    this.server.use(this.paths.transactions, TransactionsRouter);
-    this.server.use(this.paths.budgets, BudgetsRouter);
-    this.server.use(this.paths.accounts, AccountsRouter);
-    this.server.use(this.paths.account, AccountRouter);
-    this.server.use(this.paths.authorize, AuthRouter);
-    this.server.use(this.paths.bulk, BulkRouter);
+    this.app.use(this.paths.transactions, TransactionsRouter);
+    this.app.use(this.paths.budgets, BudgetsRouter);
+    this.app.use(this.paths.accounts, AccountsRouter);
+    this.app.use(this.paths.account, AccountRouter);
+    this.app.use(this.paths.authorize, AuthRouter);
+    this.app.use(this.paths.bulk, BulkRouter);
+  }
 
+  initErrorHandling() {
     //Set up 404 handling and forward to error handler
     // (HTTP 404 does not constitute an error)
-    this.server.use((req, res, next) => {
+    this.app.use((req, res, next) => {
       /* DEBUG */ console.error(`>[${new Date().toJSON()}] >404 ${req.method} ${req.originalUrl}`);
       res.status(404).json({
         error: "404 Not Found",
       });
     });
 
-    //Set up error handling route
-    this.server.use((err, req, res, next) => {
+    //Set up global error handling
+    this.app.use((err, req, res, next) => {
       //"So when you add a custom error handler,
       // you must delegate to the default Express error handler,
       // when the headers have already been sent to the client"
@@ -75,10 +81,9 @@ class Server {
     });
   }
 
-  listen() {
-    const port = this.port;
+  start() {
     //Start the http server
-    this.server.listen(port, ()=>console.log(`Server running on port ${port}.`));
+    this.app.listen(this.port, ()=>console.log(`Server running on port ${this.port}.`));
   }
 }
 

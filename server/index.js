@@ -9,4 +9,4 @@ dotenv.config();
 
 //Create & start the server
 const server = new Server();
-server.listen();
+server.start();
