@@ -1,20 +1,26 @@
 //Import modules
-const router = require("express").Router();
+const express = require("express");
 const TransactionsController = require("../controllers/transactions");
 
 
 //Define routes
-router.get("/", TransactionsController.list);
+class TransactionsRouter {
+  constructor() {
+    this.router = express.Router();
 
-router.get("/:transaction_id", TransactionsController.get);
+    this.router.get("/", TransactionsController.list);
 
-router.post("/", TransactionsController.create);
+    this.router.get("/:transaction_id", TransactionsController.get);
 
-router.post("/save", TransactionsController.save);
+    this.router.post("/", TransactionsController.create);
 
-router.put("/:transaction_id", TransactionsController.update);
+    this.router.post("/save", TransactionsController.save);
 
-router.delete("/:transaction_id", TransactionsController.destroy);
+    this.router.put("/:transaction_id", TransactionsController.update);
+
+    this.router.delete("/:transaction_id", TransactionsController.destroy);
+  }
+}
 
 //Export the router
-module.exports = router;
+module.exports = TransactionsRouter;

@@ -1,20 +1,26 @@
 //Import modules
-const router = require("express").Router();
+const express = require("express");
 const BudgetsController = require("../controllers/budgets");
 
 
 //Define routes
-router.get("/", BudgetsController.list);
+class BudgetsRouter {
+  constructor() {
+    this.router = express.Router();
 
-router.get("/:budget_id", BudgetsController.get);
+    this.router.get("/", BudgetsController.list);
 
-router.post("/", BudgetsController.create);
+    this.router.get("/:budget_id", BudgetsController.get);
 
-router.post("/", BudgetsController.save);
+    this.router.post("/", BudgetsController.create);
 
-router.put("/:budget_id", BudgetsController.update);
+    this.router.post("/", BudgetsController.save);
 
-router.delete("/:budget_id", BudgetsController.destroy);
+    this.router.put("/:budget_id", BudgetsController.update);
+
+    this.router.delete("/:budget_id", BudgetsController.destroy);
+  }
+}
 
 //Export the router
-module.exports = router;
+module.exports = BudgetsRouter;

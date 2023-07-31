@@ -1,10 +1,16 @@
 //Import modules
-const router = require("express").Router();
+const express = require("express");
 const AccountController = require("../controllers/account");
 
 
 //Define routes
-router.get("/:account_id", AccountController.get);
+class AccountRouter {
+  constructor() {
+    this.router = express.Router();
+
+    this.router.get("/:account_id", AccountController.get);
+  }
+}
 
 //Export the router
-module.exports = router;
+module.exports = AccountRouter;

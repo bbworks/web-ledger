@@ -1,14 +1,20 @@
 //Import modules
-const router = require("express").Router();
+const express = require("express");
 const AuthController = require("../controllers/authorize");
 
 
 //Define routes
-router.get("/", AuthController.authorize);
+class AuthRouter {
+  constructor() {
+    this.router = express.Router();
 
-router.post("/login", AuthController.login);
+    this.router.get("/", AuthController.authorize);
 
-router.get("/oauth2callback", AuthController.callback);
+    this.router.post("/login", AuthController.login);
+
+    this.router.get("/oauth2callback", AuthController.callback);
+  }
+}
 
 //Export the router
-module.exports = router;
+module.exports = AuthRouter;

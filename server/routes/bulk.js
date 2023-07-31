@@ -1,10 +1,16 @@
 //Import modules
-const router = require("express").Router();
+const express = require("express");
 const BulkController = require("../controllers/bulk");
 
 
 //Define routes
-router.post("/", BulkController.bulk);
+class BulkRouter {
+  constructor() {
+    this.router = express.Router();
+    
+    this.router.post("/", BulkController.bulk);
+  }
+}
 
 //Export the router
-module.exports = router;
+module.exports = BulkRouter;

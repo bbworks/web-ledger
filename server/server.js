@@ -3,12 +3,12 @@ const express = require("express");
 const cors = require("cors");
 
 //Import routers
-const TransactionsRouter = require("./routes/transactions")
-const BudgetsRouter = require("./routes/budgets")
-const AccountsRouter = require("./routes/accounts")
-const AccountRouter = require("./routes/account")
-const AuthRouter = require("./routes/authorize")
-const BulkRouter = require("./routes/bulk")
+const TransactionsRouter = require("./routes/transactions");
+const BudgetsRouter = require("./routes/budgets");
+const AccountsRouter = require("./routes/accounts");
+const AccountRouter = require("./routes/account");
+const AuthRouter = require("./routes/authorize");
+const BulkRouter = require("./routes/bulk");
 
 
 class Server {
@@ -48,12 +48,12 @@ class Server {
 
   initRoutes() {
     //Set up server routes
-    this.app.use(this.paths.transactions, TransactionsRouter);
-    this.app.use(this.paths.budgets, BudgetsRouter);
-    this.app.use(this.paths.accounts, AccountsRouter);
-    this.app.use(this.paths.account, AccountRouter);
-    this.app.use(this.paths.authorize, AuthRouter);
-    this.app.use(this.paths.bulk, BulkRouter);
+    this.app.use(this.paths.transactions, new TransactionsRouter().router);
+    this.app.use(this.paths.budgets, new BudgetsRouter().router);
+    this.app.use(this.paths.accounts, new AccountsRouter().router);
+    this.app.use(this.paths.account, new AccountRouter().router);
+    this.app.use(this.paths.authorize, new AuthRouter().router);
+    this.app.use(this.paths.bulk, new BulkRouter().router);
   }
 
   initErrorHandling() {
