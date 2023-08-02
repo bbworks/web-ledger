@@ -7,8 +7,9 @@ const AccountController = require("../controllers/account");
 class AccountRouter {
   constructor() {
     this.router = express.Router();
+    this.controller = new AccountController();
 
-    this.router.get("/:account_id", AccountController.get);
+    this.router.get("/:account_id", this.controller.get.bind(this.controller));
   }
 }
 

@@ -7,14 +7,12 @@ const AccountsController = require("../controllers/accounts");
 class AccountsRouter {
   constructor() {
     this.router = express.Router();
+    this.controller = new AccountsController();
 
-    this.router.get("/", AccountsController.get);
-
-    this.router.get("/:account_id", AccountsController.show);
-
-    this.router.post("/", AccountsController.save);
-
-    this.router.post("/:account_id", AccountsController.update);
+    this.router.get("/", this.controller.get.bind(this.controller));
+    this.router.get("/:account_id", this.controller.show.bind(this.controller));
+    this.router.post("/", this.controller.save.bind(this.controller));
+    this.router.post("/:account_id", this.controller.update.bind(this.controller));
   }
 }
 

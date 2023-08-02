@@ -1,14 +1,19 @@
 //Import modules
 const GoogleAPIAuth = require("../googleApi/authorization");
-const AuthApi = require("../api/authorize");
+const AuthService = require("../services/authorize");
 
 
 //Define controllers
 class AuthController {
-  static async login(request, response) {
+  constructor() {
+    this.service = new AuthService();
+  }
+
+  async login(request, response) {
+    console.log("test", this);
     try {
       /* DEBUG */ console.info(`>[${new Date().toJSON()}] >POST /api/v1/authorize/login`);
-      const results = await AuthApi.getLoggedInUser();
+      const results = await this.service.getLoggedInUser();
 
       /* DEBUG */ console.info(`>[${new Date().toJSON()}] >Response: POST /api/v1/authorize/login |\r\n`, results);
       return response.json(results);
@@ -33,7 +38,7 @@ class AuthController {
     }
   };
 
-  static async authorize(request, response) {
+  async authorize(request, response) {
     try {
       const {query: code} = request;
 
@@ -60,7 +65,7 @@ class AuthController {
     }
   };
 
-  static async callback(request, response) {
+  async callback(request, response) {
     try {
       const {query: code} = request;
 

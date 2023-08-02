@@ -1,11 +1,18 @@
 //Import modules
-const TransactionsApi = require("../api/transactions");
-const BudgetsApi = require("../api/budgets");
+const TransactionsService = require("../services/transactions");
+const BudgetsService = require("../services/budgets");
 
 
 //Define controllers
 class BulkController {
-  static async bulk(request, response) {
+  constructor() {
+    this.service = {
+      ...new TransactionsService(),
+      ...new BudgetsService()
+    };
+  }
+
+  async bulk(request, response) {
     try {
       //Destructure the request object
       const {body: {operations}} = request;
@@ -16,10 +23,10 @@ class BulkController {
         try {
           /* DEBUG */ console.info(`>[${new Date().toJSON()}] >POST /api/v1/bulk (${operation.method} ${operation.endpoint})`);
           if (operation.method === "POST" && operation.endpoint === "/api/v1/transactions") {
-            results = await TransactionsApi.createTransaction(operation.data.transaction);
+            results = await this.service.createTransaction(operation.data.transaction);
           }
           else if (operation.method === "POST" && operation.endpoint === "/api/v1/budgets") {
-            results = await BudgetsApi.createBudget(operation.data.budget);
+            results = await this.service.createBudget(operation.data.budget);
           }
           /* DEBUG */ console.info(`>[${new Date().toJSON()}] >Response: POST /api/v1/bulk (${operation.method} ${operation.endpoint}) |\r\n`, results);
             

@@ -7,18 +7,14 @@ const TransactionsController = require("../controllers/transactions");
 class TransactionsRouter {
   constructor() {
     this.router = express.Router();
+    this.controller = new TransactionsController();
 
-    this.router.get("/", TransactionsController.list);
-
-    this.router.get("/:transaction_id", TransactionsController.get);
-
-    this.router.post("/", TransactionsController.create);
-
-    this.router.post("/save", TransactionsController.save);
-
-    this.router.put("/:transaction_id", TransactionsController.update);
-
-    this.router.delete("/:transaction_id", TransactionsController.destroy);
+    this.router.get("/", this.controller.list.bind(this.controller));
+    this.router.get("/:transaction_id", this.controller.get.bind(this.controller));
+    this.router.post("/", this.controller.create.bind(this.controller));
+    this.router.post("/save", this.controller.save.bind(this.controller));
+    this.router.put("/:transaction_id", this.controller.update.bind(this.controller));
+    this.router.delete("/:transaction_id", this.controller.destroy.bind(this.controller));
   }
 }
 

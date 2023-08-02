@@ -7,8 +7,9 @@ const BulkController = require("../controllers/bulk");
 class BulkRouter {
   constructor() {
     this.router = express.Router();
+    this.controller = new BulkController();
     
-    this.router.post("/", BulkController.bulk);
+    this.router.post("/", this.controller.bulk.bind(this.controller));
   }
 }
 
