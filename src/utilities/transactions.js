@@ -147,8 +147,8 @@ export const importTransactions = function(transactionsData, dataType) {
     //For each CSV file, convert the contents to JSON
     return transactionsData.map(transaction=>{
       const _Date = (transaction.Date ? transaction.Date.trim() : null);
-      const PostedDate = (transaction.PostedDate ? transaction.PostedDate.trim() : null);
-      const TransactionDate = (transaction.TransactionDate ? transaction.TransactionDate.trim() : null);
+      const PostedDate = (transaction.PostedDate ? transaction.PostedDate.trim() : (transaction["Posted Date"] ? transaction["Posted Date"] : null));
+      const TransactionDate = (transaction.TransactionDate ? transaction.TransactionDate.trim() : (transaction["Transaction Date"] ? transaction["Transaction Date"] : null));
       const AccountNumber = (transaction["Card No."] ? transaction["Card No."].trim() : null);
       const TransactionType = (transaction["Transaction Type"] ? transaction["Transaction Type"].trim() : null);
       const Description = (transaction.Description ? transaction.Description.trim() : null);
@@ -176,7 +176,8 @@ export const importTransactions = function(transactionsData, dataType) {
         type = (type==="Debit" ? "Charges" : (type==="Credit" ? "Payments" : null));
       }
 
-      const transactionDate = convertDateStringToDate(nullCoalesce(TransactionDate, _Date), "MM/dd/yyyy");
+      const transactionDateString = nullCoalesce(TransactionDate, _Date);
+      const transactionDate = convertDateStringToDate(transactionDateString, (transactionDateString.match(/^\d{2}\/\d{2}\/\d{2}$/) ? "MM/dd/yy" : "MM/dd/yyyy"));
       if (isFalsy(type) || isFalsy(transactionDate)) {
         console.error(transaction);
         throw new Error(`Unable to read transaction.\r\n${Object.entries(transaction).map(([key,value])=>`${key}:${value}`).join(", ")}`);
@@ -185,7 +186,7 @@ export const importTransactions = function(transactionsData, dataType) {
 
       return {
         TransactionId: null,
-        PostedDate: (PostedDate ? convertDateStringToDate(PostedDate, "MM/dd/yyyy") : null),
+        PostedDate: (PostedDate ? convertDateStringToDate(PostedDate, (PostedDate.match(/^\d{2}\/\d{2}\/\d{2}$/) ? "MM/dd/yy" : "MM/dd/yyyy")) : null),
         TransactionDate: transactionDate,
         AccountNumber: (AccountNumber ? `*${AccountNumber}` : null),
         Type: type,
