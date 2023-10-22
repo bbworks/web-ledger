@@ -242,7 +242,7 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/MOBILE CHECK DEPOSIT/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Mobile check deposit", Notes: null};
 
   //Withdrawals
-  else if (Description.match(/ATM CASH WITHDRAWAL (?:\d{4} \w{4} \d{12}|[\w ]+)/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "ATM withdrawal", Notes: null};
+  else if (Description.match(/ATM CASH WITHDRAWAL/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "ATM withdrawal", Notes: null};
   else if (matches = Description.match(/CHECK #(\d+)/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: `Check #${matches[1]}`, Notes: null};
 
   //Transfers
@@ -262,7 +262,7 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/(?:ELECTRONIC\/ACH DEBIT )?SHARONVIEW FCU TRANSFER \d{15} \d{10}/i))  categorizedTransactionData = {Category: "Sharonview auto loan ", DescriptionDisplay: "Sharonview loan", Notes: null};
   else if (Description.match(/(?:ELECTRONIC\/ACH DEBIT )?(?:PURCHASE )?THOMASEHANNAHYMC(?: PURCHASE \d{10})?/i))  categorizedTransactionData = {Category: "YMCA membership", DescriptionDisplay: "YMCA membership", Notes: null};
   else if (Description.match(/(?:ELECTRONIC\/ACH DEBIT )?PLANET FIT CLUB FEES \d{13} \d{10}/i))  categorizedTransactionData = {Category: "Planet Fitness membership", DescriptionDisplay: "Planet Fitness membership", Notes: null};
-  else if (Description.match(/(?:ELECTRONIC\/ACH DEBIT )?DEPT EDUCATION STUDENT LN \w{11} \d{10}/i))  categorizedTransactionData = {Category: "Nelnet student loan", DescriptionDisplay: "Nelnet student loan", Notes: null};
+  else if (Description.match(/(?:(?:ELECTRONIC\/ACH DEBIT )?DEPT EDUCATION STUDENT LN \w{11} \d{10}|STUDENT LN DEPT EDUCATION 0000.+DEBIT)/i))  categorizedTransactionData = {Category: "Nelnet student loan", DescriptionDisplay: "Nelnet student loan", Notes: null};
   else if (Description.match(/(?:(?:ELECTRONIC\/ACH DEBIT )?(?:ESCAVERA HOMEOWN|CEDAR MANAGEMENT) DRAFT \w{6} \d{10})/i))  categorizedTransactionData = {Category: "HOA dues", DescriptionDisplay: "HOA dues", Notes: null};
   else if (Description.match(/Simplisafe 888-957-4675 MA/i))  categorizedTransactionData = {Category: "SimpliSafe (for mom)", DescriptionDisplay: "SimpliSafe", Notes: null};
   else if (Description.match(/[SM]DC\* ?Laurens Electric C Laurens SC/i))  categorizedTransactionData = {Category: "Laurens Electric ProTec Security", DescriptionDisplay: "Laurens Electric ProTec Security", Notes: null};
@@ -276,11 +276,12 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/Spectrum 855-707-7328 \w{2}/i))  categorizedTransactionData = {Category: "Spectrum Internet", DescriptionDisplay: "Spectrum Internet", Notes: null};
   else if (Description.match(/(?:AT&T \*Payment|ATT\*BILL PAYMENT) 800-288-2020 TX/i))  categorizedTransactionData = {Category: "AT&T Internet", DescriptionDisplay: "AT&T Internet", Notes: null};
   else if (Description.match(/PAYMENT 5\/3 INSTALL LOAN REF \d{11} TELEPHONE PAYMENT/i))  categorizedTransactionData = {Category: "Fifth Third auto loan", DescriptionDisplay: "Fifth Third auto loan", Notes: null};
-  else if (Description.match(/KIRBY SANITATION(?:\/C&J E)? 8648778887 SC/i))  categorizedTransactionData = {Category: "Kirby Sanitation", DescriptionDisplay: "Kirby Sanitation", Notes: null};
+  else if (Description.match(/KIRBY SANITATION(?:\/C&J E)? (8648778887|GREER) SC/i))  categorizedTransactionData = {Category: "Kirby Sanitation", DescriptionDisplay: "Kirby Sanitation", Notes: null};
   else if (Description.match(/Food for the Hungry (?:480-9983100|PHOENIX) AZ/i))  categorizedTransactionData = {Category: "Food for the Hungry", DescriptionDisplay: "Food for the Hungry", Notes: null};
   else if (Description.match(/SURE PAY MOSAIC [^ ]+ [\w ]+ ACH DEBIT/i))  categorizedTransactionData = {Category: "Mosaic Financing", DescriptionDisplay: "Mosaic Financing", Notes: null};
   else if (Description.match(/GLOBE LIFE AND ACCIDEN 9725406542 OK/i))  categorizedTransactionData = {Category: "Globe Life insurance", DescriptionDisplay: "Globe Life insurance", Notes: null};
   else if (Description.match(/MICROSOFT\*ONEDRIVE STA REDMOND WA/i))  categorizedTransactionData = {Category: "Microsoft OneDrive subscription", DescriptionDisplay: "Microsoft OneDrive subscription", Notes: null};
+  else if (Description.match(/COVENANT EYES OWOSSO MI USA/i))  categorizedTransactionData = {Category: "Covenant Eyes subscription", DescriptionDisplay: "Covenant Eyes subscription", Notes: null};
 
   //Recurring expenses
 
@@ -289,7 +290,7 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/CIRCLE K (?:# )?\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "Circle K", Notes: null};
   else if (Description.match(/7-ELEVEN \d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "7-Eleven", Notes: null};
   else if (Description.match(/SPINX #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "Spinx", Notes: null};
-  else if (Description.match(/(?:LOVE S TRAVEL |LOVE ?S COUNTRY ?)\d+ [\w ]+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "Love's", Notes: null};
+  else if (Description.match(/(?:LOVE S TRAVEL |LOVE ?S COUNTRY ?|LOVE'S #)\d+ [\w ]+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "Love's", Notes: null};
   else if (Description.match(/SHELL OIL [\d\w]+ [\w ]+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "Shell", Notes: null};
   else if (Description.match(/INGLES GAS EXP #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "Ingles Gas", Notes: null};
   else if (Description.match(/RACETRAC ?\d+ \d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "RaceTrac", Notes: null};
@@ -298,7 +299,7 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/BUC-EE[' ]S #\d+ \w+  ?\w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "Buc-ee's", Notes: null};
   else if (Description.match(/V GO #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "V-Go", Notes: null};
   else if (Description.match(/TEXACO \d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "Texaco", Notes: null};
-  else if (Description.match(/EXXONMOBIL \d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "ExxonMobil", Notes: null};
+  else if (Description.match(/EXXON(?:MOBIL | SCOTCHMAN #)?(?:\d+| [\w ]+) [\w ]+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "ExxonMobil", Notes: null};
   else if (Description.match(/[\w ]+ CITGO \w+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "Citgo", Notes: null};
   else if (Description.match(/MARATHON PETRO\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "Marathon", Notes: null};
   else if (Description.match(/PILOT \d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Gas", DescriptionDisplay: "Pilot Flying J", Notes: null};
@@ -336,7 +337,7 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/Dollar[- ]General #\d+ [\w ]+ \w{2}/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Dollar General", Notes: null};
   else if (Description.match(/Family Dollar #\d+ \w+ \w{2}/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Family Dollar", Notes: null};
   else if (Description.match(/Walgreens(?: #\d+ \w+ \w{2}|\.com 877-250-5823 IL)/i)) categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Walgreens", Notes: null};
-  else if (Description.match(/(?:WWW\.CVS\.COM 800-746-7287 RI|CVS PHARMACY #\d+ \w+ \w{2}|CVS CarePass 8\d{2}-?\d{3}-?\d{4} RI)/i))  categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "CVS Pharmacy", Notes: null};
+  else if (Description.match(/(?:WWW\.CVS\.COM 800-746-7287 RI|CVS[ \/]PHARMACY #\d+ \w+ \w{2}|CVS CarePass 8\d{2}-?\d{3}-?\d{4} RI)/i))  categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "CVS Pharmacy", Notes: null};
   else if (Description.match(/FIRSTCHOICE PHARMACY L \w+ \w{2}/i))  categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "FirstChoice Pharmacy", Notes: null};
   else if (Description.match(/(?:PP\*)?INSTACART(?:\*\w+)? (?:SAN FRANCISCO ?CA|4029357733 CA)/i))  categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Instacart", Notes: null};
   else if (Description.match(/SHIPT\* ORDER \w+ AL/i))  categorizedTransactionData = {Category: "Groceries/Necessities", DescriptionDisplay: "Shipt", Notes: null};
@@ -347,7 +348,8 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/Burger King #\d+(?: \w+ \w+ \w{2})?/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Burger King", Notes: null};
   else if (Description.match(/Sonic Drive[- ]?In #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Sonic Drive-In", Notes: null};
   else if (Description.match(/Cook Out [\w ]+(?: \w+ \w{2})?/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Cook Out", Notes: null};
-  else if (Description.match(/Wendy[' ]?s #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Wendy's", Notes: null};
+  else if (Description.match(/Wendy[' ]?s #?\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Wendy's", Notes: null};
+  else if (Description.match(/WhiteCastle \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "White Castle", Notes: null};
   else if (Description.match(/Krystal [\d\w]+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Krystal", Notes: null};
   else if (Description.match(/Checkers (?:Drive In|\d+|#\d+ \w+) \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Checkers", Notes: null};
   else if (Description.match(/Checkers \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Checkers", Notes: null};
@@ -357,12 +359,13 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/Steak N Shake \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Steak 'n Shake", Notes: null};
   else if (Description.match(/RED ROBIN NO \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Red Robin", Notes: null};
   else if (Description.match(/Culvers [\w ]+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Culver's", Notes: null};
+  else if (Description.match(/Whataburger \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Whataburger", Notes: null};
   else if (Description.match(/Arby ?s (?:- )?\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Arby's", Notes: null};
   else if (Description.match(/Jersey Mikes? \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Jersey Mike's Subs", Notes: null};
   else if (Description.match(/CHICKEN SALAD CHICK - \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Chicken Salad Chick", Notes: null};
   else if (Description.match(/PDQ  ?(?:\d+( OLO)?|\w+) \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "PDQ", Notes: null};
   else if (Description.match(/Chick-Fil-A #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Chick-fil-A", Notes: null};
-  else if (Description.match(/Bojangles \d+ \w+/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Bojangles", Notes: null};
+  else if (Description.match(/Bojangles'? (?:\d+|[\w ]+) \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Bojangles", Notes: null};
   else if (Description.match(/KFC \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "KFC", Notes: null};
   else if (Description.match(/Popeyes (?:\d+|- \w+) \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Popeyes", Notes: null};
   else if (Description.match(/Zaxby[' ]s #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Zaxby's", Notes: null};
@@ -387,30 +390,37 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/Mr Jalapeno- \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Mr. Jalapeño", Notes: null};
   else if (Description.match(/Chuy's \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Chuy's", Notes: null};
   else if (Description.match(/Taco Casa Inc Tuscaloosa AL/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Taco Casa", Notes: null};
-  else if (Description.match(/Papas and Beer Mexican \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Papa's & Beer", Notes: null};
+  else if (Description.match(/Papas and Beer \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Papa's & Beer", Notes: null};
   else if (Description.match(/Mi Familia \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Mi Familia Mexican Restaurant & More", Notes: null};
-  else if (Description.match(/IHOP \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "IHOP", Notes: null};
+  else if (Description.match(/Taqueria Picante \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Taqueria Picante Mexican Kitchen & Grill", Notes: null};
+  else if (Description.match(/El Carriel LLC \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "El Carriel", Notes: null};
+  else if (Description.match(/IHOP #?\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "IHOP", Notes: null};
   else if (Description.match(/Waffle House (?:\d+ )?\w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Waffle House", Notes: null};
   else if (Description.match(/TST\* Eggs Up Grill - \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Eggs Up Grill", Notes: null};
+  else if (Description.match(/Cracker Barrel #\d+ \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Cracker Barrel", Notes: null};
   else if (Description.match(/Chili'?s \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Chili's", Notes: null};
   else if (Description.match(/Sweet Basil Thai Cusin Greenville SC/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Sweet Basil Thai Cusine", Notes: null};
   else if (Description.match(/Taste of Thai Spartanburg SC/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Taste of Thai", Notes: null};
   else if (Description.match(/TST\* Kannika s Thai Ki Greenville SC/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Kannika's Thai Kitchen", Notes: null};
   else if (Description.match(/Thai Jing Restaurant Greenville SC/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Thai Jing", Notes: null};
+  else if (Description.match(/Thai Y'All Boiling Sprin SC/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Thai Y'all", Notes: null};
+  else if (Description.match(/Bangkok 2 \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Bangkok on 9", Notes: null};
   else if (Description.match(/TeaStar Cafe Spartanburg SC/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "TeaStar Thai Cafe", Notes: null};
   else if (Description.match(/Panda Hibachi Duncan SC/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Panda Hibachi", Notes: null};
   else if (Description.match(/PF Changs #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "PF Changs", Notes: null};
   else if (Description.match(/Lieu[' ]?s (?:Chinese|Asian) Bistro \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Lieu's Chinese Bistro", Notes: null};
   else if (Description.match(/Ruby Thai \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Ruby Thai", Notes: null};
   else if (Description.match(/(Mandarin Express \d+ \w+ \w+ \w{2}|Pei Wei Asian Express \w+ \w{2} USA)/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Mandarin Express", Notes: null};
+  else if (Description.match(/SQ \*The Orient on Main \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "The Orient", Notes: null};
   else if (Description.match(/Oriental House \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Oriental House", Notes: null};
   else if (Description.match(/Hibachi Grill And Buff \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Hibachi Grill & Buffet", Notes: null};
   else if (Description.match(/HTAB Enterprise LLC Duncan SC/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Fuji", Notes: null};
+  else if (Description.match(/Jade Express Spartanburg SC/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Jade Express", Notes: null};
   else if (Description.match(/Persis Indian Grill \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Persis Indian Grill", Notes: null};
   else if (Description.match(/(?:The Olive Gard|Olive Garden )\d{8} \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Olive Garden", Notes: null};
   else if (Description.match(/Paisanos Italian Resta/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Paisanos Italian Restaurant", Notes: null};
   else if (Description.match(/Paisanos Italian Greek \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Paisano's", Notes: null};
-  else if (Description.match(/Pizza Hut \d+ \d+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Pizza Hut", Notes: null};
+  else if (Description.match(/Pizza Hut \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Pizza Hut", Notes: null};
   else if (Description.match(/Pizza Inn \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Pizza Inn", Notes: null};
   else if (Description.match(/Antonio Bertolos Pizza \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Antonino Bertolo's Pizza", Notes: null};
   else if (Description.match(/Cicis Pizza \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Cicis Pizza", Notes: null};
@@ -422,6 +432,7 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/Carrabbas \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Carrabba's", Notes: null};
   else if (Description.match(/Little Caesars [\d ]+ \d{3}-\d{3}-\d{4} \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Little Caesars Pizza", Notes: null};
   else if (Description.match(/Milano Pizzeria of Sim \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Milano Pizzeria & Restaurant", Notes: null};
+  else if (Description.match(/COLDSTONE #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Cold Stone Creamery", Notes: null};
   else if (Description.match(/Tutti Frutti \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Tutti Frutti", Notes: null};
   else if (Description.match(/TCBY (?:#\d+ )?\w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "TCBY", Notes: null};
   else if (Description.match(/SQ \*Twisted Cup \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Twisted Cup", Notes: null};
@@ -431,7 +442,9 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/Dairy Queen #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Dairy Queen", Notes: null};
   else if (Description.match(/Yogurt Mountain-\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Yogurt Mountain", Notes: null};
   else if (Description.match(/SQ \*\d+ Pelican's Snob \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Pelican's SnoBalls", Notes: null};
-  else if (Description.match(/Krispy Kreme \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Krispy Kreme", Notes: null};
+  else if (Description.match(/SQ \*Kona Ice [\w ]+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Kona Ice Truck", Notes: null};
+  else if (Description.match(/TST\* Yogi's Cups and C \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Yogi's Cups & Cones", Notes: null};
+  else if (Description.match(/Krispy Kreme #?\d+ [\w ]+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Krispy Kreme", Notes: null};
   else if (Description.match(/Dunkin #\d+ \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Dunkin", Notes: null};
   else if (Description.match(/INSOMNIA COOKIES- \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Insomnia Cookies", Notes: null};
   else if (Description.match(/Spill the Beans - \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Spill the Beans", Notes: null};
@@ -440,6 +453,7 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/Bella Latte Duncan SC/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Bella Latte", Notes: null};
   else if (Description.match(/(?:SQ \*)?Little River (?:Roast(?:ing)?|Coffe) Spartanburg SC/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Little River Roasting Co.", Notes: null};
   else if (Description.match(/Coffee Underground Greenville SC/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Coffee Underground", Notes: null};
+  else if (Description.match(/Scooter's Coffee #1954 Duncan SC/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Scooter's Coffee", Notes: null};
   else if (Description.match(/SQ \*Dolce Italy Greenville SC/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Dolce Italy", Notes: null};
   else if (Description.match(/Subway \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Subway", Notes: null};
   else if (Description.match(/Panera Bread #\d+ P \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Panera Bread", Notes: null};
@@ -451,9 +465,11 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/New S And S Cafe Greenville SC/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "S & S Cafeteria", Notes: null};
   else if (Description.match(/The Blue Ridge Brewing Greenville SC/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "The Blue Ridge Brewing Company", Notes: null};
   else if (Description.match(/Carolina Ale House \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Carolina Ale House", Notes: null};
+  else if (Description.match(/OCharleys\d+\w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "O'Charley's Restaurant & Bar", Notes: null};
   else if (Description.match(/Flavorshack Hot Chicke Duncan SC/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Flavorshack Hot Chicken & Ribs", Notes: null};
   else if (Description.match(/Auntie Anne s #\w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Auntie Anne's", Notes: null};
   else if (Description.match(/River Street Sweets SA \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "River Street Sweets", Notes: null};
+  else if (Description.match(/CornDogs by Mr Cow - \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Eating Out", DescriptionDisplay: "Corn Dogs by Mr. Cow", Notes: null};
   
   //Family Fun
   else if (Description.match(/Shipwreck Cove Duncan SC/i))  categorizedTransactionData = {Category: "Family Fun", DescriptionDisplay: "Shipwreck Cove", Notes: null};
@@ -463,17 +479,18 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/SQ \*SKY TOP ORCHARD ZIRCONIA NC/i))  categorizedTransactionData = {Category: "Family Fun", DescriptionDisplay: "Sky Top Orchard", Notes: null};
 
   //Church
-  else if (Description.match(/Brookwood Church (?:Donat Simpsonville|8646888200) SC/i))  categorizedTransactionData = {Category: "Church", DescriptionDisplay: "Brookwood Church", Notes: "online giving"};
+  else if (matches = Description.match(/Brookwood Church (Donat Simpsonville|Cafe Simpsonville|8646888200) SC/i))  categorizedTransactionData = {Category: "Church", DescriptionDisplay: "Brookwood Church", Notes: (matches[1].match(/cafe/i) ? "cafe" : "online giving")};
 
   //Personal Spending
 
   //Childcare
-  else if (Description.match(/GIGGLES DROP IN CHILDC GREENVILLE SC/i))  categorizedTransactionData = {Category: "Childcare", DescriptionDisplay: "Giggles Drop-In Childcare", Notes: null};
+  else if (Description.match(/GIGGLES DROP[- ]IN CHIL(?:DC)? GREENVILLE SC/i))  categorizedTransactionData = {Category: "Childcare", DescriptionDisplay: "Giggles Drop-In Childcare", Notes: null};
   else if (Description.match(/SQ \*KIDSZONE DROP-IN H GREENVILLE SC/i))  categorizedTransactionData = {Category: "Childcare", DescriptionDisplay: "KidsZone Drop-In Childcare", Notes: null};
 
   //Other
   else if (matches = Description.match(/ELECTRONIC\/ACH CREDIT IRS TREAS 310 ([\w ]+) \d{10}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: `Internal Revenue Service ${matches[1]}`, Notes: null};
   else if (matches = Description.match(/ELECTRONIC\/ACH CREDIT SC STATE TREASUR ([\w ]+) \d{10}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: `South Carolina Treasury ${matches[1]}`, Notes: null};
+  else if (Description.match(/SPARTANBURGCO TREAS 864\d{7} SC USA/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Spartanburg County Treasury", Notes: null};
   else if (Description.match(/ELECTRONIC\/ACH CREDIT SHFECU SV WEBXFR \w{3} \d{10}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Sharonview", Notes: null};
   else if (Description.match(/HAMPTON INN \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Hampton by Hilton", Notes: null};
   else if (Description.match(/HOMES TO SUITES BY HIL \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Homes2 Suites by Hilton", Notes: null};
@@ -483,7 +500,7 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/ADVANCE AUTO PARTS #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Advance Auto Parts", Notes: null};
   else if (Description.match(/HARBOR FREIGHT TOOLS \d \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Harbor Freight", Notes: null};
   else if (Description.match(/CLASSIC ACE HARDWARE \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Classic Ace Hardware", Notes: null};
-  else if (Description.match(/(?:AMAZON\.COM|AMZN MKTP US)(?:\*\w+(?: A|\w+))? (?:AMZN\.COM )?AMZN\.COM[\/ ]BILL ?WA/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Amazon", Notes: null};
+  else if (Description.match(/(?:AMAZON\.COM|AMZN MKTP US)(?:\*\w+(?: A|\w+))? (?:(?:AMZN\.COM )?AMZN\.COM[\/ ]BILL|SEATTLE) ?WA/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Amazon", Notes: null};
   else if (Description.match(/DILLARDS \d+ [\w ]+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Dillard's", Notes: null};
   else if (Description.match(/BELK #\d+ \w+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Belk", Notes: null};
   else if (Description.match(/Hobby Lobby #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Hobby Lobby", Notes: null};
@@ -491,10 +508,15 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/Ross Stores? #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Ross Stores", Notes: null};
   else if (Description.match(/Burlington Stores \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Burlington", Notes: null};
   else if (Description.match(/Marshalls #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Marshalls", Notes: null};
+  else if (Description.match(/TJ Maxx #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "T.J. Maxx", Notes: null};
+  else if (Description.match(/H&M\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "H&M", Notes: null};
+  else if (Description.match(/Switcharoos \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Switch-A-Roos", Notes: null};
+  else if (Description.match(/Classy Kids Consignmen \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Classy Kids Consignment", Notes: null};
+  else if (Description.match(/Carter's #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Carter's", Notes: null};
   else if (Description.match(/Etsy\.com - .+ Brooklyn NY/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Etsy", Notes: null};
   else if (Description.match(/BESTBUYCOM\d{12} 888-?BESTBUY MN/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Best Buy", Notes: null};
   else if (Description.match(/STAPLES \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Staples", Notes: null};
-  else if (Description.match(/BIG LOTS STORES - #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Big Lots", Notes: null};
+  else if (Description.match(/BIG LOTS (?:STORES - )?#\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Big Lots", Notes: null};
   else if (Description.match(/AT HOME STORE \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "At Home", Notes: null};
   else if (Description.match(/FIVE BELOW \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Five Below", Notes: null};
   else if (Description.match(/2ND AND CHARLES \d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "2nd & Charles", Notes: null};
@@ -502,10 +524,11 @@ export const categorizeTransactionByDescription = function(transaction) {
   else if (Description.match(/SPARTANBURGCO TREAS 8645962603 SC/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Spartanburg County Treasury", Notes: null};
   else if (Description.match(/9999 UMG MY CHART PT P 864-4542000 SC/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Prisma Health MyChart", Notes: null};
   else if (Description.match(/Crescent Family Dentis Greer SC/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Crescent Family Dentistry", Notes: null};
-  else if (Description.match(/AIRBNB \w+ 4158005959 CA/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Airbnb", Notes: null};
+  else if (Description.match(/AIRBNB \w+ (?:4158005959|8554247262) CA/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Airbnb", Notes: null};
   else if (Description.match(/SQ \*Brown Roof Thrift \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Brown Roof Thrift", Notes: null};
-  else if (Description.match(/Switcharoos \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Switch-A-Roos", Notes: null};
   else if (Description.match(/GROUPON INC. 312-288-6424 IL/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Groupon", Notes: null};
+  else if (Description.match(/MASTER S MARK DRY CLEA \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Master's Mark Dry Cleaners", Notes: null};
+  else if (Description.match(/Guitar Center #\d+ \w+ \w{2}/i))  categorizedTransactionData = {Category: "Miscellaneous", DescriptionDisplay: "Guitar Center", Notes: null};
   
   //If there was no match, return the original transaction
   else return transaction;
