@@ -35,39 +35,39 @@ const DashboardInsights = ({ budgetCycle, budgetCycleTransactions, budgetCycleBu
       setInsights(previousInsights=>[...previousInsights, insight]);
     }
 
-    /* Check if the user is over on any budgets */
-    const budgetsOver = budgetCycleBudgetsWithSpent.filter(budgetDataWithSpent=>!["income","savings"].includes(budgetDataWithSpent.Type) && budgetDataWithSpent.Amount !== 0 && budgetDataWithSpent.Spent < budgetDataWithSpent.Amount);
+    /* Check if the user is over on any non-bill budgets */
+    const budgetsOver = budgetCycleBudgetsWithSpent.filter(budgetDataWithSpent=>!["income","savings","bill"].includes(budgetDataWithSpent.Type) && budgetDataWithSpent.Name !== "Miscellaneous" && budgetDataWithSpent.Spent < budgetDataWithSpent.Amount);
     if (budgetsOver.length) {
       const insight = {
         type: "danger",
-        iconClass: "fas fa-chart-pie",
-        title: "Analysis",
-        text: `You are overspent on ${budgetsOver.length} budgets.`
+        iconClass: "fas fa-exclamation",
+        title: "Overspending",
+        text: `You are overspent on ${budgetsOver.length} non-bill budgets: ${budgetsOver.map(b=>`${b.Name} (${convertNumberToCurrency(b.Amount-b.Spent)})`).join(", ")}.`
       };
       setInsights(previousInsights=>[...previousInsights, insight]);
     }
 
-    /* Check if there is money left in the "Personal Spending" or "Bradley" budget */
-    const personalSpendingBudgets = budgetCycleBudgets.filter(budgetData=>["Personal Spending", "Bradley", "Sarah"].includes(budgetData.Name));
-    personalSpendingBudgets.forEach(personalSpendingBudget=>{
-      const personalSpendingBudgetLeft = getBudgetAmountSpentFromTransactions(personalSpendingBudget.Name, budgetCycleTransactions.all) - personalSpendingBudget.Amount;
-      if (personalSpendingBudgetLeft > 0) {
+    /* Check if any bills were unpaid */
+    const unpaidBillsWithSpent = budgetCycleBudgetsWithSpent.filter(budgetWithSpent=>budgetWithSpent.Type === "bill" && !budgetWithSpent.Spent && Number(budgetWithSpent.DueDate?.match(/[0-3]?[0-9](?=st|nd|rd|th)/)[0]) < new Date().getDate());
+    if (unpaidBillsWithSpent.length) {
+      unpaidBillsWithSpent.forEach(unpaidBillWithSpent=>{
         const insight = {
-          type: "primary",
-          iconClass: "fas fa-chart-pie",
-          title: "Analysis",
-          text: `You have ${convertNumberToCurrency(personalSpendingBudgetLeft)} remaining in "${personalSpendingBudget.Name}".`
+          type: "danger",
+          iconClass: "fas fa-exclamation",
+          title: "Late Bill",
+          text: `You haven't paid bill ${unpaidBillWithSpent.Name} (${convertNumberToCurrency(Math.abs(unpaidBillWithSpent.Amount)-Math.abs(unpaidBillWithSpent.Spent))} due every ${unpaidBillWithSpent.DueDate}).`
         };
+        console.log(unpaidBillWithSpent)
         setInsights(previousInsights=>[...previousInsights, insight]);
-      }
-    });
+      });
+    }
 
     /* Check if any bills were overpaid */
     const overspentBillsWithSpent = budgetCycleBudgetsWithSpent.filter(budgetWithSpent=>budgetWithSpent.Type === "bill" && budgetWithSpent.Spent < budgetWithSpent.Amount);
     if (overspentBillsWithSpent.length) {
       overspentBillsWithSpent.forEach(overspentBillWithSpent=>{
         const insight = {
-          type: "danger",
+          type: "warning",
           iconClass: "fas fa-exclamation",
           title: "Higher Bill",
           text: `You overpaid bill ${overspentBillWithSpent.Name} by ${convertNumberToCurrency(Math.abs(overspentBillWithSpent.Spent)-Math.abs(overspentBillWithSpent.Amount))}.`
@@ -154,6 +154,21 @@ const DashboardInsights = ({ budgetCycle, budgetCycleTransactions, budgetCycleBu
       };
       setInsights(previousInsights=>[...previousInsights, insight]);
     }
+
+    /* Check if there is money left in the "Personal Spending" or "Bradley" budget */
+    const personalSpendingBudgets = budgetCycleBudgets.filter(budgetData=>["Personal Spending", "Bradley", "Sarah"].includes(budgetData.Name));
+    personalSpendingBudgets.forEach(personalSpendingBudget=>{
+      const personalSpendingBudgetLeft = getBudgetAmountSpentFromTransactions(personalSpendingBudget.Name, budgetCycleTransactions.all) - personalSpendingBudget.Amount;
+      if (personalSpendingBudgetLeft > 0) {
+        const insight = {
+          type: "primary",
+          iconClass: "fas fa-chart-pie",
+          title: "Analysis",
+          text: `You have ${convertNumberToCurrency(personalSpendingBudgetLeft)} remaining in "${personalSpendingBudget.Name}".`
+        };
+        setInsights(previousInsights=>[...previousInsights, insight]);
+      }
+    });
   };
 
   useEffect(()=>{
