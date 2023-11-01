@@ -92,9 +92,11 @@ class TransactionService {
 
       const [results] = await db.query(sql, values);
       
+      const newTransaction = results[0][0];
       console.log("results", results);
-      
-      return results;
+      console.log("newTransaction", newTransaction);
+
+      return newTransaction;
     }
     catch (err) {
       throw err;
@@ -348,7 +350,7 @@ class TransactionService {
 
   async deleteTransaction(transactionId) {
     try {
-      const sql = `DELETE FROM vwTransaction WHERE TransactionId = ?;`;
+      const sql = `DELETE FROM TransactionMaster WHERE TransactionId = ?;`;
 
       const values = [transactionId];
       
@@ -359,6 +361,7 @@ class TransactionService {
       
       console.log("results", results);
       
+      if (results.affectedRows === 0) throw new Error("No rows affected.");
       return results;
     }
     catch (err) {

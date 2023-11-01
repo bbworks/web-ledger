@@ -1,4 +1,5 @@
 //Import modules
+const util = require('util');
 const BudgetsService = require("../services/budgets");
 
 
@@ -11,35 +12,36 @@ class BudgetsController {
   async list(request, response) {
     try {
       //Call the getBudgets API
-      const results = await this.service.getBudgets();
-
       /* DEBUG */ console.info(`>[${new Date().toJSON()}] >GET /api/v1/budgets`);
-      response.json({data: results,});
+      const results = await this.service.getBudgets();
       /* DEBUG */ console.info(`>[${new Date().toJSON()}] >Response: GET /api/v1/budgets |\r\n`);
+      /* DEBUG */ console.log(util.inspect(results, {'maxArrayLength': 2, 'depth': null, 'colors': true}));
+      
+      response.json({data: results,});
     }
     catch (err) {
       /* DEBUG */ console.info(`>[${new Date().toJSON()}] >FAILED: GET /api/v1/budgets |\r\n`, err);
-      response.status(500).json({
+      return response.status(500).json({
         error: err,
       });
     }
   }
 
   async get(request, response) {
+    const {params: {budget_id: budgetId}} = request;
     try {
       //Destructure the request object
-      const {params: {budget_id: budgetId}} = request;
 
       //Call the getBudget API
-      const results = await this.service.getBudget(budget_id);
+      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >GET /api/v1/budgets/${budgetId}`);
+      const results = await this.service.getBudget(budgetId);
+      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >Response: GET /api/v1/budgets/${budgetId} |\r\n`);
 
-      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >GET /api/v1/budgets/:budget_id`);
-      response.json({data: results,});
-      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >Response: GET /api/v1/budgets/:budget_id |\r\n`);
+      return response.json({data: results,});
     }
     catch (err) {
-      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >FAILED: GET /api/v1/budgets/:budget_id |\r\n`, err);
-      response.status(500).json({
+      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >FAILED: GET /api/v1/budgets/${budgetId} |\r\n`, err);
+      return response.status(500).json({
         error: err
       });
     }
@@ -71,58 +73,57 @@ class BudgetsController {
       const {body: {budgets}} = request;
 
       //Call the updateBudgets API
-      const results = await this.service.updateBudgets(budgets);
-
       /* DEBUG */ console.info(`>[${new Date().toJSON()}] >POST /api/v1/budgets`);
-      response.json({data: results,});
+      const results = await this.service.updateBudgets(budgets);
       /* DEBUG */ console.info(`>[${new Date().toJSON()}] >Response: POST /api/v1/budgets |\r\n`);
+
+      response.json({data: results,});
     }
     catch (err) {
       /* DEBUG */ console.info(`>[${new Date().toJSON()}] >FAILED: POST /api/v1/budgets |\r\n`, err);
-      response.status(500).json({
+      return response.status(500).json({
         error: err
       });
     }
   }
 
   async update(request, response) {
+    const {params: {budget_id: budgetId}} = request;
     try {
       //Destructure the request object
-      const {params: {budget_id: budgetId}, body: {budget}} = request;
+      const {body: {budget}} = request;
 
       //Call the updateBudget API
-      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >PUT /api/v1/budgets/:budget_id`);
+      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >PUT /api/v1/budgets/${budgetId}`);
       const results = await this.service.updateBudget(budgetId, budget);    console.log("await this.service.updateBudget(budgetId, budget)");
-      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >Response: PUT /api/v1/budgets/:budget_id |\r\n`);
+      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >Response: PUT /api/v1/budgets/${budgetId} |\r\n`);
       
-      response.json({data: results,});
+      return response.json({data: results,});
     }
     catch (err) {
-      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >FAILED: PUT /api/v1/budgets/:budget_id |\r\n`, err);
-      response.status(500).json({
+      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >FAILED: PUT /api/v1/budgets/${budgetId} |\r\n`, err);
+      return response.status(500).json({
         error: err
       });
     }
   }
 
   async destroy(request, response) {
-  //  try {
-  //    //Destructure the request object
-  //    const {params: {transaction_id: transactionId}} = request;
-  //
-  //    //Call the deleteTransaction API
-  //    /* DEBUG */ console.info(`>[${new Date().toJSON()}] >DELETE /api/v1/transactions/:transaction_id`);
-  //    const results = await this.service.deleteTransaction(transactionId);
-  //    /* DEBUG */ console.info(`>[${new Date().toJSON()}] >Response: DELETE /api/v1/transactions/:transaction_id |\r\n`, results);
-  //
-  //    response.json({data: results,});
-  //  }
-  //  catch (err) {
-  //    /* DEBUG */ console.info(`>[${new Date().toJSON()}] >FAILED: DELETE /api/v1/transactions/:transaction_id |\r\n`, err);
-  //    return response.status(500).json({
-  //      error: err,
-  //    });
-  //  }
+    const {params: {budget_id: budgetId}} = request;
+    try {
+      //Call the deleteTransaction API
+      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >DELETE /api/v1/transactions/${budgetId}`);
+      const results = await this.service.deleteTransaction(transactionId);
+      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >Response: DELETE /api/v1/transactions/${budgetId} |\r\n`, results);
+
+      return response.json({data: results,});
+    }
+    catch (err) {
+      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >FAILED: DELETE /api/v1/transactions/${budgetId} |\r\n`, err);
+      return response.status(500).json({
+        error: err,
+      });
+    }
   }
 }
 

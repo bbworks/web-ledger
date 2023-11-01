@@ -17,7 +17,7 @@ class TransactionsController {
       /* DEBUG */ console.log(`>[${new Date().toJSON()}] >Response: GET /api/v1/transactions |\r\n`);
       /* DEBUG */ console.log(util.inspect(results, {'maxArrayLength': 2, 'depth': null, 'colors': true}));
 
-      response.json({data: results,});
+      return response.json({data: results,});
     }
     catch (err) {
       let host;
@@ -36,19 +36,19 @@ class TransactionsController {
   }
 
   async get(request, response) {
+    const {params: {transaction_id: transactionId}} = request;
     try {
       //Destructure the request object
-      const {params: {transaction_id: transactionId}} = request;
-
+      
       //Call the getTransaction API
-      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >GET /api/v1/transactions/:transaction_id`);
+      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >GET /api/v1/transactions/${transactionId}`);
       const results = await this.service.getTransaction(transactionId);
-      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >Response: GET /api/v1/transactions/:transaction_id |\r\n`, results);
+      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >Response: GET /api/v1/transactions/${transactionId} |\r\n`, results);
 
-      response.json({data: results,});
+      return response.json({data: results,});
     }
     catch (err) {
-      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >FAILED: GET /api/v1/transactions/:transaction_id |\r\n`, err);
+      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >FAILED: GET /api/v1/transactions/${transactionId} |\r\n`, err);
       return response.status(500).json({
         error: err,
       });
@@ -65,7 +65,7 @@ class TransactionsController {
       const results = await this.service.createTransaction(transaction);
       /* DEBUG */ console.info(`>[${new Date().toJSON()}] >Response: POST /api/v1/transactions |\r\n`, results);
 
-      response.json({data: results,});
+      return response.json({data: results,});
     }
     catch (err) {
       /* DEBUG */ console.info(`>[${new Date().toJSON()}] >FAILED: POST /api/v1/transactions |\r\n`, err);
@@ -85,7 +85,7 @@ class TransactionsController {
       const results = await this.service.updateTransactions(transactions);
       /* DEBUG */ console.info(`>[${new Date().toJSON()}] >Response: POST /api/v1/transactions/save |\r\n`, results);
 
-      response.json({data: results,});
+      return response.json({data: results,});
     }
     catch (err) {
       /* DEBUG */ console.info(`>[${new Date().toJSON()}] >FAILED: POST /api/v1/transactions/save |\r\n`, err);
@@ -96,19 +96,20 @@ class TransactionsController {
   }
 
   async update(request, response) {
+    const {params: {transaction_id: transactionId}} = request;
     try {
       //Destructure the request object
-      const {params: {transaction_id: transactionId}, body: {transaction, updates}} = request;
+      const {body: {transaction, updates}} = request;
 
       //Call the updateTransaction API
-      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >PUT /api/v1/transactions/:transaction_id`);
+      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >PUT /api/v1/transactions/${transactionId}`);
       const results = await this.service.updateTransaction(transactionId, transaction, updates);
-      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >Response: PUT /api/v1/transactions/:transaction_id |\r\n`, results);
+      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >Response: PUT /api/v1/transactions/${transactionId} |\r\n`, results);
 
-      response.json({data: results,});
+      return response.json({data: results,});
     }
     catch (err) {
-      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >FAILED: PUT /api/v1/transactions/:transaction_id |\r\n`, err);
+      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >FAILED: PUT /api/v1/transactions/${transactionId} |\r\n`, err);
       return response.status(500).json({
         error: err,
       });
@@ -116,21 +117,19 @@ class TransactionsController {
   }
 
   async destroy(request, response) {
+    const {params: {transaction_id: transactionId}} = request;
     try {
-      //Destructure the request object
-      const {params: {transaction_id: transactionId}} = request;
-
       //Call the deleteTransaction API
-      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >DELETE /api/v1/transactions/:transaction_id`);
+      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >DELETE /api/v1/transactions/${transactionId}`);
       const results = await this.service.deleteTransaction(transactionId);
-      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >Response: DELETE /api/v1/transactions/:transaction_id |\r\n`, results);
+      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >Response: DELETE /api/v1/transactions/${transactionId} |\r\n`, results);
 
-      response.json({data: results,});
+      return response.json({data: results,});
     }
     catch (err) {
-      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >FAILED: DELETE /api/v1/transactions/:transaction_id |\r\n`, err);
+      /* DEBUG */ console.info(`>[${new Date().toJSON()}] >FAILED: DELETE /api/v1/transactions/${transactionId} |\r\n`, err);
       return response.status(500).json({
-        error: err,
+        error: err
       });
     }
   }

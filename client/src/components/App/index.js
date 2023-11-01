@@ -42,8 +42,11 @@ const App = () => {
   const {data:accountDataApi, loading:accountDataLoading, error:accountDataError, fetchApi:fetchAccountData} = useApi(async ()=>await getAccountData(signedInUser && signedInUser.id), []);
   //const {data:updateTransactionsApi, loading:updateTransactionsLoading, error:updateTransactionsError, fetchApi:fetchUpdateTransactions} = useApi(updateTransactions, []);
   //const {data:updateBudgetsDataApi, loading:updateBudgetsDataLoading, error:updateBudgetsDataError, fetchApi:fetchUpdateBudgetsData} = useApi(updateBudgetsData, []);
+  const {data: createTransactionResponse, error: createTransactionError, isLoading: createTransactionLoading, fetchData: createTransaction, status: createTransactionStatus, ok: createTransactionOk} = useFetch();
   const {data: updateTransactionResponse, error: updateTransactionError, isLoading: updateTransactionLoading, fetchData: updateTransaction, status: updateTransactionStatus, ok: updateTransactionOk} = useFetch();
-  const {data: updateBudgetResponse, error: updateBudgetError, isLoading: updateBudgetLoading, fetchData: updateBudget, status: updateBudgetStatus, ok: updateBudgetOk} = useFetch();
+  const {data: deleteTransactionResponse, error: deleteTransactionError, isLoading: deleteTransactionLoading, fetchData: deleteTransaction, status: deleteTransactionStatus, ok: deleteTransactionOk} = useFetch();
+  const {data: bulkResponse, error: bulkError, isLoading: bulkLoading, fetchData: bulkOperation, status: bulkStatus, ok: bulkOk} = useFetch();
+  const {data: createBudgetResponse, error: createBudgetError, isLoading: createBudgetLoading, fetchData: createBudget, status: createBudgetStatus, ok: createBudgetOk} = useFetch();
   
   const [footerNavbar, setFooterNavbar] = useState(null);
   const [budgetCycle, setBudgetCycle] = useState(getBudgetCycleFromDate(new Date()));
@@ -131,6 +134,16 @@ const App = () => {
   useConsoleLog(accountDataApi, "AccountAPI:");
   useConsoleLog(
     {
+      createTransactionResponse,
+      createTransactionError,
+      createTransactionLoading,
+      createTransactionStatus,
+      createTransactionOk,
+    }, 
+    "createTransaction"
+  );
+  useConsoleLog(
+    {
       updateTransactionResponse,
       updateTransactionError,
       updateTransactionLoading,
@@ -141,13 +154,33 @@ const App = () => {
   );
   useConsoleLog(
     {
-      updateBudgetResponse,
-      updateBudgetError,
-      updateBudgetLoading,
-      updateBudgetStatus,
-      updateBudgetOk,
+      deleteTransactionResponse,
+      deleteTransactionError,
+      deleteTransactionLoading,
+      deleteTransactionStatus,
+      deleteTransactionOk,
     }, 
-    "updateBudget"
+    "deleteTransaction"
+  );
+  useConsoleLog(
+    {
+      createBudgetResponse,
+      createBudgetError,
+      createBudgetLoading,
+      createBudgetStatus,
+      createBudgetOk,
+    }, 
+    "createBudget"
+  );
+  useConsoleLog(
+    {
+      bulkResponse,
+      bulkError,
+      bulkLoading,
+      bulkStatus,
+      bulkOk,
+    }, 
+    "bulkOperation"
   );
 
   //Create helper functions
@@ -183,7 +216,7 @@ const App = () => {
       console.log("confirmedTransactions: ", newTransactions);
       setTransactionsImportConfirmedModalTransactions(newTransactions);
       openTransactionsImportConfirmedModal();
-      return previousTransactions;
+      return;
     }
 
     //Otherwise, ask user to confirm true duplicates,
@@ -193,9 +226,43 @@ const App = () => {
     setTransactionsImportDuplicatesModalDuplicates(duplicates);
     openTransactionsImportDuplicatesModal();
 
-    return previousTransactions;
+    return;
   };
 
+  
+  // Create state update functions
+  const setDatabaseStateWrapper = async (setState, setStateHandler, previousState, newState, replacedState, callback, apiRequest, apiValidation)=>{
+    //If there is no new state, short-circuit before updating state
+    if ((Array.isArray(newState) ? !newState.length : newState !== false && !newState)) return;
+
+    let newStateApiResults;
+  
+    //If there is an API request to update the database, call it
+    if (apiRequest && apiRequest instanceof Function) {
+      try {
+        newStateApiResults = await apiRequest(newState);
+        
+        //Validate the response
+        if (apiValidation && apiValidation instanceof Function) apiValidation(newStateApiResults);
+
+        newStateApiResults = newStateApiResults.data;
+      }
+      catch (err) {
+        console.error(new Error("An error occurred."));
+        return new Error("An error occurred.");
+      }
+    }
+    else {
+      newStateApiResults = newState;
+    }
+
+    //After successfully updating the database,
+    // continue with updating the UI with the new state
+    
+    //Run through state normalization
+    setState(await setStateHandler(previousState, newStateApiResults, callback, replacedState));
+  };
+  
   const setTransactionsHandler = async (previousTransactions, newTransactions, callback, oldTransaction)=>{
     //If there are no new transactions, short-circuit
     if ((Array.isArray(newTransactions) ? !newTransactions.length : newTransactions !== false && !newTransactions)) return previousTransactions;
@@ -204,8 +271,7 @@ const App = () => {
     let transactions;
     if (newTransactions) {
       //Check that we have an array of transactions
-      let transactionsArray = newTransactions;
-      if (!(newTransactions instanceof Array)) transactionsArray = [newTransactions];
+      const transactionsArray = (!Array.isArray(newTransactions) ? [newTransactions] : newTransactions);
 
       //Type check transactions data to convert from strings to the correct type
       const typeCheckedTransactions = typeCheckTransactions(transactionsArray);
@@ -224,7 +290,7 @@ const App = () => {
 
   const setTransactionsWrapper = async (previousTransactions, newTransactions)=>{
     //Run through transaction normalization
-    setTransactions(await setTransactionsHandler(previousTransactions, newTransactions));
+    setDatabaseStateWrapper(setTransactions, setTransactionsHandler, previousTransactions, newTransactions);
   };
 
   const importTransactionsWrapper = async (previousTransactions, newTransactions)=>{
@@ -234,64 +300,103 @@ const App = () => {
     };
     
     //Run through transaction normalization
-    setTransactions(await setTransactionsHandler(previousTransactions, newTransactions, callback));
+    setDatabaseStateWrapper(setTransactions, setTransactionsHandler, previousTransactions, newTransactions, null, callback );//, apiRequest, apiValidation);
   };
 
   const insertTransactionsWrapper = async (previousTransactions, newTransactions)=>{
+    const apiRequest = async (newTransactions)=>{
+      //If not an Array, call the create API
+      const newTransaction = (!Array.isArray(newTransactions) ? newTransactions : (newTransactions.length === 1 ? newTransactions[0] : undefined));
+      if(newTransaction) {
+        const body = {
+          transaction: newTransaction,
+        };
+        return createTransaction(`${process.env.REACT_APP_API_ENDPOINT ?? ''}/api/v1/transactions`, "POST", body);
+      }
+
+      //Otherwise, call the bulk API
+      const body = {
+        operations: newTransactions.map(newTransaction=>({
+          method: "POST",
+          endpoint: "/api/v1/transactions",
+          data: {
+            transaction: newTransaction,
+          },
+        })),
+      };
+      return bulkOperation(`${process.env.REACT_APP_API_ENDPOINT ?? ''}/api/v1/bulk`, "POST", body);
+    };
+    
+    const apiValidation = (results)=>{
+      //Validate that no errored records were returned
+      //for(const erroredTransaction of erroredTransactions) {throwErrors(erroredTransaction);}
+      const erroredTransactions = (!Array.isArray(results.data) ? [results.data] : results.data).filter(d=>d.error);
+      if (erroredTransactions.length) throw new Error (`API request failed with the following errors: ${erroredTransactions.join("\r\n")}`);
+    };
+    
     const callback = async (previousTransactions, newTransactions)=>{
-      //Append the new transactions
+      //Append the new, non-errored transactions
       return [...previousTransactions, ...newTransactions];
     };
     
     //Run through transaction normalization
-    setTransactions(await setTransactionsHandler(previousTransactions, newTransactions, callback));
+    setDatabaseStateWrapper(setTransactions, setTransactionsHandler, previousTransactions, newTransactions, undefined, callback, apiRequest, apiValidation);
   };
 
-  const updateTransactionWrapper = async (previousTransactions, oldTransaction, newTransaction)=>{
-    //Update a single transaction
-    const callback = async (previousTransactions, newTransactions, oldTransaction)=>{
-      //Get the single updated transaction wrapped in an array
-      const newTransaction = newTransactions[0];
-      
-      //Update the database
-      try {
-        const body = {
-          transaction: newTransaction,
-          updates: getObjectUpdates(oldTransaction, newTransaction),
-        };
-        const results = await updateTransaction(`${process.env.REACT_APP_API_ENDPOINT ?? ''}/api/v1/transactions/${newTransaction.TransactionDetailId}`, "PUT", body);
-        const updatedTransaction = results.data[0];
-
-        //After successfully updating the database,
-        // update UI transactions with the new transaction
-        const transactions = [...previousTransactions]; //create deep copy
-        transactions[transactions.indexOf(oldTransaction)] = newTransaction;
-        
-        return transactions;
-      }
-      catch (err) {
-        //If the requst fails, do NOT update the UI
-        return transactions;
-      }
+  const updateTransactionWrapper = async (previousTransactions, oldTransaction, updatedTransaction)=>{
+    const apiRequest = async (updatedTransaction)=>{
+      const body = {
+        transaction: updatedTransaction,
+        updates: getObjectUpdates(oldTransaction, updatedTransaction),
+      };
+      return updateTransaction(`${process.env.REACT_APP_API_ENDPOINT ?? ''}/api/v1/transactions/${updatedTransaction.TransactionDetailId}`, "PUT", body)?.data?.[0];
     };
     
+    const apiValidation = (result)=>{
+      //Validate that no errored records were returned
+      //for(const erroredTransaction of erroredTransactions) {throwErrors(erroredTransaction);}
+      if (!result) throw new Error(`API request failed with the following errors: ${result}`);
+    };
+    
+    const callback = async (previousTransactions, newTransactions, oldTransaction)=>{
+      //Get the single updated transaction wrapped in an array
+      const updatedTransaction = newTransactions[0];
+      
+      //Create a deep copy of the transactions (a new Array, not a pointer that will mutate the previous one)
+      const transactions = [...previousTransactions];
+      
+      //Replace the old transaction with the new one
+      transactions[transactions.indexOf(oldTransaction)] = updatedTransaction;
+      
+      return transactions;
+    };
+
     //Run through transaction normalization
-    setTransactions(await setTransactionsHandler(previousTransactions, newTransaction, callback, oldTransaction));
+    setDatabaseStateWrapper(setTransactions, setTransactionsHandler, previousTransactions, updatedTransaction, callback, oldTransaction, apiRequest, apiValidation);
   };
 
   const deleteTransactionWrapper = async (previousTransactions, deletedTransaction)=>{
-    //Delete a single transaction
+    const apiRequest = async (newTransactions)=>{
+      return deleteTransaction(`${process.env.REACT_APP_API_ENDPOINT ?? ''}/api/v1/transactions/${deletedTransaction.TransactionId}`, "DELETE");
+    };
+    
+    const apiValidation = (newTransactions)=>{};
+    
     const callback = async (previousTransactions, transaction, deletedTransaction)=>{
-      //Update transactions with the new transaction
-      const transactions = [...previousTransactions]; //create deep copy
+      //Create a deep copy of the transactions (a new Array, not a pointer that will mutate the previous one)
+      const transactions = [...previousTransactions];
+      
+      //Find the index of the deleted transaction
       const index = transactions.indexOf(deletedTransaction);
+     
+      //Remove the transaction
       transactions.splice(index, 1);
       
       return transactions;
     };
     
     //Run through transaction normalization
-    setTransactions(await setTransactionsHandler(previousTransactions, false, callback, deletedTransaction));
+    setDatabaseStateWrapper(setTransactions, setTransactionsHandler, previousTransactions, false, deletedTransaction, callback, apiRequest, apiValidation);
   };
 
   const setBudgetsHandler = async (previousBudgets, newBudgets, callback)=>{
@@ -319,20 +424,47 @@ const App = () => {
 
   const setBudgetsDataWrapper = async (previousBudgets, newBudgets)=>{
     //Run through budget normalization
-    const results = await setBudgetsHandler(previousBudgets, newBudgets);
-    setBudgetsData(results);
+    setDatabaseStateWrapper(setBudgetsData, setBudgetsHandler, previousBudgets, newBudgets);
   };
 
   const createBudgetsWrapper = async (previousBudgets, newBudgets)=>{
-    //Add new budget
+    const apiRequest = async (newBudgets)=>{
+      //If not an Array, call the create API
+      const newBudget = (!Array.isArray(newBudgets) ? newBudgets : (newBudgets.length === 1 ? newBudgets[0] : undefined));
+      if(newBudget) {
+        const body = {
+          transaction: newBudget,
+        };
+        return createBudget(`${process.env.REACT_APP_API_ENDPOINT ?? ''}/api/v1/budgets`, "POST", body);
+      }
+
+      //Otherwise, call the bulk API
+      const body = {
+        operations: newBudgets.map(newBudget=>({
+          method: "POST",
+          endpoint: "/api/v1/budgets",
+          data: {
+            budget: newBudget,
+          },
+        })),
+      };
+      return bulkOperation(`${process.env.REACT_APP_API_ENDPOINT ?? ''}/api/v1/bulk`, "POST", body);
+    };
+      
+    const apiValidation = (results)=>{
+      //Validate that no errored records were returned
+      //for(const erroredBudget of erroredBudgets) {throwErrors(erroredBudget);}
+      const erroredBudgets = (!Array.isArray(results.data) ? [results.data] : results.data).filter(d=>d.error);
+      if (erroredBudgets.length) throw new Error (`API request failed with the following errors: ${erroredBudgets.join("\r\n")}`);
+    };
+    
     const callback = async (previousBudgets, newBudgets)=>{
-      //Append the new budget
+      //Append the new, non-errored budgets
       return [...previousBudgets, ...newBudgets];
     };
     
     //Run through budget normalization
-    const results = await setBudgetsHandler(previousBudgets, newBudgets, callback);
-    setBudgetsData(results);
+    setDatabaseStateWrapper(setBudgetsData, setBudgetsHandler, previousBudgets, newBudgets, undefined, callback, apiRequest, apiValidation);
   };
 
   const setAccountsDataWrapper = newAccountsData=>{
@@ -410,12 +542,12 @@ const App = () => {
     closeTransactionsImportConfirmedModal();
   };
 
-  const onNewBudgetModalSubmit = (newBudget)=>{
-    createBudgetsWrapper(newBudget);
+  const onNewBudgetModalSubmit = (previousBudgets, newBudget)=>{
+    createBudgetsWrapper(previousBudgets, newBudget);
   };
 
-  const onCloneBudgetModalSubmit = (newBudgets)=>{
-    createBudgetsWrapper(newBudgets);
+  const onCloneBudgetModalSubmit = (previousBudgets, newBudgets)=>{
+    createBudgetsWrapper(previousBudgets, newBudgets);
   };
 
   const onNewTransactionModalSubmit =(previousTransactions, newTransaction)=>{

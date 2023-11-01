@@ -52,12 +52,12 @@ const BudgetsView = ({ transactions, budgetsData, budgetCycle, allBudgetCycles, 
   };
 
   const onNewBudgetModalSubmit = newBudget=>{
-    onNewBudgetModalSubmitProp(newBudget);
+    onNewBudgetModalSubmitProp(budgetsData, newBudget);
     closeNewBudgetModal();
   };
 
-  const onCloneBudgetModalSubmit = budgets=>{
-    onCloneBudgetModalSubmitProp(budgets);
+  const onCloneBudgetModalSubmit = newBudgets=>{
+    onCloneBudgetModalSubmitProp(budgetsData, newBudgets);
     closeCloneBudgetModal();
   };
 
