@@ -95,7 +95,7 @@ class BudgetsController {
 
       //Call the updateBudget API
       /* DEBUG */ console.info(`>[${new Date().toJSON()}] >PUT /api/v1/budgets/${budgetId}`);
-      const results = await this.service.updateBudget(budgetId, budget);    console.log("await this.service.updateBudget(budgetId, budget)");
+      const results = await this.service.updateBudget(budgetId, budget);
       /* DEBUG */ console.info(`>[${new Date().toJSON()}] >Response: PUT /api/v1/budgets/${budgetId} |\r\n`);
       
       return response.json({data: results,});
