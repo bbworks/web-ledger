@@ -40,8 +40,7 @@ const App = () => {
   const {data:budgetsDataApi, loading:budgetsDataLoading, error:budgetsDataError, fetchApi:fetchBudgetsData} = useApi(getBudgetsData, []);
   const {data:accountsDataApi, loading:accountsDataLoading, error:accountsDataError, fetchApi:fetchAccountsData} = useApi(getAccountsData, []);
   const {data:accountDataApi, loading:accountDataLoading, error:accountDataError, fetchApi:fetchAccountData} = useApi(async ()=>await getAccountData(signedInUser && signedInUser.id), []);
-  //const {data:updateTransactionsApi, loading:updateTransactionsLoading, error:updateTransactionsError, fetchApi:fetchUpdateTransactions} = useApi(updateTransactions, []);
-  //const {data:updateBudgetsDataApi, loading:updateBudgetsDataLoading, error:updateBudgetsDataError, fetchApi:fetchUpdateBudgetsData} = useApi(updateBudgetsData, []);
+  
   const {data: createTransactionResponse, error: createTransactionError, isLoading: createTransactionLoading, fetchData: createTransaction, status: createTransactionStatus, ok: createTransactionOk} = useFetch();
   const {data: updateTransactionResponse, error: updateTransactionError, isLoading: updateTransactionLoading, fetchData: updateTransaction, status: updateTransactionStatus, ok: updateTransactionOk} = useFetch();
   const {data: deleteTransactionResponse, error: deleteTransactionError, isLoading: deleteTransactionLoading, fetchData: deleteTransaction, status: deleteTransactionStatus, ok: deleteTransactionOk} = useFetch();
@@ -349,13 +348,13 @@ const App = () => {
         transaction: updatedTransaction,
         updates: getObjectUpdates(oldTransaction, updatedTransaction),
       };
-      return updateTransaction(`${process.env.REACT_APP_API_ENDPOINT ?? ''}/api/v1/transactions/${updatedTransaction.TransactionDetailId}`, "PUT", body)?.data?.[0];
+      return updateTransaction(`${process.env.REACT_APP_API_ENDPOINT ?? ''}/api/v1/transactions/${updatedTransaction.TransactionDetailId}`, "PUT", body);
     };
     
     const apiValidation = (result)=>{
       //Validate that no errored records were returned
       //for(const erroredTransaction of erroredTransactions) {throwErrors(erroredTransaction);}
-      if (!result) throw new Error(`API request failed with the following errors: ${result}`);
+      if (!result.data) throw new Error(`API request failed with the following errors: ${result.data}`);
     };
     
     const callback = async (previousTransactions, newTransactions, oldTransaction)=>{
@@ -372,7 +371,7 @@ const App = () => {
     };
 
     //Run through transaction normalization
-    setDatabaseStateWrapper(setTransactions, setTransactionsHandler, previousTransactions, updatedTransaction, callback, oldTransaction, apiRequest, apiValidation);
+    setDatabaseStateWrapper(setTransactions, setTransactionsHandler, previousTransactions, updatedTransaction, oldTransaction, callback, apiRequest, apiValidation);
   };
 
   const deleteTransactionWrapper = async (previousTransactions, deletedTransaction)=>{
@@ -407,15 +406,14 @@ const App = () => {
     let budgets;
     if (newBudgets) {
       //Check that we have an array of budgets
-      let budgetsArray = newBudgets;
-      if (!(newBudgets instanceof Array)) budgetsArray = [newBudgets];
+      const budgetsArray = (!Array.isArray(newBudgets) ? [newBudgets] : newBudgets);
 
       //Type check budgets data to convert from strings to the correct type
-      budgets = typeCheckBudgetsData(budgetsArray);
+      budgets = typeCheckTransactions(budgetsArray);
     }
 
     //Return the data manipulation callback result, sorted
-    if (callback) return await callback(previousBudgets, budgets)
+    if (callback) return (await callback(previousBudgets, budgets))
       .sort((a,b)=>b.BudgetCycle-a.BudgetCycle);
 
     //Otherwise, just return the budgets, sorted
@@ -581,6 +579,19 @@ const App = () => {
     saveSettings(submittedSettings);
   };
 
+
+  const onLogOut = async ()=>{
+    try {
+      const results = await fetch(`${process.env.REACT_APP_API_ENDPOINT || ""}/api/v1/authorize/logout`, {method: "post"}).then(response=>{if(!response.ok) throw response; return response;}).then(response=>response.json());
+    }
+    catch (err) {
+      // return throwException(err);
+    }
+    finally {
+      onSignInChange(null);
+    }
+  };
+
   //When the app loads, attempt to get the user credential
   useEffect(()=>{
     (async ()=>{
@@ -666,7 +677,7 @@ const App = () => {
     //Otherwise, return the standard application UI
     return (
       <>
-        <Header signedInUser={signedInUser} />
+        <Header signedInUser={signedInUser} onLogOut={onLogOut} />
         <Switch>
           <Route path={["/dashboard", "/"]} exact>
             <DashboardView signedInUser={signedInUser} transactions={transactions} accountsData={accountsData} accountData={accountData} budgetsData={budgetsData} budgetCycle={budgetCycle} allBudgetCycles={allBudgetCycles} onBudgetCycleChange={onBudgetCycleChange} setFooterNavbar={setFooterNavbar} />
