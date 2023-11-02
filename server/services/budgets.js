@@ -3,14 +3,16 @@ const db = require("../db");
 const mysql = require('mysql2');
 
 class BudgetsService {
-    async getBudgets() {
-    // return await getSheetsSpreadsheetValues("Budgets Data");
+  async getBudgets() {
     try {
       const sql = `SELECT * FROM vwBudget;`
 
-      const [results] = await db.execute(sql);
       console.log("SQL:", mysql.format(sql));
+      
+      const [results] = await db.execute(sql);
+      
       // console.log("results", results);
+      
       return results;
     }
     catch (err) {
@@ -86,7 +88,7 @@ class BudgetsService {
       console.log("results", results);
       console.log("LAST_INSERT_ID()", lastInsertId);
       
-      const newBudget = await getBudget(lastInsertId);
+      const newBudget = await this.getBudget(lastInsertId);
       
       console.log("newBudget", newBudget);
       

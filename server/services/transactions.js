@@ -3,8 +3,7 @@ const db = require("../db");
 const mysql = require('mysql2');
 
 class TransactionService {
-    async getTransactions() {
-    //return await getSheetsSpreadsheetValues("Transactions Data");
+  async getTransactions() {
     try {
       const sql = `SELECT * FROM vwTransaction;`
 
@@ -31,10 +30,11 @@ class TransactionService {
       console.log("SQL:", mysql.format(sql, values));
 
       const [results] = await db.query(sql, values);
+      const [transaction] = results;
       
       console.log("results", results);
       
-      return results;
+      return transaction;
     }
     catch (err) {
       throw err;
@@ -91,11 +91,15 @@ class TransactionService {
       console.log("SQL:", mysql.format(sql, values));
 
       const [results] = await db.query(sql, values);
+      const lastInsertId = results[0][0]["LAST_INSERT_ID()"];
       
-      const newTransaction = results[0][0];
       console.log("results", results);
+      console.log("LAST_INSERT_ID()", lastInsertId);
+      
+      const newTransaction = await this.getTransaction(lastInsertId);
+      
       console.log("newTransaction", newTransaction);
-
+      
       return newTransaction;
     }
     catch (err) {
@@ -115,11 +119,11 @@ class TransactionService {
     }
   };
 
-  async updateTransaction(transactionDetailId, newTransaction, updates) {
+  async updateTransaction(transactionDetailId, updatedTransaction, updates) {
     try {
       //If there are no updates, return false
       if (!Object.keys(updates).length) {
-        console.log(`Nothing to update for transaction ${transactionDetailId}--returning.`);
+        console.log(`Nothing to update for transaction detail id ${transactionDetailId}--returning.`);
         return false;
       };
       
@@ -265,14 +269,13 @@ class TransactionService {
     ON newTags.value = Tag.Name
   WHERE newTags.value IS NULL;`}
 
-  SELECT * FROM vwTransaction WHERE TransactionDetailId = ?;
   COMMIT;`;
       // const values = [
-      //   newTransaction.Type
-      //   , new Date(newTransaction.BudgetCycle)
-      //   , newTransaction.AccountNumber /* Account */
-      //   , newTransaction.Category /* Budget */
-      //   , newTransaction.User
+      //   updatedTransaction.Type
+      //   , new Date(updatedTransaction.BudgetCycle)
+      //   , updatedTransaction.AccountNumber /* Account */
+      //   , updatedTransaction.Category /* Budget */
+      //   , updatedTransaction.User
       //   , _updates
       //   , transactionDetailId
       // ];
@@ -283,32 +286,32 @@ class TransactionService {
           []
           :
           [
-            newTransaction.TransactionId
-            , new Date(newTransaction.TransactionDate)
-            , new Date(newTransaction.PostedDate)
-            , newTransaction.AccountNumber /* Account */
-            , newTransaction.Type
-            , newTransaction.Description
-            , newTransaction.DescriptionManual
-            , newTransaction.DescriptionDisplay
-            , new Date(newTransaction.BudgetCycle)
-            , Boolean(newTransaction.IsAutoCategorized)
-            , Boolean(newTransaction.IsUpdatedByUser)
-            , new Date(newTransaction.date_created)
-            , newTransaction.created_by
-            , new Date(newTransaction.date_modified)
-            , newTransaction.modified_by
-            , newTransaction.User
-            , newTransaction.TransactionDetailId
-            , newTransaction.Amount
-            , newTransaction.Category /* Budget */
-            , newTransaction.Notes
-            , newTransaction.Tags.toString()
-            , new Date(newTransaction.detail_date_created)
-            , newTransaction.detail_created_by
-            , new Date(newTransaction.detail_date_modified)
-            , newTransaction.detail_modified_by
-            , newTransaction.detail_User
+            updatedTransaction.TransactionId
+            , new Date(updatedTransaction.TransactionDate)
+            , new Date(updatedTransaction.PostedDate)
+            , updatedTransaction.AccountNumber /* Account */
+            , updatedTransaction.Type
+            , updatedTransaction.Description
+            , updatedTransaction.DescriptionManual
+            , updatedTransaction.DescriptionDisplay
+            , new Date(updatedTransaction.BudgetCycle)
+            , Boolean(updatedTransaction.IsAutoCategorized)
+            , Boolean(updatedTransaction.IsUpdatedByUser)
+            , new Date(updatedTransaction.date_created)
+            , updatedTransaction.created_by
+            , new Date(updatedTransaction.date_modified)
+            , updatedTransaction.modified_by
+            , updatedTransaction.User
+            , updatedTransaction.TransactionDetailId
+            , updatedTransaction.Amount
+            , updatedTransaction.Category /* Budget */
+            , updatedTransaction.Notes
+            , updatedTransaction.Tags.toString()
+            , new Date(updatedTransaction.detail_date_created)
+            , updatedTransaction.detail_created_by
+            , new Date(updatedTransaction.detail_date_modified)
+            , updatedTransaction.detail_modified_by
+            , updatedTransaction.detail_User
           ]
         ),
         ...(
@@ -317,31 +320,33 @@ class TransactionService {
           []
           :
           [
-              newTransaction.Tags.toString()
-            , newTransaction.User
-            , newTransaction.TransactionId
-            , newTransaction.User
-            , newTransaction.TransactionId
+              updatedTransaction.Tags.toString()
+            , updatedTransaction.User
+            , updatedTransaction.TransactionId
+            , updatedTransaction.User
+            , updatedTransaction.TransactionId
           ]
         ),
-        newTransaction.TransactionDetailId
+        updatedTransaction.TransactionDetailId
       ];
       
       console.log("updates:", _updates);
       console.log("SQL:", mysql.format(sql, values));
 
       const [results] = await db.query(sql, values);
-      const updatedTransaction = results[2];
       console.log("results", results);
-      console.log("updatedTransaction", updatedTransaction);
-
+      
       //If there are no changes, return false
       if (results[1].changedRows === 0) {
         console.log(`Nothing to update for transaction ${transactionDetailId}--returning.`);
         return false;
       };
       
-      return updatedTransaction;
+      const transaction = await this.getTransaction(updatedTransaction.TransactionId);
+      
+      console.log("updatedTransaction", transaction);
+      
+      return transaction;
     }
     catch (err) {
       throw err;
