@@ -11,12 +11,12 @@ CREATE TABLE TransactionMaster (
       TransactionId       int           NOT NULL AUTO_INCREMENT
     , TransactionDate     datetime      NOT NULL
     , PostedDate          datetime      NULL
-    , AccountId           int           NOT NULL
-    , TypeId              int           NOT NULL
+    , AccountId           int           NULL
+    , TypeId              int           NULL
     , Description         varchar(100)  NOT NULL
     , DescriptionManual   varchar(100)  NULL
     , DescriptionDisplay  varchar(100)  NULL
-    , BudgetCycleId       int           NOT NULL
+    , BudgetCycleId       int           NULL
     , IsAutoCategorized   boolean       NOT NULL
     , IsUpdatedByUser     boolean       NOT NULL
     , date_created        datetime      NOT NULL  DEFAULT CURRENT_TIMESTAMP

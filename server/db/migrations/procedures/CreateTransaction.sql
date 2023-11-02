@@ -37,7 +37,7 @@ BEGIN
 
 
 	# Validate the Type
-	IF NOT EXISTS (
+	IF $Type IS NOT NULL AND NOT EXISTS (
 		SELECT 1 FROM Type WHERE Name = $Type AND ResourceType = 'T'
 	)
 	THEN
@@ -46,7 +46,7 @@ BEGIN
 	END IF;
 
 	# Validate the Account
-	IF NOT EXISTS (
+	IF $Account IS NOT NULL AND NOT EXISTS (
 		SELECT 1 FROM Account WHERE AccountNumber = $Account
 	)
 	THEN
@@ -55,7 +55,7 @@ BEGIN
 	END IF;
 
 	# Validate the BudgetCycle
-	IF NOT EXISTS (
+	IF $BudgetCycle IS NOT NULL AND NOT EXISTS (
 		SELECT 1 FROM BudgetCycle WHERE BudgetCycle = $BudgetCycle
 	)
 	THEN
@@ -64,7 +64,7 @@ BEGIN
 	END IF;
 
 	# Validate the Budget
-	IF NOT EXISTS (
+	IF $Budget IS NOT NULL AND NOT EXISTS (
 		SELECT 1 FROM Budget INNER JOIN BudgetCycle ON Budget.BudgetCycleId = BudgetCycle.BudgetCycleId WHERE Budget.Name = $Budget AND BudgetCycle.BudgetCycle = $BudgetCycle
 	)
 	THEN
@@ -130,6 +130,7 @@ BEGIN
 		#AND TransactionMaster.IsUpdatedByUser = denormalized.IsUpdatedByUser
 	WHERE TransactionMaster.TransactionId IS NULL;
 
+	# Save the last insert id
 	SET @transactionId = LAST_INSERT_ID(); 
 
 	INSERT INTO TransactionDetail (
@@ -189,14 +190,14 @@ BEGIN
 	END IF;
 
 	# Return the new transaction
-    SELECT
+	SELECT
 		*
 	FROM TransactionMaster
 	INNER JOIN TransactionDetail
 		ON TransactionMaster.TransactionId = TransactionDetail.TransactionId
 	WHERE TransactionMaster.TransactionId = @transactionId;
 
-	SELECT LAST_INSERT_ID();
+	SELECT @transactionId AS `LAST_INSERT_ID()`;
 END ;;
 
 DELIMITER ;

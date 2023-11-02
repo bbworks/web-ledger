@@ -31,7 +31,7 @@ BEGIN
 
 
 	# Validate the Type
-	IF NOT EXISTS (
+	IF $Type IS NOT NULL AND NOT EXISTS (
 		SELECT 1 FROM Type WHERE Name = $Type AND ResourceType = 'B'
 	)
 	THEN
@@ -40,7 +40,7 @@ BEGIN
 	END IF;
 
 	# Validate the BudgetCycle
-	IF NOT EXISTS (
+	IF $BudgetCycle IS NOT NULL AND NOT EXISTS (
 		SELECT 1 FROM BudgetCycle WHERE BudgetCycle = $BudgetCycle
 	)
 	THEN
@@ -49,7 +49,7 @@ BEGIN
 	END IF;
 
 	# Validate the BudgetGroup
-	IF NOT EXISTS (
+	IF $BudgetGroup IS NOT NULL AND NOT EXISTS (
 		SELECT 1 FROM BudgetGroup WHERE Name = $BudgetGroup
 	)
 	THEN
@@ -133,7 +133,10 @@ BEGIN
 		AND Budget.ColorId = Color.ColorId
 	WHERE Budget.BudgetId IS NULL;
 
-	SELECT LAST_INSERT_ID();
+	# Save the last insert id
+	SET @budgetId = LAST_INSERT_ID(); 
+
+	SELECT @budgetId AS `LAST_INSERT_ID()`;
 END ;;
 
 DELIMITER ;
