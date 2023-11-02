@@ -433,7 +433,7 @@ const App = () => {
       const newBudget = (!Array.isArray(newBudgets) ? newBudgets : (newBudgets.length === 1 ? newBudgets[0] : undefined));
       if(newBudget) {
         const body = {
-          transaction: newBudget,
+          budget: newBudget,
         };
         return createBudget(`${process.env.REACT_APP_API_ENDPOINT ?? ''}/api/v1/budgets`, "POST", body);
       }
