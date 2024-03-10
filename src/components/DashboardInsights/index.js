@@ -126,6 +126,18 @@ const DashboardInsights = ({ budgetCycle, budgetCycleTransactions, budgetCycleBu
         setInsights(previousInsights=>[...previousInsights, insight]);
       }
     });
+    /* Check for budgets with no budgeted amount that were still spent from */
+    const emptySpentBudgets = budgetCycleBudgetsWithSpent.filter(budgetWithSpent=>budgetWithSpent.Amount === 0 && budgetWithSpent.Spent !== 0 && budgetWithSpent.Name !== "Miscellaneous");
+    console.log("emptyBudgets", emptySpentBudgets);
+    if (emptySpentBudgets.length) {
+      const insight = {
+        type: "warning",
+        iconClass: "fas fa-question",
+        title: "Empty Budget Spending",
+        text: `You have spent ${convertNumberToCurrency(Math.abs(getSumByProp(emptySpentBudgets, "Spent")))} in ${emptySpentBudgets.length} budget${emptySpentBudgets.length === 1 ? '' : "s"} that had no budgeted amount: ${emptySpentBudgets.map(b=>`${b.Name} (${convertNumberToCurrency(b.Amount-b.Spent)})`).join(", ")}`
+      };
+      setInsights(previousInsights=>[...previousInsights, insight]);
+    }
 
     /* Check how much money flexible money is left this budget cycle */
     const totalIncome = getSumByProp(budgetCycleTransactions.income, "Amount");
