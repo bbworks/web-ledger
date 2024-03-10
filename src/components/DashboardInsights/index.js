@@ -139,6 +139,20 @@ const DashboardInsights = ({ budgetCycle, budgetCycleTransactions, budgetCycleBu
       setInsights(previousInsights=>[...previousInsights, insight]);
     }
 
+    /* Check for miscellaneous or uncategorized transactions */
+    const miscellaneousBudget = budgetCycleBudgetsWithSpent.find(budgetWithSpent=>budgetWithSpent.Name === "Miscellaneous");
+    const miscellaneousTransactionGroups = miscellaneousBudget.Transactions.reduce((acc, t)=>({...acc, [t.DescriptionDisplay]: {Amount: (acc[t.DescriptionDisplay]?.Amount || 0)+t.Amount, Count: (acc[t.DescriptionDisplay]?.Count || 0)+1}}), {});
+    console.log(miscellaneousTransactionGroups);
+    if (miscellaneousBudget && miscellaneousBudget.Spent) {
+      const insight = {
+        type: "warning",
+        iconClass: "fas fa-list",
+        title: "Miscellaneous",
+        text: `You have spent ${convertNumberToCurrency(Math.abs(miscellaneousBudget.Spent))} on ${miscellaneousBudget.Transactions.length} uncategorized item${miscellaneousBudget.Transactions.length === 1 ? '' : "s"}: ${Object.entries(miscellaneousTransactionGroups).sort(([, aValue], [, bValue])=>(bValue > aValue ? -1 : (aValue < bValue ? 1 : 0))).map(([key, value])=>`${key} (${value.Count}): ${convertNumberToCurrency(Math.abs(value.Amount))}`).join(", ")}`
+      };
+      setInsights(previousInsights=>[...previousInsights, insight]);
+    }
+
     /* Check how much money flexible money is left this budget cycle */
     const totalIncome = getSumByProp(budgetCycleTransactions.income, "Amount");
     const totalExpenses = getSumByProp(budgetCycleTransactions.expenses, "Amount");
