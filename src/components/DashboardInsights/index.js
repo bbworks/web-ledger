@@ -27,7 +27,7 @@ const DashboardInsights = ({ budgetCycle, budgetCycleTransactions, budgetCycleBu
     });
 
     /* Check if less was earned for this month than expected */
-    const incomeExpected = budgetCycleBudgets.find(budgetData=>budgetData.Name==="Infor payroll").Amount;
+    const incomeExpected = getSumByProp(budgetCycleBudgets.filter(budgetData=>budgetData.Name.match(/payroll/i)), "Amount");
     const incomebudgetCycleBudgets = budgetCycleBudgets.filter(budgetData=>budgetData.Type==="income");
     const incomeEarned = incomebudgetCycleBudgets.reduce((total,b)=>total+=getBudgetAmountSpentFromTransactions(b.Name, budgetCycleTransactions.all), 0);
     const incomeUnderEarned = (incomeEarned - incomeExpected)*-1;
@@ -76,7 +76,7 @@ const DashboardInsights = ({ budgetCycle, budgetCycleTransactions, budgetCycleBu
         type: "danger",
         iconClass: "fas fa-exclamation",
         title: "Overspending",
-        text: `You are overspent on ${budgetsOver.length} non-bill budgets: ${budgetsOver.map(b=>`${b.Name} (${convertNumberToCurrency(b.Amount-b.Spent)})`).join(", ")}.`
+        text: `You are overspent on ${budgetsOver.length} non-bill budget${budgetsOver.length === 1 ? '' : "s"}: ${budgetsOver.map(b=>`${b.Name} (+${convertNumberToCurrency(b.Amount-b.Spent)})`).join(", ")}`
       };
       setInsights(previousInsights=>[...previousInsights, insight]);
     }
@@ -97,35 +97,24 @@ const DashboardInsights = ({ budgetCycle, budgetCycleTransactions, budgetCycleBu
     }
 
     /* Check if any bills were overpaid */
-    const overspentBillsWithSpent = budgetCycleBudgetsWithSpent.filter(budgetWithSpent=>budgetWithSpent.Type === "bill" && budgetWithSpent.Spent < budgetWithSpent.Amount);
+    const overspentBillsWithSpent = budgetCycleBudgetsWithSpent.filter(budgetWithSpent=>budgetWithSpent.Type === "bill" && Math.abs(budgetWithSpent.Spent) > Math.abs(budgetWithSpent.Amount));
     if (overspentBillsWithSpent.length) {
       overspentBillsWithSpent.forEach(overspentBillWithSpent=>{
+        const budgetSpentAmount = Math.abs(overspentBillWithSpent.Spent);
+        const budgetBudgetedAmount = Math.abs(overspentBillWithSpent.Amount);
+        const overspentPercentage = (budgetSpentAmount-budgetBudgetedAmount)/budgetBudgetedAmount*100;
+        
         const insight = {
           type: "warning",
-          iconClass: "fas fa-exclamation",
+          iconClass: "fas fa-chart-bar",
           title: "Higher Bill",
-          text: `You overpaid bill ${overspentBillWithSpent.Name} by ${convertNumberToCurrency(Math.abs(overspentBillWithSpent.Spent)-Math.abs(overspentBillWithSpent.Amount))}.`
+          text: `Bill ${overspentBillWithSpent.Name} has gone up ${convertNumberToCurrency(budgetSpentAmount-budgetBudgetedAmount)} (${overspentPercentage >= 0 && "+"}${overspentPercentage.toFixed(1)}%).`
         };
         console.log(overspentBillWithSpent)
         setInsights(previousInsights=>[...previousInsights, insight]);
       });
     }
 
-    /* Check if a bill has gone up */
-    const bills = budgetCycleBudgets.filter(budgetData=>budgetData.type==="bill");
-    bills.forEach(bill=>{
-      const amountSpent = getBudgetAmountSpentFromTransactions(bill.name, budgetCycleTransactions.all)
-      if (!amountSpent) return;
-      if (Math.abs(amountSpent) > Math.abs(bill.amount)) {
-        const insight = {
-          type: "warning",
-          iconClass: "fas fa-chart-bar",
-          title: "Trends",
-          text: `Bill "${bill.name}" has gone up ${convertNumberToCurrency(Math.abs(amountSpent)-Math.abs(bill.amount))}.`
-        };
-        setInsights(previousInsights=>[...previousInsights, insight]);
-      }
-    });
     /* Check for budgets with no budgeted amount that were still spent from */
     const emptySpentBudgets = budgetCycleBudgetsWithSpent.filter(budgetWithSpent=>budgetWithSpent.Amount === 0 && budgetWithSpent.Spent !== 0 && budgetWithSpent.Name !== "Miscellaneous");
     console.log("emptyBudgets", emptySpentBudgets);
@@ -181,14 +170,18 @@ const DashboardInsights = ({ budgetCycle, budgetCycleTransactions, budgetCycleBu
       .reduce((total,b)=>total+=((b.Amount-b.Spent)*-1), 0)
       /* Return the inverse (negative is surplus) */
       *-1;
+    console.log("test", budgetCycleBudgetsWithSpent
+    .filter(b=>b.Type==="bill" && b.Spent!==0)
+      .map(b=>`${b.Name}: ${(b.Amount-b.Spent)*-1}`));
     const remainingFlexibleSpendingMoney = totalIncome + totalExpenses + leftoverPaidBillsMoney + remainingBillsToBePaid + remainingSavingsToBeSaved;
     console.log(remainingFlexibleSpendingMoney, totalIncome, totalExpenses, leftoverPaidBillsMoney, remainingBillsToBePaid, remainingSavingsToBeSaved)
+    const flexibleMoneyBreakdown = ` (${convertNumberToCurrency(remainingBillsToBePaid*-1)} in remaining bills, ${leftoverPaidBillsMoney >= 0 ? "+" : ''}${convertNumberToCurrency(leftoverPaidBillsMoney)} left over from bills, ${convertNumberToCurrency(remainingSavingsToBeSaved*-1)} left to be saved)`;
     if (remainingFlexibleSpendingMoney > 0) {
       const insight = {
         type: "primary",
         iconClass: "fas fa-chart-line",
         title: "Projection",
-        text: `You have ${convertNumberToCurrency(remainingFlexibleSpendingMoney)} of flexible money remaining.`
+        text: `You have ${convertNumberToCurrency(remainingFlexibleSpendingMoney)} of flexible money remaining ${flexibleMoneyBreakdown}`
       };
       setInsights(previousInsights=>[...previousInsights, insight]);
     }
@@ -197,22 +190,23 @@ const DashboardInsights = ({ budgetCycle, budgetCycleTransactions, budgetCycleBu
         type: "warning",
         iconClass: "fas fa-chart-line",
         title: "Projection",
-        text: `You are ${convertNumberToCurrency(remainingFlexibleSpendingMoney)} in the negative of "flexible" money.`
+        text: `You are ${convertNumberToCurrency(remainingFlexibleSpendingMoney)} in the negative of "flexible" money ${flexibleMoneyBreakdown}`
       };
       setInsights(previousInsights=>[...previousInsights, insight]);
     }
 
     /* Check if there is money left to put into Savings */
-    const savingsBudgetData = budgetCycleBudgets.find(budgetData=>budgetData.Name==="Savings");
-    const savingsBudgetLeft = getBudgetAmountSpentFromTransactions("Savings", budgetCycleTransactions.all) - savingsBudgetData.Amount;
-    if (savingsBudgetLeft > 0) {
-      const insight = {
-        type: "primary",
-        iconClass: "fas fa-chart-pie",
-        title: "Analysis",
-        text: `You have ${convertNumberToCurrency(savingsBudgetLeft)} more to put into "Savings".`
-      };
-      setInsights(previousInsights=>[...previousInsights, insight]);
+    const savingsBudgetsWithRemainingMoney = budgetCycleBudgetsWithSpent.filter(budgetWithSpent=>budgetWithSpent.Name === "Savings" && Math.abs(budgetWithSpent.Spent) < Math.abs(budgetWithSpent.Amount));
+    if (savingsBudgetsWithRemainingMoney.length) {
+      savingsBudgetsWithRemainingMoney.forEach(savingsBudget=>{
+          const insight = {
+            type: "primary",
+            iconClass: "fas fa-chart-pie",
+            title: "Analysis",
+            text: `You have ${convertNumberToCurrency(Math.abs(savingsBudget.Amount-savingsBudget.Spent))} more budgeted to put into ${savingsBudget.Name}.`
+          };
+          setInsights(previousInsights=>[...previousInsights, insight]);
+        });
     }
 
     /* Check if there is money left in the "Personal Spending" or "Bradley" budget */
