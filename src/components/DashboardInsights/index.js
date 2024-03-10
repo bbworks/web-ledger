@@ -57,6 +57,18 @@ const DashboardInsights = ({ budgetCycle, budgetCycleTransactions, budgetCycleBu
       setInsights(previousInsights=>[...previousInsights, insight]);
     }
 
+    /* Check what bills are yet to be paid */
+    const unpaidBudgets = budgetCycleBudgetsWithSpent.filter(budgetWithSpent=>budgetWithSpent.Type === "bill" && !budgetWithSpent.Spent);
+    if (unpaidBudgets.length) {
+      const insight = {
+        type: "info",
+        iconClass: "fas fa-info",
+        title: "Remaining Bills",
+        text: `There ${unpaidBudgets.length === 1 ? "is" : "are"} ${unpaidBudgets.length} bill${unpaidBudgets.length === 1 ? '' : "s"} totalling ${convertNumberToCurrency(Math.abs(getSumByProp(unpaidBudgets, "Amount")))} remaining for this month: ${unpaidBudgets.map(b=>`${b.Name} (${convertNumberToCurrency(Math.abs(b.Amount))})`).join(", ")}`
+      };
+      setInsights(previousInsights=>[...previousInsights, insight]);
+    }
+
     /* Check if the user is over on any non-bill budgets */
     const budgetsOver = budgetCycleBudgetsWithSpent.filter(budgetDataWithSpent=>!["income","savings","bill"].includes(budgetDataWithSpent.Type) && budgetDataWithSpent.Name !== "Miscellaneous" && budgetDataWithSpent.Spent < budgetDataWithSpent.Amount);
     if (budgetsOver.length) {
