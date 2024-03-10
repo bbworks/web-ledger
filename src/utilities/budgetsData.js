@@ -9,16 +9,17 @@ export const isIncomeTransaction = transaction=>{
   return transaction.Description.match(/ELECTRONIC\/ACH CREDIT INFOR US , INC\. PAYROLL 3203469219/i);
 };
 
+export const getBudgetTransactions = (budgetName, transactions)=>{
+  return transactions.filter(transaction=>(
+    //For non-income & non-payment transactions with no category, mark as Miscellaneous budget
+    budgetName === "Miscellaneous" ?
+    [budgetName, null].includes(transaction.Category) && !isCreditCardPaymentTransaction(transaction) && !isIncomeTransaction(transaction) :
+    transaction.Category === budgetName
+  ));
+};
+
 export const getBudgetAmountSpentFromTransactions = (budgetName, transactions)=>{
-  const check = transaction=>{
-    return (
-      //For the Miscellaneous budget, include non-income transactions with no category
-      budgetName === "Miscellaneous" ?
-      [budgetName, null].includes(transaction.Category) && !isCreditCardPaymentTransaction(transaction) && !isIncomeTransaction(transaction) :
-      transaction.Category === budgetName
-    )
-  };
-  return getSumByProp(transactions.filter(transaction=>check(transaction)), "Amount");
+  return getSumByProp(getBudgetTransactions(budgetName, transactions), "Amount");
 };
 
 export const typeCheckBudgetsData = budgetsData=>{

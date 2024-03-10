@@ -1,7 +1,7 @@
 import {useState, useEffect} from 'react';
 
 import DashboardInsight from './../DashboardInsight';
-import {getSumByProp, convertNumberToCurrency, getBudgetAmountSpentFromTransactions} from './../../utilities';
+import {getSumByProp, convertNumberToCurrency, getBudgetTransactions, getBudgetAmountSpentFromTransactions} from './../../utilities';
 
 import './index.scss';
 
@@ -15,10 +15,16 @@ const DashboardInsights = ({ budgetCycle, budgetCycleTransactions, budgetCycleBu
     setInsights([]);
 
     //Declare variables
-    const budgetCycleBudgetsWithSpent = budgetCycleBudgets.map(b=>({
-      ...b,
-      Spent: getBudgetAmountSpentFromTransactions(b.Name, budgetCycleTransactions.all) || 0,
-    }));
+    const budgetCycleBudgetsWithSpent = budgetCycleBudgets.map(b=>{
+      const budgetTransactions = getBudgetTransactions(b.Name, budgetCycleTransactions.all);
+      const budgetTransactionsSum = getSumByProp(budgetTransactions, "Amount") || 0;
+      
+      return {
+        ...b,
+        Transactions: budgetTransactions,
+        Spent: budgetTransactionsSum,
+      };
+    });
 
     /* Check if less was earned for this month than expected */
     const incomeExpected = budgetCycleBudgets.find(budgetData=>budgetData.Name==="Infor payroll").Amount;
