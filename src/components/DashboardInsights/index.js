@@ -41,6 +41,22 @@ const DashboardInsights = ({ budgetCycle, budgetCycleTransactions, budgetCycleBu
       setInsights(previousInsights=>[...previousInsights, insight]);
     }
 
+    {
+      /* Check if less was earned for this month than budgeted for */
+      const budgetedAmount = getSumByProp(budgetCycleBudgets.filter(budgetData=>budgetData.Type!=="income"), "Amount");
+      const incomebudgetCycleBudgets = budgetCycleBudgets.filter(budgetData=>budgetData.Type==="income");
+      const incomeEarned = incomebudgetCycleBudgets.reduce((total,b)=>total+=getBudgetAmountSpentFromTransactions(b.Name, budgetCycleTransactions.all), 0);
+      // const positiveEarned = getSumByProp(budgetCycleTransactions.income, "Amount");
+      const incomeUnderEarned = (incomeEarned + /*-*/budgetedAmount);
+      const insight = {
+        type: (incomeUnderEarned >= 0 ? "success" : "danger"),
+        iconClass: "fas fa-chart-pie",
+        title: "Income",
+        text: `You have ${incomeUnderEarned >= 0 ? "over" : "under"}-earned ${convertNumberToCurrency(incomeUnderEarned)} of ${convertNumberToCurrency(Math.abs(budgetedAmount))} budgeted for this month.`
+      };
+      setInsights(previousInsights=>[...previousInsights, insight]);
+    }
+
     /* Check if the user is over on any non-bill budgets */
     const budgetsOver = budgetCycleBudgetsWithSpent.filter(budgetDataWithSpent=>!["income","savings","bill"].includes(budgetDataWithSpent.Type) && budgetDataWithSpent.Name !== "Miscellaneous" && budgetDataWithSpent.Spent < budgetDataWithSpent.Amount);
     if (budgetsOver.length) {
