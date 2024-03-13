@@ -15,8 +15,9 @@ const TransactionDetailModal = ({ transaction, allBudgetCycles, categories, type
   const [Amount, setAmount] = useState(""); //empty string, as initial value for input[type="text"]
   const [Description, setDescription] = useState(""); //empty string, as initial value for input[type="text"]
   const [DescriptionDisplay, setDescriptionDisplay] = useState(""); //empty string, as initial value for input[type="text"]
-  const [Category, setCategory] = useState(""); //empty string, as initial value for input[type="text"]
+  const [Budget, setBudget] = useState(""); //empty string, as initial value for input[type="text"]
   const [Type, setType] = useState(""); //empty string, as initial value for input[type="text"]
+  // const [Category, setCategory] = useState(""); //empty string, as initial value for input[type="text"]
   const [Notes, setNotes] = useState(""); //empty string, as initial value for input[type="text"]
   const [Tags, setTags] = useState([]);
 
@@ -28,8 +29,9 @@ const TransactionDetailModal = ({ transaction, allBudgetCycles, categories, type
     {name: "Amount", placeholder: "Amount", value: Amount, tag: "input", tagType: "text", setState: setAmount, disabled: false},
     {name: "Description", placeholder: "Description", value: Description, tag: "input", tagType: "text", setState: setDescription, disabled: true},
     {name: "DescriptionDisplay", placeholder: "Description", value: DescriptionDisplay, tag: "input", tagType: "text", setState: setDescriptionDisplay, disabled: false},
-    {name: "Category", placeholder: "Select a category...", value: Category, items: categories, tag: "input", tagType: "text", setState: setCategory, disabled: false},
+    {name: "Budget", placeholder: "Select a budget...", value: Budget, items: categories, tag: "input", tagType: "text", setState: setBudget, disabled: false},
     {name: "Type", placeholder: "Select a type...", value: Type, items: types, tag: "input", tagType: "text", setState: setType, disabled: false},
+    // {name: "Category", placeholder: "Select a category...", value: Category, items: categories, tag: "input", tagType: "text", setState: setCategory, disabled: false},
     {name: "Notes", placeholder: "Notes", value: Notes, tag: "textarea", tagType: null, setState: setNotes, disabled: false},
     {name: "Tags", placeholder: "Tags", value: Tags, tag: "input", tagType: "text", setState: setTags, disabled: false},
   ];
@@ -48,11 +50,12 @@ const TransactionDetailModal = ({ transaction, allBudgetCycles, categories, type
     setAmount(transactionDisplay.Amount);
     setDescription(transactionDisplay.Description);
     setDescriptionDisplay(transactionDisplay.DescriptionDisplay);
-    setCategory(transactionDisplay.Category);
+    setBudget(transactionDisplay.Budget);
+    // setCategory(transactionDisplay.Category);
     setNotes(transactionDisplay.Notes);
     setType(transactionDisplay.Type);
     setTags(transactionDisplay.Tags);
-    console.log("Updating TransactionDetailModal state based on updated prop \"transaction\".", transaction, PostedDate, TransactionDate, AccountNumber, Amount, Description, Category, Notes, Type, Tags)
+    console.log("Updating TransactionDetailModal state based on updated prop \"transaction\".", transaction, PostedDate, TransactionDate, AccountNumber, Amount, Description, Budget, /* Category, */ Notes, Type, Tags)
   }, [transaction, isOpen]);
 
   const onTransactionDetailInputChange = (value, transactionDetail)=>{

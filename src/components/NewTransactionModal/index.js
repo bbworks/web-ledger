@@ -15,8 +15,9 @@ const NewTransactionModal = ({ budgetCycle, allBudgetCycles, categories, types, 
   const [Amount, setAmount] = useState("");
   const [Description, setDescription] = useState("");
   const [DescriptionDisplay, setDescriptionDisplay] = useState("");
-  const [Category, setCategory] = useState("");
+  const [Budget, setBudget] = useState("");
   const [Type, setType] = useState("");
+  // const [Category, setCategory] = useState("");
   const [Notes, setNotes] = useState("");
   const [Tags, setTags] = useState([]);
 
@@ -28,8 +29,9 @@ const NewTransactionModal = ({ budgetCycle, allBudgetCycles, categories, types, 
     {name: "Amount", placeholder: "Amount", value: Amount, tag: "input", tagType: "text", setState: setAmount, disabled: false},
     {name: "Description", placeholder: "Description", value: Description, tag: "input", tagType: "text", setState: setDescription},
     {name: "DescriptionDisplay", placeholder: "Description", value: DescriptionDisplay, tag: "input", tagType: "text", setState: setDescriptionDisplay, disabled: false},
-    {name: "Category", placeholder: "Select a category...", value: Category, items: categories, tag: "InputDropdown", tagType: null, setState: setCategory, disabled: false},
+    {name: "Budget", placeholder: "Select a budget...", value: Budget, items: categories, tag: "InputDropdown", tagType: null, setState: setBudget, disabled: false},
     {name: "Type", placeholder: "Select a type...", value: Type, items: types, tag: "InputDropdown", tagType: null, setState: setType, disabled: false},
+    // {name: "Category", placeholder: "Select a category...", value: Category, items: categories, tag: "InputDropdown", tagType: null, setState: setCategory, disabled: false},
     {name: "Notes", placeholder: "Notes", value: Notes, tag: "textarea", tagType: null, setState: setNotes, disabled: false},
     {name: "Tags", placeholder: "Tags", value: Tags, tag: "input", tagType: "text", setState: setTags, disabled: false},
   ];
@@ -150,7 +152,8 @@ const NewTransactionModal = ({ budgetCycle, allBudgetCycles, categories, types, 
   		Description: value.Description,
   		DescriptionDisplay: value.DescriptionDisplay,
   		Amount: value.Amount,
-  		Category: value.Category,
+  		Budget: value.Budget,
+  		// Category: value.Category,
   		Notes: value.Notes,
   		Tags: value.Tags,
   		BudgetCycle: value.BudgetCycle,
