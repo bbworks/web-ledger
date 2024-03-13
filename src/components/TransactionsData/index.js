@@ -61,9 +61,9 @@ const TransactionsData = ({ budgetCycleTransactions, onTransactionEditButtonClic
         .filter(t=>
           searchFilters.map(({key:searchKey, value:searchValue})=>{
             const value = t[searchKey ?? defaultTransactionProperty];
-            if (!value && !(searchKey === "Category" && searchValue === "Miscellaneous")) return false;
+            if (!value && !(searchKey === "Budget" && searchValue === "Miscellaneous")) return false;
 
-            if (searchKey === "Category" && searchValue === "Miscellaneous") return value === null || value.match(new RegExp(searchValue, "i"));
+            if (searchKey === "Budget" && searchValue === "Miscellaneous") return value === null || value.match(new RegExp(searchValue, "i"));
             return matchValueAgainstValue(value, searchValue);
           })
           .every(i=>i)

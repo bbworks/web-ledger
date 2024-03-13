@@ -26,6 +26,7 @@ const TransactionRow = ({ transaction, onTransactionEditButtonClick:onTransactio
     Type: "",
     Description: "",
     Amount: "",
+    Budget: "",
     Category: "",
     Notes: "",
     Tags: [],
@@ -37,7 +38,8 @@ const TransactionRow = ({ transaction, onTransactionEditButtonClick:onTransactio
       ...formattedTransactionDisplay,
       Description: getTransactionDefaultDescriptionDisplay(transaction),
       AccountNumber: formattedTransactionDisplay.AccountNumber || "*----",
-      Category: formattedTransactionDisplay.Category || "[uncategorized]"
+      Category: formattedTransactionDisplay.Category || "[uncategorized]",
+      Budget: formattedTransactionDisplay.Budget || "[unbudgeted]"
     })
   }, [transaction]);
 
@@ -178,7 +180,7 @@ const TransactionRow = ({ transaction, onTransactionEditButtonClick:onTransactio
         <div className="transaction-row-subdescription-container">
           <span className="transaction-row-account">{transactionDisplay.AccountNumber}</span>
           &nbsp;|&nbsp;
-          <span className="transaction-row-category">{transactionDisplay.Category}</span>
+          <span className="transaction-row-budget">{transactionDisplay.Budget}</span>
         </div>
       </div>
       <button className={"transaction-row-delete-button"} onClick={onTransactionDeleteButtonClick} tabIndex={-1}>

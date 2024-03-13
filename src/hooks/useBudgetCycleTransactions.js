@@ -30,7 +30,7 @@ const useBudgetCycleTransactions = (transactions, budgetCycle)=>{
   };
 
   const isIncome = transaction=>{
-    return transaction.Category?.match(/payroll|^Other income$/i);
+    return transaction.Budget?.match(/payroll|^Other income$/i);
   };
 
   const isIncomeTransaction = transaction=>{
@@ -59,7 +59,7 @@ const useBudgetCycleTransactions = (transactions, budgetCycle)=>{
     //Get expense transactions from this budget cycle
     if (!transactions.length) return [];
 
-    return transactions.filter(transaction=>!(transaction.Category?.match(/payroll|^Other income$/i)) && isExpenseTransaction(transaction));
+    return transactions.filter(transaction=>!(transaction.Budget?.match(/payroll|^Other income$/i)) && isExpenseTransaction(transaction));
   };
 
   const getBudgetCycleTransactions = (transactions, budgetCycle)=>{

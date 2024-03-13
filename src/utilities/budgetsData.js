@@ -11,10 +11,10 @@ export const isIncomeTransaction = transaction=>{
 
 export const getBudgetTransactions = (budgetName, transactions)=>{
   return transactions.filter(transaction=>(
-    //For non-income & non-payment transactions with no category, mark as Miscellaneous budget
+    //For non-income & non-payment transactions with no budget, mark as Miscellaneous budget
     budgetName === "Miscellaneous" ?
-    [budgetName, null].includes(transaction.Category) && !isCreditCardPaymentTransaction(transaction) && !isIncomeTransaction(transaction) :
-    transaction.Category === budgetName
+    [budgetName, null].includes(transaction.Budget) && !isCreditCardPaymentTransaction(transaction) && !isIncomeTransaction(transaction) :
+    transaction.Budget === budgetName
   ));
 };
 
