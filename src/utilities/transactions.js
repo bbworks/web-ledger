@@ -630,3 +630,7 @@ export const isTransactionAutoCategorizedOrUpdatedByUser = transaction=>{
 export const getTransactionsAmountTotal = transactions=>{
   return transactions.reduce((total, transaction)=>total+=transaction.Amount, 0);
 };
+
+export const isBudgetedIncomeTransaction = transaction=>{
+  return transaction.Budget?.match(/payroll|^Other income$/i);
+};

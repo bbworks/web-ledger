@@ -1,19 +1,16 @@
 import {getSumByProp} from './utilities.js';
+import {isBudgetedIncomeTransaction} from './transactions.js';
 import {parseGoogleSheetsNumber, parseGoogleSheetsDate} from './../googleApi';
 
 export const isCreditCardPaymentTransaction = transaction=>{
   return transaction.Description.match(/PAYMENT - THANK YOU ATLANTA GA/i);
 };
 
-export const isIncomeTransaction = transaction=>{
-  return transaction.Description.match(/ELECTRONIC\/ACH CREDIT INFOR US , INC\. PAYROLL 3203469219/i);
-};
-
 export const getBudgetTransactions = (budgetName, transactions)=>{
   return transactions.filter(transaction=>(
     //For non-income & non-payment transactions with no budget, mark as Miscellaneous budget
     budgetName === "Miscellaneous" ?
-    [budgetName, null].includes(transaction.Budget) && !isCreditCardPaymentTransaction(transaction) && !isIncomeTransaction(transaction) :
+    [budgetName, null].includes(transaction.Budget) && !isCreditCardPaymentTransaction(transaction) && !isBudgetedIncomeTransaction(transaction) :
     transaction.Budget === budgetName
   ));
 };

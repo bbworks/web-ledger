@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react';
 
-import {getBudgetCycleFromDate, isAllTransactionsBudgetCycle} from './../utilities';
+import {getBudgetCycleFromDate, isAllTransactionsBudgetCycle, isBudgetedIncomeTransaction} from './../utilities';
 
 const isTransactionWithinBudgetCycle = (transaction, budgetCycle)=>{
   return getBudgetCycleFromDate(transaction.BudgetCycle || transaction.TransactionDate).getTime() === budgetCycle.getTime();
@@ -29,10 +29,6 @@ const useBudgetCycleTransactions = (transactions, budgetCycle)=>{
     )
   };
 
-  const isIncome = transaction=>{
-    return transaction.Budget?.match(/payroll|^Other income$/i);
-  };
-
   const isIncomeTransaction = transaction=>{
     return transaction.Amount >= 0 && !isPaymentTransaction(transaction);
   };
@@ -45,14 +41,14 @@ const useBudgetCycleTransactions = (transactions, budgetCycle)=>{
     //Get income transactions from last budget cycle
     if (!transactions.length) return [];
 
-    return transactions.filter(transaction=>isIncome(transaction));
+    return transactions.filter(transaction=>isBudgetedIncomeTransaction(transaction));
   };
 
   const getCurrentBudgetCycleIncomeTransactions = transactions=>{
     //Get other income transactions from this budget cycle
     if (!transactions.length) return [];
 
-    return transactions.filter(transaction=>!isIncome(transaction) && isIncomeTransaction(transaction));
+    return transactions.filter(transaction=>!isBudgetedIncomeTransaction(transaction) && isIncomeTransaction(transaction));
   };
 
   const getCurrentBudgetCycleExpenseTransactions = transactions=>{
