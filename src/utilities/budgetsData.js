@@ -25,6 +25,7 @@ export const typeCheckBudgetsData = budgetsData=>{
       BudgetId: parseGoogleSheetsNumber(budgetData.BudgetId),
       Amount: parseGoogleSheetsNumber(budgetData.Amount),
       BudgetCycle: parseGoogleSheetsDate(budgetData.BudgetCycle),
+      DueNext: parseGoogleSheetsDate(budgetData.DueNext),
       DateCreated: parseGoogleSheetsDate(budgetData.DateCreated),
       DateModified: parseGoogleSheetsDate(budgetData.DateModified),
     })

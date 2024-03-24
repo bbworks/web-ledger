@@ -13,6 +13,7 @@ const NewBudgetModal = ({ budgetCycle, allBudgetCycles, types, groups, isOpen, o
   const [Amount, setAmount] = useState(""); //empty string, as initial value for input[type="text"]
   const [Type, setType] = useState(""); //empty string, as initial value for input[type="text"]
   const [Group, setGroup] = useState(""); //empty string, as initial value for input[type="text"]
+  const [DueCycle, setDueCycle] = useState(""); //empty string, as initial value for input[type="text"]
   const [DueDate, setDueDate] = useState(""); //empty string, as initial value for input[type="text"]
   const [IsPaidByCreditCardNotAccount, setIsPaidByCreditCardNotAccount] = useState(""); //empty string, as initial value for input[type="text"]
 
@@ -24,6 +25,7 @@ const NewBudgetModal = ({ budgetCycle, allBudgetCycles, types, groups, isOpen, o
     {name: "Amount", placeholder: "Amount", value: Amount, tag: "input", tagType: "text", setState: setAmount, disabled: false},
     {name: "Type", placeholder: "Type", value: Type, items: types, tag: "input", tagType: "text", setState: setType, disabled: false},
     {name: "Group", placeholder: "Group", value: Group, items: groups, tag: "input", tagType: "text", setState: setGroup, disabled: false},
+    {name: "DueCycle", placeholder: "Due Cycle", value: DueCycle, tag: "input", tagType: "text", setState: setDueCycle, disabled: false},
     {name: "DueDate", placeholder: "Due Date", value: DueDate, tag: "input", tagType: "text", setState: setDueDate, disabled: false},
     {name: "IsPaidByCreditCardNotAccount", label: "Charged to Credit Card?", value: IsPaidByCreditCardNotAccount, tag: "input", tagType: "checkbox", setState: setIsPaidByCreditCardNotAccount, disabled: false},
   ];
@@ -68,6 +70,7 @@ const NewBudgetModal = ({ budgetCycle, allBudgetCycles, types, groups, isOpen, o
       Amount: value.Amount,
       Type: value.Type,
       Group: value.Group,
+      DueCycle: value.DueCycle,
       DueDate: value.DueDate,
       IsPaidByCreditCardNotAccount: value.IsPaidByCreditCardNotAccount,
       BudgetCycle: value.BudgetCycle,
@@ -105,9 +108,10 @@ const NewBudgetModal = ({ budgetCycle, allBudgetCycles, types, groups, isOpen, o
     //When switched off of bill,
     // clear the unneeded bill budget options
     setDueDate("");
+    setDueCycle("");
     setIsPaidByCreditCardNotAccount("");
     return setIsBillOptionsOpen(false);
-  }, [Type, setDueDate, setIsPaidByCreditCardNotAccount]);
+  }, [Type, setDueCycle, setDueDate, setIsPaidByCreditCardNotAccount]);
 
 
   return (
@@ -119,7 +123,7 @@ const NewBudgetModal = ({ budgetCycle, allBudgetCycles, types, groups, isOpen, o
       <form className="new-budget-modal-form" onSubmit={onSubmit}>
         <Modal.Body>
           {budgetDetails.map((budgetDetail, i)=>(
-            !isBillOptionsOpen && ["DueDate", "IsPaidByCreditCardNotAccount"].includes(budgetDetail.name) ?
+            !isBillOptionsOpen && ["DueCycle", "DueDate", "IsPaidByCreditCardNotAccount"].includes(budgetDetail.name) ?
             null :
             <TransactionDetailModalInput key={budgetDetail.name} transactionDetail={budgetDetail} tabIndex={i+1} onChange={(value)=>onTransactionDetailInputChange(value, budgetDetail)} onInputDropdownSubmit={(value)=>onInputDropdownSubmit(value, budgetDetail)} />
           ))}

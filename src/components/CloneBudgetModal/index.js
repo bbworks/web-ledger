@@ -89,6 +89,7 @@ const CloneBudgetModal = ({ budgetCycle, budgetsData, types, groups, allBudgetCy
         Amount: null,
         Type: null,
         Group: null,
+        DueCycle: null,
         DueDate: null,
         IsPaidByCreditCardNotAccount: null,
         BudgetCycle: null,
@@ -132,6 +133,7 @@ const CloneBudgetModal = ({ budgetCycle, budgetsData, types, groups, allBudgetCy
                 <input className="clone-budget-modal-form-input-text clone-budget-modal-form-input-text-amount" type="text" name={`clone-budget-${i+1}-amount`} value={(!isNaN(Number(budgetCycleBudget.Amount)) ? convertNumberToCurrency(budgetCycleBudget.Amount) : budgetCycleBudget.Amount) || ""} onChange={(event)=>onInputChange("Amount", event.target.value, i)} />
                 <InputDropdown className="clone-budget-modal-form-input-text clone-budget-modal-form-input-text-type" type="text" name={`clone-budget-${i+1}-type`} value={budgetCycleBudget.Type || ""} items={types} onChange={(value)=>onInputChange("Type", value, i)} onSubmit={(value)=>onInputChange("Type", value, i)} />
                 <InputDropdown className="clone-budget-modal-form-input-text clone-budget-modal-form-input-text-group" type="text" name={`clone-budget-${i+1}-group`} value={budgetCycleBudget.Group || ""} items={groups} onChange={(value)=>onInputChange("Group", value, i)} onSubmit={(value)=>onInputChange("Group", value, i)} />
+                <input className="clone-budget-modal-form-input-text clone-budget-modal-form-input-text-duecycle" type="hidden" name={`clone-budget-${i+1}-duecycle`} value={budgetCycleBudget.DueCycle || ""} onChange={(event)=>onInputChange("DueCycle", event.target.value, i)} />
                 <input className="clone-budget-modal-form-input-text clone-budget-modal-form-input-text-duedate" type="hidden" name={`clone-budget-${i+1}-duedate`} value={budgetCycleBudget.DueDate || ""} onChange={(event)=>onInputChange("DueDate", event.target.value, i)} />
                 <input className="clone-budget-modal-form-input-text clone-budget-modal-form-input-text-Ispaidbycreditcardnotaccount" type="hidden" name={`clone-budget-${i+1}-Ispaidbycreditcardnotaccount`} value={!(budgetCycleBudget.IsPaidByCreditCardNotAccount === null || budgetCycleBudget.IsPaidByCreditCardNotAccount === undefined) && budgetCycleBudget.IsPaidByCreditCardNotAccount.toString() || ""} onChange={(event)=>onInputChange("IsPaidByCreditCardNotAccount", event.target.value, i)} />
                 <input className="clone-budget-modal-form-input-text clone-budget-modal-form-input-text-budgetcycle" type="hidden" name={`clone-budget-${i+1}-budgetcycle`} value={budgetCycle || ""} />

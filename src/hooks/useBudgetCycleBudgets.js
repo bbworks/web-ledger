@@ -7,7 +7,10 @@ const useBudgetCycleBudgets = (budgetsData, budgetCycle)=>{
   const getBudgetCycleBudgets = (budgetsData, budgetCycle)=>{
     if (!(budgetCycle instanceof Date)) return [];
 
-    const filteredBudgets = budgetsData.filter(b=>b.BudgetCycle.getTime() === budgetCycle.getTime());
+    const filteredBudgets = budgetsData.filter(b=>
+      b.BudgetCycle.getTime() === budgetCycle.getTime() /* budgets from this budgetCycle */
+      || (b.BudgetCycle.getTime() < budgetCycle.getTime() && b.DueNext?.getTime() > budgetCycle.getTime()) /* budgets from a previous budgetCycle */
+    );
     console.log("budgetCycleBudgets", filteredBudgets);
     return filteredBudgets;
   };
