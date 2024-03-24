@@ -2,25 +2,25 @@ import {useState, useEffect} from 'react';
 
 import {getBudgetCycleFromDate, isAllTransactionsBudgetCycle, isBudgetedIncomeTransaction} from './../utilities';
 
-const isTransactionWithinBudgetCycle = (transaction, budgetCycle)=>{
-  return getBudgetCycleFromDate(transaction.BudgetCycle || transaction.TransactionDate).getTime() === budgetCycle.getTime();
-};
-
-const getTransactionsWithinBudgetCycleFromPrevious = (transactions, budgetCycle, budgets)=>{
-  if (!budgets?.length) return;
-  const budgetsFromPreviousBudgetCycles = budgets.filter(b=>b.BudgetCycle.getTime() < budgetCycle.getTime() && b.DueNext?.getTime() > budgetCycle.getTime());
-  return transactions.filter(t=>
-    budgetsFromPreviousBudgetCycles.filter(previousBudget=>
-      t.Budget === previousBudget.Name &&  // tranasactions for this Budget
-      t.BudgetCycle.getTime() < budgetCycle.getTime() &&  // transactions that occurred before this budgetCycle
-      t.BudgetCycle.getTime() < previousBudget.DueNext.getTime() &&  // transactions that occurred before the previous Budget is due
-      t.BudgetCycle.getTime() >= previousBudget.BudgetCycle.getTime()  // transactions that occurred during or after the previous Budget
-    ).length
-  );
-};
-
 const useBudgetCycleTransactions = (transactions, budgetCycle, budgets)=>{
   //Declare functions
+  const isTransactionWithinBudgetCycle = (transaction, budgetCycle)=>{
+    return getBudgetCycleFromDate(transaction.BudgetCycle || transaction.TransactionDate).getTime() === budgetCycle.getTime();
+  };
+  
+  const getTransactionsWithinBudgetCycleFromPrevious = (transactions, budgetCycle, budgets)=>{
+    if (!budgets?.length) return;
+    const budgetsFromPreviousBudgetCycles = budgets.filter(b=>b.BudgetCycle.getTime() < budgetCycle.getTime() && b.DueNext?.getTime() > budgetCycle.getTime());
+    return transactions.filter(t=>
+      budgetsFromPreviousBudgetCycles.filter(previousBudget=>
+        t.Budget === previousBudget.Name &&  // tranasactions for this Budget
+        t.BudgetCycle.getTime() < budgetCycle.getTime() &&  // transactions that occurred before this budgetCycle
+        t.BudgetCycle.getTime() < previousBudget.DueNext.getTime() &&  // transactions that occurred before the previous Budget is due
+        t.BudgetCycle.getTime() >= previousBudget.BudgetCycle.getTime()  // transactions that occurred during or after the previous Budget
+      ).length
+    );
+  };
+  
   const isPaymentTransaction = transaction=>{
     return (
       transaction.Type === "Payment" ||
