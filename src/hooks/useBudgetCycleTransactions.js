@@ -6,7 +6,20 @@ const isTransactionWithinBudgetCycle = (transaction, budgetCycle)=>{
   return getBudgetCycleFromDate(transaction.BudgetCycle || transaction.TransactionDate).getTime() === budgetCycle.getTime();
 };
 
-const useBudgetCycleTransactions = (transactions, budgetCycle)=>{
+const getTransactionsWithinBudgetCycleFromPrevious = (transactions, budgetCycle, budgets)=>{
+  if (!budgets?.length) return;
+  const budgetsFromPreviousBudgetCycles = budgets.filter(b=>b.BudgetCycle.getTime() < budgetCycle.getTime() && b.DueNext?.getTime() > budgetCycle.getTime());
+  return transactions.filter(t=>
+    budgetsFromPreviousBudgetCycles.filter(previousBudget=>
+      t.Budget === previousBudget.Name &&  // tranasactions for this Budget
+      t.BudgetCycle.getTime() < budgetCycle.getTime() &&  // transactions that occurred before this budgetCycle
+      t.BudgetCycle.getTime() < previousBudget.DueNext.getTime() &&  // transactions that occurred before the previous Budget is due
+      t.BudgetCycle.getTime() >= previousBudget.BudgetCycle.getTime()  // transactions that occurred during or after the previous Budget
+    ).length
+  );
+};
+
+const useBudgetCycleTransactions = (transactions, budgetCycle, budgets)=>{
   //Declare functions
   const isPaymentTransaction = transaction=>{
     return (
@@ -58,7 +71,7 @@ const useBudgetCycleTransactions = (transactions, budgetCycle)=>{
     return transactions.filter(transaction=>!(transaction.Budget?.match(/payroll|^Other income$/i)) && isExpenseTransaction(transaction));
   };
 
-  const getBudgetCycleTransactions = (transactions, budgetCycle)=>{
+  const getBudgetCycleTransactions = (transactions, budgetCycle, budgets)=>{
     //Get transactions marked with this budgetCycle
     // (or with a Date of this budget cycle, if no BudgetCycle)
     const currentBudgetCycleTransactions = (
@@ -98,9 +111,13 @@ const useBudgetCycleTransactions = (transactions, budgetCycle)=>{
     //Get this month's transactions (minus income)
     const currentBudgetCycleExpenseTransactions = getCurrentBudgetCycleExpenseTransactions(currentBudgetCycleTransactions, budgetCycle);
 
+    //Get transactions that apply from previous months
+    const previousBudgetCycleTransactions = getTransactionsWithinBudgetCycleFromPrevious(transactions, budgetCycle, budgets);
+
     const budgetCycleTransactionsReturn = {
       income: [...lastBudgetCycleIncomeTransactions, ...currentBudgetCycleIncomeTransactions],
       expenses: currentBudgetCycleExpenseTransactions,
+      previous: previousBudgetCycleTransactions,
       get all() {return [...this.income, ...this.expenses].flat()},
     };
 
@@ -110,13 +127,13 @@ const useBudgetCycleTransactions = (transactions, budgetCycle)=>{
   };
 
   //Initialize state
-  const [budgetCycleTransactions, setBudgetCycleTransactions] = useState(getBudgetCycleTransactions(transactions, budgetCycle));
+  const [budgetCycleTransactions, setBudgetCycleTransactions] = useState(getBudgetCycleTransactions(transactions, budgetCycle, budgets));
 
   //Whenever transactions or budgetCycle changes,
   // update state
   useEffect(()=>
-    setBudgetCycleTransactions(getBudgetCycleTransactions(transactions, budgetCycle))
-  , [transactions, budgetCycle]);
+    setBudgetCycleTransactions(getBudgetCycleTransactions(transactions, budgetCycle, budgets))
+  , [transactions, budgetCycle, budgets]);
 
   //Return the state
   return budgetCycleTransactions;

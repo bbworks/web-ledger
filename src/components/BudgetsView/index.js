@@ -23,7 +23,7 @@ const BudgetsView = ({ transactions, budgetsData, budgetCycle, allBudgetCycles, 
   const [isNewBudgetModalOpen, setIsNewBudgetModalOpen] = useState(false);
   const [isCloneBudgetModalOpen, setIsCloneBudgetModalOpen] = useState(false);
 
-  const budgetCycleTransactions = useBudgetCycleTransactions(transactions, budgetCycle);
+  const budgetCycleTransactions = useBudgetCycleTransactions(transactions, budgetCycle, budgetsData);
   const budgetCycleBudgets = useBudgetCycleBudgets(budgetsData, budgetCycle);
 
   const onNewBudgetClick = event=>{
@@ -85,7 +85,7 @@ const BudgetsView = ({ transactions, budgetsData, budgetCycle, allBudgetCycles, 
                 !budgetCycleBudgets ?
                 '' :
                 budgetCycleBudgets.map(budgetData=>
-                  <BudgetGraph key={budgetData.Name} budget={{...budgetData, color: "#2196f3", amountSpent: getBudgetAmountSpentFromTransactions(budgetData.Name, budgetCycleTransactions.all)}}/>
+                  <BudgetGraph key={budgetData.Name} budget={{...budgetData, color: "#2196f3", amountSpent: getBudgetAmountSpentFromTransactions(budgetData.Name, [...budgetCycleTransactions.all, ...budgetCycleTransactions.previous])}}/>
                 )
               )
             }
