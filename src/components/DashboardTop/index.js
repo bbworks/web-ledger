@@ -1,15 +1,12 @@
-import {convertNumberToCurrency} from './../../utilities';
-import {useBudgetCycleTransactions} from './../../hooks';
+import {convertNumberToCurrency, getSumByProp} from './../../utilities';
 
 import DashboardBudgetCycleDropdown from './../DashboardBudgetCycleDropdown';
 
 import './index.scss';
 
-const DashboardTop = ({ transactions, accountsData, accountData, budgetCycle, allBudgetCycles, onBudgetCycleChange })=>{
-  const budgetCycleTransactions = useBudgetCycleTransactions(transactions, budgetCycle);
-
-  const currentBudgetCycleIncome = budgetCycleTransactions.income.length && budgetCycleTransactions.income.reduce((total, t)=>total+=t.Amount, 0);
-  const currentBudgetCycleExpenses = budgetCycleTransactions.expenses.length && budgetCycleTransactions.expenses.reduce((total, t)=>total+=t.Amount, 0);
+const DashboardTop = ({ transactions, accountsData, accountData, budgetCycle, allBudgetCycles, budgetCycleTransactions, onBudgetCycleChange })=>{
+  const currentBudgetCycleIncome = budgetCycleTransactions.income.length && getSumByProp(budgetCycleTransactions.income, "Amount");
+  const currentBudgetCycleExpenses = budgetCycleTransactions.expenses.length && getSumByProp(budgetCycleTransactions.expenses, "Amount");
   const currentBudgetCycleRemaining = currentBudgetCycleIncome+currentBudgetCycleExpenses;
 
   const getLastUpdatedDate = transactions=>{
@@ -28,7 +25,14 @@ const DashboardTop = ({ transactions, accountsData, accountData, budgetCycle, al
         <div className="row">
           <div className="dashboard-accounts-total-container col text-center fw-bold h4 d-flex flex-column border-end border-2">
             Month Remaining:
-            <span className="dashboard-accounts-total">{currentBudgetCycleRemaining ? convertNumberToCurrency(currentBudgetCycleRemaining) : "--"}</span>
+            <span className="dashboard-accounts-total">{currentBudgetCycleRemaining ? convertNumberToCurrency(currentBudgetCycleRemaining) : "--"}
+              <br />
+              <span className="dashboard-accounts-income-expenses">
+                <span className="dashboard-accounts-income">{getSumByProp(budgetCycleTransactions.income, "Amount") > 0 ? '+' : ''}{currentBudgetCycleRemaining ? convertNumberToCurrency(getSumByProp(budgetCycleTransactions.income, "Amount")) : "--"}</span>
+                &nbsp;/&nbsp;
+                <span className="dashboard-accounts-expenses">{currentBudgetCycleRemaining ? convertNumberToCurrency(getSumByProp(budgetCycleTransactions.expenses, "Amount")) : "--"}</span>
+              </span>
+            </span>
           </div>
           <div className="dashboard-credit-score-container col text-center fw-bold h4 d-flex flex-column">
             Credit Score:

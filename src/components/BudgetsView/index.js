@@ -9,11 +9,9 @@ import CloneBudgetModal from './../CloneBudgetModal';
 
 import {getBudgetAmountSpentFromTransactions} from './../../utilities';
 
-import {useBudgetCycleTransactions, useBudgetCycleBudgets} from './../../hooks';
-
 import './index.scss';
 
-const BudgetsView = ({ transactions, budgetsData, budgetCycle, allBudgetCycles, onBudgetCycleChange, budgetTypes, budgetGroups, onNewBudgetModalSubmit:onNewBudgetModalSubmitProp, onCloneBudgetModalSubmit:onCloneBudgetModalSubmitProp, setFooterNavbar })=>{
+const BudgetsView = ({ transactions, budgetsData, budgetCycle, allBudgetCycles, budgetCycleBudgets, onBudgetCycleChange, budgetTypes, budgetGroups, onNewBudgetModalSubmit:onNewBudgetModalSubmitProp, onCloneBudgetModalSubmit:onCloneBudgetModalSubmitProp, setFooterNavbar })=>{
   //Send the route to the footer navbar
   const route = useLocation().pathname;
   useEffect(()=>{
@@ -22,9 +20,6 @@ const BudgetsView = ({ transactions, budgetsData, budgetCycle, allBudgetCycles, 
 
   const [isNewBudgetModalOpen, setIsNewBudgetModalOpen] = useState(false);
   const [isCloneBudgetModalOpen, setIsCloneBudgetModalOpen] = useState(false);
-
-  const budgetCycleTransactions = useBudgetCycleTransactions(transactions, budgetCycle, budgetsData);
-  const budgetCycleBudgets = useBudgetCycleBudgets(budgetsData, budgetCycle);
 
   const onNewBudgetClick = event=>{
     openNewBudgetModal();
@@ -85,7 +80,7 @@ const BudgetsView = ({ transactions, budgetsData, budgetCycle, allBudgetCycles, 
                 !budgetCycleBudgets ?
                 '' :
                 budgetCycleBudgets.map(budgetData=>
-                  <BudgetGraph key={budgetData.Name} budget={{...budgetData, color: "#2196f3", amountSpent: getBudgetAmountSpentFromTransactions(budgetData.Name, [...budgetCycleTransactions.all, ...budgetCycleTransactions.previous])}}/>
+                  <BudgetGraph key={budgetData.Name} budget={{...budgetData, color: "#2196f3"}}/>
                 )
               )
             }

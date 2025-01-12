@@ -1,207 +1,82 @@
 import {useState, useEffect} from 'react';
 
-import {getSumByProp, getBudgetCycleFromDate, getBudgetAmountSpentFromTransactions} from './../../utilities';
+import {getSumByProp} from './../../utilities';
 
 import './index.scss';
 
-const DashboardShowcase = ({ budgetCycle, budgetCycleTransactions, budgetCycleBudgets })=>{
+const DashboardShowcase = ({ budgetCycle, budgetCycleTransactions, budgetCycleBudgets, totalIncome, totalExpenses, remainingBillsToBePaid, remainingBillsToBePaidTotal, leftoverPaidBills, leftoverPaidBillsTotal, remainingSavingsToBeSaved, remainingSavingsToBeSavedTotal, remainingGiving, remainingGivingTotal, remainingFlexibleSpendingMoney, isCurrentBudgetCycle, isPastBudgetCycle, isFutureBudgetCycle })=>{
   //Current statuses
-  const budgetCycleStatuses = [
-    {
-      heading: "Over-budget 😔",
-      description: "You have majorly overspent this month.",
-      test: (budgetCycle, budgetCycleTransactions, budgetCycleBudgets)=>{
-        const isCurrentBudgetCycle = budgetCycle.getTime() === getBudgetCycleFromDate(new Date()).getTime();
-        const totalIncome = getSumByProp(budgetCycleTransactions.income, "Amount");
-        const totalExpenses = getSumByProp(budgetCycleTransactions.expenses, "Amount");
-        return isCurrentBudgetCycle && (totalIncome + totalExpenses) < 0;
-			}
-    },
-    {
-      heading: "Looking bad 😬",
-      description: "You are projected to overspend this month.",
-      test: (budgetCycle, budgetCycleTransactions, budgetCycleBudgets)=>{
-        const isCurrentBudgetCycle = budgetCycle.getTime() === getBudgetCycleFromDate(new Date()).getTime();
-        const totalIncome = getSumByProp(budgetCycleTransactions.income, "Amount");
-        const totalExpenses = getSumByProp(budgetCycleTransactions.expenses, "Amount");
-        const remainingBillsToBePaid =
-          /* Add a "Spent" key to each budget data */
-          budgetCycleBudgets.map(b=>({
-            ...b,
-            Spent: getBudgetAmountSpentFromTransactions(b.Name, budgetCycleTransactions.all) || 0,
-          }))
-          /* filter to only bills that have NOT been paid */
-          .filter(b=>b.Type==="bill" && b.Spent===0)
-          /* Get the sum of all the remaining money AFTER paid bills */
-          .reduce((total,b)=>total+=((b.Amount-b.Spent)*-1), 0)
-          /* Return the inverse (negative is surplus) */
-          *-1;
-        const leftoverPaidBillsMoney =
-          /* Add a "Spent" key to each budget data */
-          budgetCycleBudgets.map(b=>({
-            ...b,
-            Spent: getBudgetAmountSpentFromTransactions(b.Name, budgetCycleTransactions.all) || 0,
-          }))
-          /* filter to only bills that have been paid */
-          .filter(b=>b.Type==="bill" && b.Spent!==0)
-          /* Get the sum of all the remaining money AFTER paid bills */
-          .reduce((total,b)=>total+=((b.Amount-b.Spent)*-1), 0)
-        const remainingSavingsToBeSaved =
-          /* Add a "Spent" key to each budget data */
-          budgetCycleBudgets.map(b=>({
-            ...b,
-            Spent: getBudgetAmountSpentFromTransactions(b.Name, budgetCycleTransactions.all) || 0,
-          }))
-          /* filter to only savings */
-          .filter(b=>b.Type==="savings")
-          /* Get the sum of all the remaining money AFTER paid bills */
-          .reduce((total,b)=>total+=((b.Amount-b.Spent)*-1), 0)
-          /* Return the inverse (negative is surplus) */
-          *-1;
-          const remainingFlexibleSpendingMoney = totalIncome + totalExpenses + leftoverPaidBillsMoney + remainingBillsToBePaid + remainingSavingsToBeSaved;
-        console.log("Budget status: ", remainingFlexibleSpendingMoney, isCurrentBudgetCycle, totalIncome, totalExpenses, remainingBillsToBePaid, leftoverPaidBillsMoney, remainingSavingsToBeSaved)
-        return isCurrentBudgetCycle && remainingFlexibleSpendingMoney < 0;
-			}
-    },
-    {
-      heading: "Getting tight 😯",
-      description: "You are running low on money.",
-      test: (budgetCycle, budgetCycleTransactions, budgetCycleBudgets)=>{
-        const isCurrentBudgetCycle = budgetCycle.getTime() === getBudgetCycleFromDate(new Date()).getTime();
-        const totalIncome = getSumByProp(budgetCycleTransactions.income, "Amount");
-        const totalExpenses = getSumByProp(budgetCycleTransactions.expenses, "Amount");
-        const remainingBillsToBePaid =
-          /* Add a "Spent" key to each budget data */
-          budgetCycleBudgets.map(b=>({
-            ...b,
-            Spent: getBudgetAmountSpentFromTransactions(b.Name, budgetCycleTransactions.all) || 0,
-          }))
-          /* filter to only bills that have NOT been paid */
-          .filter(b=>b.Type==="bill" && b.Spent===0)
-          /* Get the sum of all the remaining money AFTER paid bills */
-          .reduce((total,b)=>total+=((b.Amount-b.Spent)*-1), 0)
-          /* Return the inverse (negative is surplus) */
-          *-1;
-        const leftoverPaidBillsMoney =
-          /* Add a "Spent" key to each budget data */
-          budgetCycleBudgets.map(b=>({
-            ...b,
-            Spent: getBudgetAmountSpentFromTransactions(b.Name, budgetCycleTransactions.all) || 0,
-          }))
-          /* filter to only bills that have been paid */
-          .filter(b=>b.Type==="bill" && b.Spent!==0)
-          /* Get the sum of all the remaining money AFTER paid bills */
-          .reduce((total,b)=>total+=((b.Amount-b.Spent)*-1), 0)
-        const remainingSavingsToBeSaved =
-          /* Add a "Spent" key to each budget data */
-          budgetCycleBudgets.map(b=>({
-            ...b,
-            Spent: getBudgetAmountSpentFromTransactions(b.Name, budgetCycleTransactions.all) || 0,
-          }))
-          /* filter to only savings */
-          .filter(b=>b.Type==="savings")
-          /* Get the sum of all the remaining money AFTER paid bills */
-          .reduce((total,b)=>total+=((b.Amount-b.Spent)*-1), 0)
-          /* Return the inverse (negative is surplus) */
-          *-1;
-          const remainingFlexibleSpendingMoney = totalIncome + totalExpenses + leftoverPaidBillsMoney + remainingBillsToBePaid + remainingSavingsToBeSaved;
-        return isCurrentBudgetCycle && remainingFlexibleSpendingMoney < 250;
-			}
-    },
-    {
-      heading: "All good! 💃",
-      description: "You are on track for this month.",
-      test: (budgetCycle, budgetCycleTransactions, budgetCycleBudgets)=>{
-        const isCurrentBudgetCycle = budgetCycle.getTime() === getBudgetCycleFromDate(new Date()).getTime();
-        const totalIncome = getSumByProp(budgetCycleTransactions.income, "Amount");
-        const totalExpenses = getSumByProp(budgetCycleTransactions.expenses, "Amount");
-        const remainingBillsToBePaid =
-          /* Add a "Spent" key to each budget data */
-          budgetCycleBudgets.map(b=>({
-            ...b,
-            Spent: getBudgetAmountSpentFromTransactions(b.Name, budgetCycleTransactions.all) || 0,
-          }))
-          /* filter to only bills that have NOT been paid */
-          .filter(b=>b.Type==="bill" && b.Spent===0)
-          /* Get the sum of all the remaining money AFTER paid bills */
-          .reduce((total,b)=>total+=((b.Amount-b.Spent)*-1), 0)
-          /* Return the inverse (negative is surplus) */
-          *-1;
-        const leftoverPaidBillsMoney =
-          /* Add a "Spent" key to each budget data */
-          budgetCycleBudgets.map(b=>({
-            ...b,
-            Spent: getBudgetAmountSpentFromTransactions(b.Name, budgetCycleTransactions.all) || 0,
-          }))
-          /* filter to only bills that have been paid */
-          .filter(b=>b.Type==="bill" && b.Spent!==0)
-          /* Get the sum of all the remaining money AFTER paid bills */
-          .reduce((total,b)=>total+=((b.Amount-b.Spent)*-1), 0)
-        const remainingSavingsToBeSaved =
-          /* Add a "Spent" key to each budget data */
-          budgetCycleBudgets.map(b=>({
-            ...b,
-            Spent: getBudgetAmountSpentFromTransactions(b.Name, budgetCycleTransactions.all) || 0,
-          }))
-          /* filter to only savings */
-          .filter(b=>b.Type==="savings")
-          /* Get the sum of all the remaining money AFTER paid bills */
-          .reduce((total,b)=>total+=((b.Amount-b.Spent)*-1), 0)
-          /* Return the inverse (negative is surplus) */
-          *-1;
-          const remainingFlexibleSpendingMoney = totalIncome + totalExpenses + leftoverPaidBillsMoney + remainingBillsToBePaid + remainingSavingsToBeSaved;
-        return isCurrentBudgetCycle && remainingFlexibleSpendingMoney >= 250;
-			}
-    },
-    //Past statuses
-    {
-      heading: "Over-budget 😔",
-      description: "You overspent this month.",
-      test: (budgetCycle, budgetCycleTransactions, budgetCycleBudgets)=>{
-        const isPastBudgetCycle = budgetCycle.getTime() < getBudgetCycleFromDate(new Date()).getTime();
-        const totalIncome = getSumByProp(budgetCycleTransactions.income, "Amount");
-        const totalExpenses = getSumByProp(budgetCycleTransactions.expenses, "Amount");
-        return isPastBudgetCycle && (totalIncome + totalExpenses) < 0;
-			}
-    },
-    {
-      heading: "Done 😌",
-      description: "You were on track for this month.",
-      test: (budgetCycle, budgetCycleTransactions, budgetCycleBudgets)=>{
-        const isPastBudgetCycle = budgetCycle.getTime() < getBudgetCycleFromDate(new Date()).getTime();
-        const totalIncome = getSumByProp(budgetCycleTransactions.income, "Amount");
-        const totalExpenses = getSumByProp(budgetCycleTransactions.expenses, "Amount");
-        return isPastBudgetCycle && (totalIncome + totalExpenses) >= 0;
-			}
-    },
-    //Future statuses
-    {
-      heading: " 😔",
-      description: "You're going to overspend this month.",
-      test: (budgetCycle, budgetCycleTransactions, budgetCycleBudgets)=>{
-        const isFutureBudgetCycle = budgetCycle.getTime() > getBudgetCycleFromDate(new Date()).getTime();
-        const totalIncome = getSumByProp(budgetCycleTransactions.income, "Amount");
-        const totalExpenses = getSumByProp(budgetCycleTransactions.expenses, "Amount");
-        return isFutureBudgetCycle && (totalIncome + totalExpenses) < 0;
-			}
-    },
-    {
-      heading: "Looking good 😌",
-      description: "You're going to be on track for this month.",
-      test: (budgetCycle, budgetCycleTransactions, budgetCycleBudgets)=>{
-        const isFutureBudgetCycle = budgetCycle.getTime() > getBudgetCycleFromDate(new Date()).getTime();
-        const totalIncome = getSumByProp(budgetCycleTransactions.income, "Amount");
-        const totalExpenses = getSumByProp(budgetCycleTransactions.expenses, "Amount");
-        return isFutureBudgetCycle && (totalIncome + totalExpenses) >= 0;
-			}
-    },
-  ];
-
   const getBudgetCycleStatus = (budgetCycle, budgetCycleTransactions, budgetCycleBudgets)=>{
-    if (!budgetCycle || !budgetCycleTransactions.all.length || !budgetCycleBudgets.length) return null;
-    return budgetCycleStatuses.find(status=>status.test(budgetCycle, budgetCycleTransactions, budgetCycleBudgets));
-  };
+    if (!budgetCycleBudgets.length) return null;
 
+    const lowRemainingFlexibleSpendingMoneyAmount = 250;
+
+    const budgetCycleStatuses = [
+      {
+        heading: "Over-budget 😔",
+        description: "You have majorly overspent this month.",
+        test: (budgetCycleBudgets)=>{
+          return isCurrentBudgetCycle && (totalIncome + totalExpenses) < 0;
+        }
+      },
+      {
+        heading: "Looking bad 😬",
+        description: "You are projected to overspend this month.",
+        test: (budgetCycleBudgets)=>{
+          return isCurrentBudgetCycle && remainingFlexibleSpendingMoney < 0;
+        }
+      },
+      {
+        heading: "Getting tight 😯",
+        description: "You are running low on money.",
+        test: (budgetCycleBudgets)=>{
+          return isCurrentBudgetCycle && remainingFlexibleSpendingMoney < lowRemainingFlexibleSpendingMoneyAmount;
+        }
+      },
+      {
+        heading: "All good! 💃",
+        description: "You are on track for this month.",
+        test: (budgetCycleBudgets)=>{
+          const totalIncome = getSumByProp(budgetCycleTransactions.income, "Amount");
+          const totalExpenses = getSumByProp(budgetCycleTransactions.expenses, "Amount");
+          return isCurrentBudgetCycle && remainingFlexibleSpendingMoney >= lowRemainingFlexibleSpendingMoneyAmount;
+        }
+      },
+      //Past statuses
+      {
+        heading: "Over-budget 😔",
+        description: "You overspent this month.",
+        test: (budgetCycleBudgets)=>{
+          return isPastBudgetCycle && (totalIncome + totalExpenses) < 0;
+        }
+      },
+      {
+        heading: "Done 😌",
+        description: "You were on track for this month.",
+        test: (budgetCycleBudgets)=>{
+          return isPastBudgetCycle && (totalIncome + totalExpenses) >= 0;
+        }
+      },
+      //Future statuses
+      {
+        heading: " 😔",
+        description: "You're going to overspend this month.",
+        test: (budgetCycleBudgets)=>{
+          return isFutureBudgetCycle && (totalIncome + totalExpenses) < 0;
+        }
+      },
+      {
+        heading: "Looking good 😌",
+        description: "You're going to be on track for this month.",
+        test: (budgetCycleBudgets)=>{
+          return isFutureBudgetCycle && (totalIncome + totalExpenses) >= 0;
+        }
+      },
+    ];
+    
+    return budgetCycleStatuses.find(status=>status.test(budgetCycleBudgets));
+  };
+  
   const [budgetCycleStatus, setBudgetCycleStatus] = useState(getBudgetCycleStatus(budgetCycle, budgetCycleTransactions, budgetCycleBudgets));
 
   useEffect(()=>

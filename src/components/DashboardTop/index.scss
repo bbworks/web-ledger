@@ -6,4 +6,21 @@
   .dashboard-month-dropdown {
     background-color: white;
   }
+
+  .dashboard-accounts-income-expenses {
+    display: block;
+    color: gray;
+    font-weight: lighter;
+    font-size: 0.75rem;
+  }
+  
+  .dashboard-accounts-income {
+    // color: green;
+    color: hsl(120deg 35% 25%);
+  }
+
+  .dashboard-accounts-expenses {
+    // color: red;
+    color: hsl(0 50% 50% / 1);
+  }
 }

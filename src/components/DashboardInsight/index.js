@@ -3,7 +3,7 @@ import './index.scss';
 const DashboardInsight = ({ insight })=>{
   let insightTypeIconClass = insight.insightTypeIconClass;
   if (!insightTypeIconClass) {
-    if (insight.type === "primary") {
+    if (insight.type === "info") {
       insightTypeIconClass = "fas fa-xs fa-info-circle";
     }
     else if (insight.type === "success") {

@@ -9,7 +9,7 @@ const useBudgetCycleTransactions = (transactions, budgetCycle, budgets)=>{
   };
   
   const getTransactionsWithinBudgetCycleFromPrevious = (transactions, budgetCycle, budgets)=>{
-    if (!budgets?.length) return;
+    if (!budgets?.length) return [];
     const budgetsFromPreviousBudgetCycles = budgets.filter(b=>b.BudgetCycle.getTime() < budgetCycle.getTime() && b.DueNext?.getTime() > budgetCycle.getTime());
     return transactions.filter(t=>
       budgetsFromPreviousBudgetCycles.filter(previousBudget=>

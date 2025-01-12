@@ -6,7 +6,7 @@ const BudgetGraphStatusIcon = ({ budget, overBudget, overEarned })=> {
   let iconColor;
 
   if (budget.Type === "bill") {
-    if (budget.amountSpent) {
+    if (budget.BudgetCycleSpent) {
       if (!overBudget) {
         iconClass = "fas fa-check-circle";
         iconText = "Paid";
@@ -25,12 +25,12 @@ const BudgetGraphStatusIcon = ({ budget, overBudget, overEarned })=> {
     }
   }
   if (budget.Type === "income") {
-    if (budget.amountSpent) {
-      //if (budget.amountSpent === budget.Amount) {
+    if (budget.BudgetCycleSpent) {
+      //if (budget.BudgetCycleSpent === budget.Amount) {
       //Acount for floating-point errors
       if (
-          0 <= Math.abs(budget.amountSpent-budget.Amount) &&
-          Math.abs(budget.amountSpent-budget.Amount) < 0.000000000001
+          0 <= Math.abs(budget.BudgetCycleSpent-budget.BudgetCycleAmount) &&
+          Math.abs(budget.BudgetCycleSpent-budget.BudgetCycleAmount) < 0.000000000001
         ) {
         iconClass = "fas fa-check-circle";
         iconText = "Earned";

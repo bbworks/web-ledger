@@ -10,7 +10,7 @@
 
 .budget-graph-bar-stats {
   position: relative;
-  z-index: 2;
+  z-index: 9;
   font-size: 1rem
 }
 
@@ -20,6 +20,14 @@
   top: 0.5rem;
   right: 0.5rem;
   font-size: 0.8rem;
+}
+
+.budget-graph-bar-previous {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  height: 100%;
+  background: repeating-linear-gradient(135deg, rgba(33, 150, 243, 0.7) 0px, rgba(33, 150, 243, 0.7) 6px, rgba(33, 150, 243, 0.15) 6px, rgba(33, 150, 243, 0.15) 8px)!important;
 }
 
 .budget-graph-bar-inner {
@@ -32,3 +40,7 @@
 .budget-graph-status-icon-container {
   font-size: 0.6rem;
 }
+
+// background {
+//   repeating-linear-gradient(135deg, rgba(33, 150, 243, 0.7) 0px, rgba(33, 150, 243, 0.7) 6px, rgba(33, 150, 243, 0.15) 6px, rgba(33, 150, 243, 0.15) 8px);
+// }

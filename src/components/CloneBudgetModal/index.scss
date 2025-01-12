@@ -1,8 +1,23 @@
 .clone-budget-modal {
   .clone-budget-modal-form-input-group {
     display: flex;
+    align-items: center;
+    flex-wrap: wrap;
     width: 100%;
     padding: 0.37rem 0.75rem;
+  }
+
+  .clone-budget-modal-heading {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    width: 100%;
+    padding: 0 0.75rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .clone-budget-modal-heading {
+    color: gray;
   }
 
   .clone-budget-modal-form-input-text {
@@ -27,5 +42,12 @@
 
   .clone-budget-modal-form-input-group:hover .clone-budget-modal-form-delete-button {
     visibility: visible;
+  }
+
+  .clone-budget-modal-form-label-due-period{
+    margin-top: -0.5rem;
+    width: 100%;
+    font-size: 0.625rem;
+    color: #6c757d;
   }
 }

@@ -11,11 +11,9 @@ import TransactionsImportConfirmedModal from './../TransactionsImportConfirmedMo
 import TransactionsImportFormToggle from './../TransactionsImportFormToggle';
 import NewTransactionModal from './../NewTransactionModal';
 
-import {useBudgetCycleTransactions} from './../../hooks';
-
 import './index.scss';
 
-const TransactionsView = ({ transactions, budgetCycle, allBudgetCycles, transactionsImportDuplicatesModalNewTransactions, transactionsImportDuplicatesModalDuplicates, isTransactionsImportDuplicatesModalOpen, onTransactionsImportDuplicatesModalClose, onTransactionsImportDuplicatesModalSubmit, onTransactionsImportFormSubmit:onTransactionsImportFormSubmitProp, onTransactionsImportFormFileInputChange:onTransactionsImportFormFileInputChangeProp, onTransactionDetailModalSubmit:onTransactionDetailModalSubmitProp, onTransactionDeleteModalSubmit:onTransactionDeleteModalSubmitProp, transactionsImportConfirmedModalTransactions, isTransactionsImportConfirmedModalOpen, closeTransactionsImportConfirmedModal, onTransactionsImportConfirmedModalSubmit, onBudgetCycleChange, transactionCategories, transactionTypes, onNewTransactionModalSubmit:onNewTransactionModalSubmitProp, setFooterNavbar })=>{
+const TransactionsView = ({ transactions, budgetCycle, allBudgetCycles, budgetsData, transactionsImportDuplicatesModalNewTransactions, transactionsImportDuplicatesModalDuplicates, budgetCycleBudgets, budgetCycleTransactions, isTransactionsImportDuplicatesModalOpen, onTransactionsImportDuplicatesModalClose, onTransactionsImportDuplicatesModalSubmit, onTransactionsImportFormSubmit:onTransactionsImportFormSubmitProp, onTransactionsImportFormFileInputChange:onTransactionsImportFormFileInputChangeProp, onTransactionDetailModalSubmit:onTransactionDetailModalSubmitProp, onTransactionDeleteModalSubmit:onTransactionDeleteModalSubmitProp, transactionsImportConfirmedModalTransactions, isTransactionsImportConfirmedModalOpen, closeTransactionsImportConfirmedModal, onTransactionsImportConfirmedModalSubmit, onBudgetCycleChange, transactionCategories, transactionTypes, onNewTransactionModalSubmit:onNewTransactionModalSubmitProp, setFooterNavbar })=>{
   //Send the route to the footer navbar
   const route = useLocation().pathname;
   useEffect(()=>{
@@ -29,8 +27,6 @@ const TransactionsView = ({ transactions, budgetCycle, allBudgetCycles, transact
   const [transactionDeleteModalTransaction, setTransactionDeleteModalTransaction] = useState(null);
   const [isTransactionDeleteModalOpen, setIsTransactionDeleteModalOpen] = useState(false);
   const [isNewTransactionModalOpen, setIsNewTransactionModalOpen] = useState(false);
-
-  const budgetCycleTransactions = useBudgetCycleTransactions(transactions, budgetCycle);
 
   const onTransactionImportFormToggleClick = event=>{
     setIsTransactionImportFormOpen(wasOpen=>!wasOpen);

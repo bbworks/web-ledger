@@ -10,7 +10,8 @@ import {useBudgetCycleBudgets} from './../../hooks';
 import './index.scss';
 
 const CloneBudgetModal = ({ budgetCycle, budgetsData, types, groups, allBudgetCycles, isOpen, onClose, onSubmit:onSubmitProp })=>{
-  const getPreviousBudgetCycleWithBudgets = (allBudgetCycles, budgetCycle)=>{
+  //Create helper functions
+  const getPreviousBudgetCycle = (allBudgetCycles, budgetCycle)=>{
     if (!budgetCycle) return;
     const allBudgetCyclesSorted = allBudgetCycles.sort((a,b)=>b.getTime()-a.getTime());
     const previousBudgetCycle = allBudgetCyclesSorted.find((b, i)=>(i===0 ? false : allBudgetCyclesSorted[i-1].getTime() === budgetCycle.getTime()));
@@ -18,38 +19,42 @@ const CloneBudgetModal = ({ budgetCycle, budgetsData, types, groups, allBudgetCy
     return allBudgetCyclesSorted.find(b=>b.getTime() < budgetCycle.getTime());
   };
 
-  const previousBudgetCycle = getPreviousBudgetCycleWithBudgets(allBudgetCycles, budgetCycle);
+  const filterPreviousBudgetCycleBudgetsToClone = previousBudgetCycleBudgets=>{
+    return previousBudgetCycleBudgets.filter(b=>!(b.DuePeriod !== "Monthly" && b.DueNext.getTime() !== budgetCycle.getTime()))
+  };
 
-  const [BudgetCycle, setBudgetCycle] = useState(previousBudgetCycle);
+  //Set state
+  const [previousBudgetCycle, setPreviousBudgetCycle] = useState(getPreviousBudgetCycle(allBudgetCycles, budgetCycle));
 
-  const budgetCycleBudgets = useBudgetCycleBudgets(budgetsData, BudgetCycle);
+  const previousBudgetCycleBudgets = useBudgetCycleBudgets(budgetsData, previousBudgetCycle);
 
-  const [clonedBudgetCycleBudgets, setClonedBudgetCycleBudgets] = useState(budgetCycleBudgets);
+  const [previousBudgetCycleBudgetsToClone, setPreviousBudgetCycleBudgetsToClone] = useState(filterPreviousBudgetCycleBudgetsToClone(previousBudgetCycleBudgets));
 
   const [isBillOptionsOpen, setIsBillOptionsOpen] = useState(false);
 
   const inputOptions = [
-    {name: "BudgetCycle", placeholder: "Select a budget cycle", value: getBudgetCycleString(BudgetCycle), items: allBudgetCycles.map(b=>getBudgetCycleString(b)), tag: "input", tagType: "text", setState: setBudgetCycle, disabled: false},
+    {name: "BudgetCycle", placeholder: "Select a budget cycle", value: getBudgetCycleString(previousBudgetCycle), items: allBudgetCycles.map(b=>getBudgetCycleString(b)), tag: "input", tagType: "text", setState: setPreviousBudgetCycle, disabled: false},
   ];
 
 
-  const onClonedBudgetCycleChange = (value, inputOption)=>{
+  //Create functions
+  const onPreviousBudgetCycleChange = (value, inputOption)=>{
     return inputOption.setState(getBudgetCycleFromBudgetCycleString(value));
   };
 
-  const onClonedBudgetCycleSubmit = (value, inputOption)=>{
+  const onPreviousBudgetCycleSubmit = (value, inputOption)=>{
     return inputOption.setState(getBudgetCycleFromBudgetCycleString(value));
   };
 
   const onInputChange = (name, value, i)=>{
     console.log(name, value, i);
-    setClonedBudgetCycleBudgets(previousClonedBudgetCycleBudgets=>[
-      ...previousClonedBudgetCycleBudgets.slice(0,i),
+    setPreviousBudgetCycleBudgetsToClone(previousBudgetCycleBudgetsToClone=>[
+      ...previousBudgetCycleBudgetsToClone.slice(0,i),
       {
-        ...previousClonedBudgetCycleBudgets[i],
+        ...previousBudgetCycleBudgetsToClone[i],
         [name]: value,
       },
-      ...previousClonedBudgetCycleBudgets.slice(i+1),
+      ...previousBudgetCycleBudgetsToClone.slice(i+1),
     ]);
   };
 
@@ -60,7 +65,7 @@ const CloneBudgetModal = ({ budgetCycle, budgetsData, types, groups, allBudgetCy
 
     //Vaildate the state values into an array of objects,
     // with updated DateCreated, DateModified values
-    const value = clonedBudgetCycleBudgets.map(e=>({
+    const value = previousBudgetCycleBudgetsToClone.map(e=>({
       ...e,
       BudgetId: "",
       BudgetCycle: budgetCycle,
@@ -75,15 +80,15 @@ const CloneBudgetModal = ({ budgetCycle, budgetsData, types, groups, allBudgetCy
   };
 
   const onInputGroupMouseDeleteButtonClick = index=>{
-    setClonedBudgetCycleBudgets(previousClonedBudgetCycleBudgets=>[
-      ...previousClonedBudgetCycleBudgets.slice(0, index),
-      ...previousClonedBudgetCycleBudgets.slice(index+1),
+    setPreviousBudgetCycleBudgetsToClone(previousBudgetCycleBudgetsToClone=>[
+      ...previousBudgetCycleBudgetsToClone.slice(0, index),
+      ...previousBudgetCycleBudgetsToClone.slice(index+1),
     ]);
   };
 
   const onAddButtonClick = ()=>{
-    setClonedBudgetCycleBudgets(previousClonedBudgetCycleBudgets=>[
-      ...previousClonedBudgetCycleBudgets,
+    setPreviousBudgetCycleBudgetsToClone(previousBudgetCycleBudgetsToClone=>[
+      ...previousBudgetCycleBudgetsToClone,
       {
         Name: null,
         Amount: null,
@@ -100,34 +105,37 @@ const CloneBudgetModal = ({ budgetCycle, budgetsData, types, groups, allBudgetCy
   };
 
 
-  //Whenever budgetCycleBudgets gets updated,
-  // update the clonedBudgetCycleBudgets
+  //Whenever previousBudgetCycleBudgets gets updated,
+  // update the previousBudgetCycleBudgetsToClone
   useEffect(()=>{
-    setClonedBudgetCycleBudgets(budgetCycleBudgets);
-  }, [budgetCycleBudgets]);
+    setPreviousBudgetCycleBudgetsToClone(filterPreviousBudgetCycleBudgetsToClone(previousBudgetCycleBudgets));
+  }, [previousBudgetCycleBudgets]);
 
   //Whenever budgetCycle gets updated,
   // update the previousBudgetCycle
   useEffect(()=>{
-    setBudgetCycle(previousBudgetCycle);
-  }, [budgetCycle]);
+    setPreviousBudgetCycle(getPreviousBudgetCycle(allBudgetCycles, budgetCycle));
+  }, [allBudgetCycles, budgetCycle]);
 
 
   return (
     <Modal id="clone-budget-modal" className="clone-budget-modal" show={isOpen} onHide={onClose}>
       <Modal.Header>
-        <Modal.Title className="modal-title">Clone Budget</Modal.Title>
+        <Modal.Title className="modal-title">Clone Budget - {getBudgetCycleString(budgetCycle)}</Modal.Title>
         <button className="btn-close" type="button" onClick={onClose}></button>
       </Modal.Header>
       <form className="clone-budget-modal-form" onSubmit={onSubmit}>
         <Modal.Body>
-          {
-            inputOptions.map((inputOption, i)=>(
-              <TransactionDetailModalInput key={inputOption.name} transactionDetail={inputOption} tabIndex={i+1} onChange={(value)=>onClonedBudgetCycleChange(value, inputOption)} onInputDropdownSubmit={(value)=>onClonedBudgetCycleSubmit(value, inputOption)} />
-            ))
-          }
+          <div className="clone-budget-modal-heading">
+            <label className="clone-budget-modal-heading-label">Clone from:</label>
+            {
+              inputOptions.map((inputOption, i)=>(
+                <TransactionDetailModalInput key={inputOption.name} transactionDetail={inputOption} tabIndex={i+1} onChange={(value)=>onPreviousBudgetCycleChange(value, inputOption)} onInputDropdownSubmit={(value)=>onPreviousBudgetCycleSubmit(value, inputOption)} />
+              ))
+            }
+          </div>
           <div>
-            {clonedBudgetCycleBudgets.map((budgetCycleBudget, i)=>(
+            {previousBudgetCycleBudgetsToClone.map((budgetCycleBudget, i)=>(
               <div key={i} className="clone-budget-modal-form-input-group">
                 <input className="clone-budget-modal-form-input-text clone-budget-modal-form-input-text-name" type="text" name={`clone-budget-${i+1}-name`} value={budgetCycleBudget.Name || ""} onChange={(event)=>onInputChange("Name", event.target.value, i)} />
                 <input className="clone-budget-modal-form-input-text clone-budget-modal-form-input-text-amount" type="text" name={`clone-budget-${i+1}-amount`} value={(!isNaN(Number(budgetCycleBudget.Amount)) ? convertNumberToCurrency(budgetCycleBudget.Amount) : budgetCycleBudget.Amount) || ""} onChange={(event)=>onInputChange("Amount", event.target.value, i)} />
@@ -140,6 +148,7 @@ const CloneBudgetModal = ({ budgetCycle, budgetsData, types, groups, allBudgetCy
                 <button className="clone-budget-modal-form-delete-button" type="button" onClick={event=>onInputGroupMouseDeleteButtonClick(i)}>
                   <i className="clone-budget-modal-form-delete-button-icon fas fa-times"></i>
                 </button>
+                {budgetCycleBudget.DuePeriod === "Monthly" ? '' : <div class="clone-budget-modal-form-label-due-period">{budgetCycleBudget.DuePeriod} | {getBudgetCycleString(budgetCycleBudget.BudgetCycle)} - {getBudgetCycleString(budgetCycleBudget.DueNext)}</div>}
               </div>
             ))}
           </div>
